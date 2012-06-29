@@ -1,0 +1,41 @@
+#summary Instructions for setting up USB readout from SCROD or Universal_eval to a PC
+#labels Featured
+
+= Introduction =
+
+There are 4 steps to go through before a USB readout will work:
+
+  # install windows/linux driver on PC
+  # program cypress/eeprom
+  # install readout software on PC
+  # program FPGA/flash to talk to cypress
+
+= Details =
+
+==install windows/linux driver on PC==
+
+Depending on which operating system you're using, there are different steps to take.
+
+===install windows driver on PC===
+
+===install linux driver on PC===
+
+==program cypress/eeprom==
+
+You can program the cypress directly and use it, but when power to the board is lost, it will forget its programming.  To make the cypress capable of being useful upon power-up, you will have to program the eeprom connected to the cypress.
+
+===program cypress===
+
+===program eeprom connected to cypress===
+
+==install readout software on PC==
+
+http://www.microsoft.com/visualstudio/en-us/products/2010-editions/visual-cpp-express
+
+==program FPGA/flash to talk to cypress==
+
+Like the cypress, the FPGA can either be programmed directly and used, or the flash memory (platform flash or SPI) can be programmed so the FPGA will know what to do upon power-up.
+
+===program FPGA to talk to cypress===
+
+===program FPGA's flash to talk to cypress===
