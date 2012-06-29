@@ -10,6 +10,8 @@ There are 4 steps to go through before a USB readout will work:
   # install readout software on PC
   # program FPGA/flash to talk to cypress
 
+----
+
 = Details =
 
 ==install windows/linux driver on PC==
@@ -20,6 +22,8 @@ Depending on which operating system you're using, there are different steps to t
 
 ===install linux driver on PC===
 
+----
+
 ==program cypress/eeprom==
 
 You can program the cypress directly and use it, but when power to the board is lost, it will forget its programming.  To make the cypress capable of being useful upon power-up, you will have to program the eeprom connected to the cypress.
@@ -28,9 +32,21 @@ You can program the cypress directly and use it, but when power to the board is 
 
 ===program eeprom connected to cypress===
 
+----
+
 ==install readout software on PC==
 
+===install readout software on windows===
+
+If you want to do development of the USB readout software, you will have to have a compiler installed.  To get one, follow this link and download the installer:
+
 http://www.microsoft.com/visualstudio/en-us/products/2010-editions/visual-cpp-express
+
+Follow the instructions to get visual c++ express installed.
+
+===install readout software on linux===
+
+----
 
 ==program FPGA/flash to talk to cypress==
 
