@@ -66,7 +66,10 @@ http://www.microsoft.com/visualstudio/en-us/products/2010-editions/visual-cpp-ex
 
 Follow the instructions to get visual c++ express installed.
 
-===install readout software on linux===
+===install readout software on linux (Ubuntu)===
+  # Double check if libusb-1.0-0 and g++ are installed.
+  # In the directory of the software, type 'make test2' or 'make test_usb' to compile the executable.
+  # Type './test2' or './test_usb' to run the executable. If you're having trouble running the program it might be due to administrative rights; try adding 'sudo' before './'
 
 ----
 
