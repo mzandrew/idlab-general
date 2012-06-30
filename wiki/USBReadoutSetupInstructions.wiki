@@ -19,9 +19,22 @@ There are 4 steps to go through before a USB readout will work:
 Depending on which operating system you're using, there are different steps to take.
 
 ===install windows driver on PC===
+  Assuming Cypress Suite USB 3.4.7 is used
+  # Go to C:/Cypress/Cypress Suite USB 3.4.7/Driver/bin
+  # Open appropriate OS folder. e.g., w2k = Windows2k ,wlh = Windows7/Vista, wxp = Windows XP
+  # Open appropriate architecture.
+  # Open cyusb.inf
+  # Scroll down to find the different platforms. In the appropriate platform, copy and paste the line as follows: <%VID_XXXX&PID_XXXX.DeviceDesc%=CyUsb, USB\VID_XXXX&PID_XXXX>. Modify the XXXX with the proper VID and PID
+  # Scroll further down to find the Strings section. You can choose to modify this section to provide human readable name for the device. <VID_XXXX&PID_XXXX.DeviceDesc="Cypress USB Generic Driver (3.4.2.147)">. Once again modify XXXX to the proper VID and PID. Changing the text in quotes will change the human readable name for the device.
+  # Save the .inf file
+  # Plug in your USB device and open Window's Device Manager
+  # Locate the USB device, it should show up with an exclamation mark because drivers were not installed.
+  # Right click and select Update Drivers
+  # Select the option to manually locate driver and point the location to the path of the modified .inf file
+  # If everything is done correctly, your device will appear in Window's Device Manager. There still might be an exclamation mark due to Window's security with unsigned drivers. To resolve this, boot the OS in Disable Device Signature Enforcement mode.
 
 ===install linux driver on PC===
-
+This should be automagic
 ----
 
 ==program cypress/eeprom==
@@ -29,6 +42,15 @@ Depending on which operating system you're using, there are different steps to t
 You can program the cypress directly and use it, but when power to the board is lost, it will forget its programming.  To make the cypress capable of being useful upon power-up, you will have to program the eeprom connected to the cypress.
 
 ===program cypress===
+====Windows====
+  # Install Cypress Suite (using version 3.4.7) and run the ControlCenter.
+  # Select the Cypress device
+  # Click "Program FX2" -> "RAM"
+  # Select the .hex file to program the Cypress chip
+
+====Linux (Ubuntu)====
+  # Install cycfx2prog (sudo apt-get install cycfx2prog)
+  # In the terminal enter the command 'cycfx2prog prg:path_to_hex_file/file.hex run' without the quotes
 
 ===program eeprom connected to cypress===
 
