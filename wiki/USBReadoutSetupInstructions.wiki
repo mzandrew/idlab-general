@@ -7,8 +7,8 @@ There are 4 steps to go through before a USB readout will work:
 
   # install windows/linux driver on PC
   # program cypress/eeprom
-  # install readout software on PC
   # program FPGA/flash to talk to cypress
+  # install readout software on PC
 
 ----
 
@@ -54,22 +54,7 @@ You can program the cypress directly and use it, but when power to the board is 
 
 ===program eeprom connected to cypress===
 
-----
-
-==install readout software on PC==
-
-===install readout software on windows===
-
-If you want to do development of the USB readout software, you will have to have a compiler installed.  To get one, follow this link and download the installer:
-
-http://www.microsoft.com/visualstudio/en-us/products/2010-editions/visual-cpp-express
-
-Follow the instructions to get visual c++ express installed.
-
-===install readout software on linux (Ubuntu)===
-  # Double check if libusb-1.0-0 and g++ are installed.
-  # In the directory of the software, type 'make test2' or 'make test_usb' to compile the executable.
-  # Type './test2' or './test_usb' to run the executable. If you're having trouble running the program it might be due to administrative rights; try adding 'sudo' before './'
+(https://idlab-general.googlecode.com/files/fw.iic download fw.iic here])
 
 ----
 
@@ -80,3 +65,21 @@ Like the cypress, the FPGA can either be programmed directly and used, or the fl
 ===program FPGA to talk to cypress===
 
 ===program FPGA's flash to talk to cypress===
+
+----
+
+==install readout software on PC==
+
+===install readout software on windows===
+
+If you want to modify the USB readout software, you will have to have a compiler installed.
+
+We have some old software that compiles with wxwidgets, but it needs to be updated to work with the new method of talking to the cypress.
+
+The software that corresponds to the new method of talking to the cypress does not currently work (and needs visual c++ installed).
+
+===install readout software on linux (Ubuntu)===
+  # Make sure libusb-1.0-0 and g++ are installed.  If not, run {{{sudo apt-get install libusb-1.0-0; sudo apt-get install build-essential}}}
+  # Put the following line in the file /etc/udev/rules.d/idlab.rules:  {{{SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device",SYSFS{idVendor}=="04b4" , SYSFS{idProduct}=="1004", MODE="0666"}}} and then {{{sudo udevadm control --reload-rules}}}
+  # In the directory of the software, type 'make test2' or 'make test_usb' to compile the executable.
+  # Type './test2' or './test_usb' to run the executable.  (you may have to load the cypress firmware and/or the FPGA firmware before this will work).
