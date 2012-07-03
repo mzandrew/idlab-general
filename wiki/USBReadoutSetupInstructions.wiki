@@ -54,7 +54,7 @@ You can program the cypress directly and use it, but when power to the board is 
 
 ===program eeprom connected to cypress===
 
-(https://idlab-general.googlecode.com/files/fw.iic download fw.iic here])
+([https://idlab-general.googlecode.com/files/fw.iic download fw.iic here])
 
 ----
 
@@ -81,5 +81,5 @@ The software that corresponds to the new method of talking to the cypress does n
 ===install readout software on linux (Ubuntu)===
   # Make sure libusb-1.0-0 and g++ are installed.  If not, run {{{sudo apt-get install libusb-1.0-0; sudo apt-get install build-essential}}}
   # Put the following line in the file /etc/udev/rules.d/idlab.rules:  {{{SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device",SYSFS{idVendor}=="04b4" , SYSFS{idProduct}=="1004", MODE="0666"}}} and then {{{sudo udevadm control --reload-rules}}}
-  # In the directory of the software, type 'make test2' or 'make test_usb' to compile the executable.
-  # Type './test2' or './test_usb' to run the executable.  (you may have to load the cypress firmware and/or the FPGA firmware before this will work).
+  # In the directory of the software, run 'make' compile the executables.
+  # Type './bin/SCROD_test' or './bin/universal_eval_test' to run the executable.  (you may have to load the cypress firmware and/or the FPGA firmware before this will work).
