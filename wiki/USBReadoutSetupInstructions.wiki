@@ -46,11 +46,11 @@ You can program the cypress directly and use it, but when power to the board is 
   # Install Cypress Suite (using version 3.4.7) and run the ControlCenter.
   # Select the Cypress device
   # Click "Program FX2" -> "RAM"
-  # Select the .hex file to program the Cypress chip
+  # Select the .hex file to program the Cypress chip ([http://idlab-general.googlecode.com/files/fw.hex download fw.hex here])
 
 ====Linux (Ubuntu)====
   # Install cycfx2prog (sudo apt-get install cycfx2prog)
-  # In the terminal enter the command 'cycfx2prog prg:path_to_hex_file/file.hex run' without the quotes
+  # In the terminal enter the command 'cycfx2prog prg:fw.hex run' without the quotes ([http://idlab-general.googlecode.com/files/fw.hex download fw.hex here])
 
 ===program eeprom connected to cypress===
 
