@@ -6,14 +6,35 @@ The existing firmware in USB_and_fiber_readout is meant to be a basic starting p
 
 == Implementation details ==
 
-An overview of the documentation is provided in the following diagram.
+An overview of the documentation is provided in the following diagram (full version available [http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/usb_and_fiber_loopback/usb_and_fiber_loopback.html [here]] ):
 
-[http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/usb_and_fiber_loopback/usb_and_fiber_loopback.html [full version]] [http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/usb_and_fiber_loopback/usb_and_fiber_loopback.png]
+[http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/usb_and_fiber_loopback/usb_and_fiber_loopback.png]
 
-== Other potential applications ==
+Two full duplex, 3.125 Gb/s fiberoptic links are also implemented using version 6.2 of the Xilinx 8B/10B Aurora Core.  In the iTOP application, one of these links is intended for nominal "event/waveform" data, while the other is for the "trigger" data.  Both links utilize the 32-bit streaming interface of the Aurora protocol.
 
-This firmware could be relatively easily modified by 
+The USB portion of the code is adapted from Xin Gao's implementation of the Cypress USB interface.  Documentation on that can be found [https://code.google.com/p/idlab-general/source/browse/USB_and_fiber_readout/documentation/USB-FPGA%20Doc.pdf [here]].  It implements four USB endpoints.  Endpoints 2 and 4 allow data to be sent by USB to the FPGA, and endpoints 6 and 8 are allocated for sending data from the FPGA to a PC via USB.  The data from the Cypress is read out in 16-bit wide words, half the size of the Aurora protocols described above.  To allow compatibility of the interface with downstream logic, there are four FIFOs with asymmetric read/write widths to convert the Cypress data into 32-bit words.
+
+Multiplexing is implemented to allow switching between these two data acquisition paths (USB/fiberoptic).  The multiplexer selects are based on detecting the presence of the USB clock, which is only active when a USB connection is made between the board and a PC.  If this clock is found, the USB connection will take priority over the fiberoptic connections and will deactivate the fiberoptic transceivers.
+
+Following the multiplexing logic, the selected data path connects to a set of FIFOs (two for receiving data and two for sending data).  The default values for these sizes are chosen based on loose expectations from requirements for the "event" and "trigger" data paths, and should be tailored to your use.
+
+This firmware simply loops back the input FIFOs to the output FIFOs, but can be modified for more broader application in generic data acquisition systems.  For example, a command interpreter can be wired to the input FIFOs to allow for receiving data, setting registers, etc.  Likewise, desired user data can be sent through the output FIFOs for acquisition on a PC.  This is the next planned upgrade to this firmware.
 
 == Changes required for use with Universal Eval (Rev A or B) ==
 
-== Known issues ==
+The project as posted should synthesize and implement for the SCROD Revision A2.  The project is intended also for use in the Universal Eval, with the following changes:
+
+  * The generic "INCLUDE_AURORA" should be set to 0 at the daq_top.vhd level.  This will keep any Aurora primitives from attempting to be instantiated, and is necessary since the Universal Eval uses a Spartan-3.
+  * The target FPGA for the design should be changed to the appropriate Spartan-3.
+  * A new ucf file should be created to match the pin mappings for the Universal Eval.  If the existing SCROD ucf is used as a template, the fiberoptic pieces of the ucf file should be commented out or removed.
+  * The FIFO sizes may have to be changed to fit within Spartan-3 resources.  The main offender is likely to be the "event/waveform" output FIFO, which is very large in the original project.
+
+== Other potential applications ==
+
+This firmware would be relatively easily modified to allow sending data to the FPGA via USB and having the data be looped back by fiberoptic.  This would allow for testing .  The modifications should be made at the daq_fifo_layer.vhd level of the hierarchy.
+
+== Known issues and limitations ==
+
+  * The fiberoptic interface seems to accumulate significant numbers of errors unless the size of the outgoing data for loopback is limited to ~100 kB.  This may be due to the sizing of the FIFOs in the design or the interface logic to the Aurora channels, which are occasionally unavailable due to clock compensation cycles.
+  * The USB interface will accumulate significant numbers of errors unless the size of the outgoing data for loopback is limited to ~512 bytes or less.  This may be due to the sizing of the FIFOs in the design.
+  * The multiplex selects should only really be utilized at the time of FPGA programming.  Trying to switch interfaces during operation results in both interfaces failing to properly send data after the switch.  I believe this could be handled by properly tying signals for the unused interface low during the appropriate multiplex select condition.  However, for now this has not been addressed since the primary goal was to allow selection of the interface without recompiling, which this certainly accomplishes.
