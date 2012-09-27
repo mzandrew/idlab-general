@@ -1,15 +1,19 @@
 #summary Description of FPGA firmware in USB_and_fiber_readout subdirectory.
 
-= Introduction =
+== Introduction ==
 
 The existing firmware in USB_and_fiber_readout is meant to be a basic starting point or template for adding some data acquisition to a board.  The firmware is meant to compile as-is for the SCROD Revision A2, and also be usable on Universal Eval Revisions A and B, with minor modifications that are detailed below.
 
-= Implementation details =
+== Implementation details ==
 
 An overview of the documentation is provided in the following diagram.
 
-= Other potential applications =
+[http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/usb_and_fiber_loopback/usb_and_fiber_loopback.html [full version]] [http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/usb_and_fiber_loopback/usb_and_fiber_loopback.png]
 
-= Changes required for use with Universal Eval (Rev A or B) =
+== Other potential applications ==
 
-= Known issues =
+This firmware could be relatively easily modified by 
+
+== Changes required for use with Universal Eval (Rev A or B) ==
+
+== Known issues ==
