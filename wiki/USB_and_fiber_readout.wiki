@@ -4,9 +4,9 @@
 
 The existing firmware in USB_and_fiber_readout is meant to be a basic starting point or template for adding some data acquisition to a board.  The firmware is meant to compile as-is for the SCROD RevA2, and also be usable on Universal Eval Revisions A and B, with minor modifications that are detailed below.
 
-= Implementation Details =
+= Implementation details =
 
-= Other potential 
+= Other potential applications =
 
 = Changes required for use with Universal Eval (Rev A or B) =
 
