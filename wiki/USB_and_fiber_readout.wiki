@@ -28,6 +28,7 @@ The project as posted should synthesize and implement for the SCROD Revision A2.
   * The target FPGA for the design should be changed to the appropriate Spartan-3.
   * A new ucf file should be created to match the pin mappings for the Universal Eval.  If the existing SCROD ucf is used as a template, the fiberoptic pieces of the ucf file should be commented out or removed.
   * The FIFO sizes may have to be changed to fit within Spartan-3 resources.  The main offender is likely to be the "event/waveform" output FIFO, which is very large in the original project.
+  * The chipscope cores need to be regenerated for a Spartan-3, since they are by default generated for a Spartan-6.
 
 == Other potential applications ==
 
