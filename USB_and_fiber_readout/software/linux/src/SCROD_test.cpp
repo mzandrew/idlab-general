@@ -61,10 +61,12 @@ int main(){
 		int size = 0;
 		unsigned int *outbuf;
 		packet command_stack;
-		command_stack.CreateCommandPacket(12);
-//		command_stack.AddPingToPacket();
+		command_stack.CreateCommandPacket(12); // this means SCROD rev 'A2'
+		command_stack.AddPingToPacket();
 		command_stack.AddWriteToPacket(0, a);
 		command_stack.AddReadToPacket(0);
+		command_stack.AddReadToPacket(1);
+		command_stack.AddReadToPacket(2);
 		command_stack.PrintPacket();
 		outbuf = command_stack.AssemblePacket(size);
 
