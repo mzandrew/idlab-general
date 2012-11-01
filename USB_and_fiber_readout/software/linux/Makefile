@@ -1,13 +1,13 @@
 CXXFLAGS = -I/usr/include/libusb-1.0 
 
 # things we always need built:
-FINAL_OBJECT_FILES = bin/SCROD_test bin/universal_eval_test
+#FINAL_OBJECT_FILES = bin/SCROD_test bin/universal_eval_test
+FINAL_OBJECT_FILES = bin/SCROD_test bin/packet_test
 
 # needed to link all:
-INTERMEDIATE_OBJECT_FILES = work/usb.o
+INTERMEDIATE_OBJECT_FILES = work/idl_usb.o work/packet_interface.o
 
-LINK_OPTIONS = -lusb-1.0
-#-L$(shell pwd)/contrib -laltix -lxx_usb -lusb -Wl,-rpath,$(shell pwd)/contrib
+LINK_OPTIONS = -L/usr/lib/i386-linux-gnu -lusb-1.0
 
 default :
 	if [ ! -e src     ]; then mkdir     src; fi
@@ -26,8 +26,9 @@ work/%.o : src/%.cpp
 work/%.o : src/%.c
 	g++ $(CXXFLAGS) -c $< -o $@
 
-bin/universal_eval_test : work/universal_eval_test.o ; g++ $^ $(LINK_OPTIONS) -o $@
 bin/SCROD_test : work/SCROD_test.o $(INTERMEDIATE_OBJECT_FILES) ; g++ $^ $(LINK_OPTIONS) -o $@
+
+bin/packet_test : work/packet_test.o $(INTERMEDIATE_OBJECT_FILES) ; g++ $^ $(LINK_OPTIONS) -o $@
 
 clean: 
 	-rm -rf work bin

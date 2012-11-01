@@ -352,7 +352,7 @@ begin
 		--We need some bridge logic between the Aurora AXI signals and the native FIFO signals
 		--State machines to handle the read_enable and valid signals.
 		--Fiber0: Asynchronous state logic for outputs
-		process (internal_FIBER_0_TX_DATA_TVALID_STATE_reg) begin
+		process (internal_FIBER_0_TX_DATA_TVALID_STATE_reg, internal_FIBER_0_TX_DATA_TREADY, internal_FIFO_OUT_0_EMPTY) begin
 			case(internal_FIBER_0_TX_DATA_TVALID_STATE_reg) is
 				when "00" => --Idle state
 					internal_FIBER_0_TX_READ_ENABLE <= '0';
@@ -413,7 +413,7 @@ begin
 			end if;
 		end process;
 		--Fiber1: Asynchronous state logic for outputs
-		process (internal_FIBER_1_TX_DATA_TVALID_STATE_reg) begin
+		process (internal_FIBER_1_TX_DATA_TVALID_STATE_reg, internal_FIBER_1_TX_DATA_TREADY, internal_FIFO_OUT_1_EMPTY) begin
 			case(internal_FIBER_1_TX_DATA_TVALID_STATE_reg) is
 				when "00" => --Idle state
 					internal_FIBER_1_TX_READ_ENABLE <= '0';
@@ -678,11 +678,11 @@ begin
 	end generate synthesize_without_USB;
 
 
-	i_icon : entity work.s6_icon
-	port map(
-		CONTROL0 => internal_CHIPSCOPE_CONTROL
-	);
-	
+--	i_icon : entity work.s6_icon
+--	port map(
+--		CONTROL0 => internal_CHIPSCOPE_CONTROL
+--	);
+--	
 --	i_vio : entity work.s6_vio
 --	port map(
 --		CONTROL  => internal_CHIPSCOPE_CONTROL,
@@ -690,51 +690,51 @@ begin
 --		SYNC_IN  => internal_CHIPSCOPE_SYNC_IN,
 --		SYNC_OUT => internal_CHIPSCOPE_SYNC_OUT
 --	);
-	
-	i_ila : entity work.s6_ila
-	port map(
-		CONTROL => internal_CHIPSCOPE_CONTROL,
-		CLK     => internal_FIFO_CLOCK,
-		TRIG0   => internal_CHIPSCOPE_ILA
-	);
-
-	internal_CHIPSCOPE_SYNC_IN(0)  <= internal_TOGGLE_DAQ_TO_FIBER;
-	internal_CHIPSCOPE_SYNC_IN(1)  <= internal_FIFO_OUT_0_EMPTY;
-	internal_CHIPSCOPE_SYNC_IN(2)  <= internal_FIFO_OUT_1_EMPTY;
-	internal_CHIPSCOPE_SYNC_IN(3)  <= internal_FIFO_INP_0_FULL;
-	internal_CHIPSCOPE_SYNC_IN(4)  <= internal_FIFO_INP_1_FULL;
-	internal_CHIPSCOPE_SYNC_IN(5)  <= internal_USB_EP2_FULL;
-	internal_CHIPSCOPE_SYNC_IN(6)  <= internal_USB_EP2_EMPTY;
-	internal_CHIPSCOPE_SYNC_IN(7)  <= internal_USB_EP4_FULL;
-	internal_CHIPSCOPE_SYNC_IN(8)  <= internal_USB_EP4_EMPTY;
-	internal_CHIPSCOPE_SYNC_IN(9)  <= internal_USB_EP6_FULL;
-	internal_CHIPSCOPE_SYNC_IN(10) <= internal_USB_EP6_EMPTY;
-	internal_CHIPSCOPE_SYNC_IN(11) <= internal_USB_EP8_FULL;
-	internal_CHIPSCOPE_SYNC_IN(12) <= internal_USB_EP8_EMPTY;
-	internal_CHIPSCOPE_SYNC_IN(28 downto 13) <= internal_USB_EP2_DATA_16BIT;
-	internal_CHIPSCOPE_SYNC_IN(44 downto 29) <= internal_USB_EP6_DATA_16BIT;
-
-	internal_CHIPSCOPE_ILA(0)             <= internal_TOGGLE_DAQ_TO_FIBER;
-	internal_CHIPSCOPE_ILA(1)             <= internal_FIFO_OUT_0_EMPTY;
-	internal_CHIPSCOPE_ILA(2)             <= internal_FIFO_OUT_0_FULL;
-	internal_CHIPSCOPE_ILA(3)             <= internal_FIFO_OUT_0_READ_ENABLE;
-	internal_CHIPSCOPE_ILA(4)             <= internal_FIFO_OUT_0_WRITE_ENABLE;
-	internal_CHIPSCOPE_ILA(5)             <= internal_FIFO_OUT_0_VALID;
-	internal_CHIPSCOPE_ILA(19 downto 18)  <= internal_FIBER_0_TX_DATA_TVALID_NEXT_STATE;
-	internal_CHIPSCOPE_ILA(21 downto 20)  <= internal_FIBER_0_TX_DATA_TVALID_STATE_reg;
-	internal_CHIPSCOPE_ILA(53 downto 22)  <= internal_FIFO_INP_0_WRITE_DATA;
-	internal_CHIPSCOPE_ILA(54)            <= internal_FIFO_INP_0_EMPTY;
-	internal_CHIPSCOPE_ILA(55)            <= internal_FIFO_INP_0_FULL;
-	internal_CHIPSCOPE_ILA(56)            <= internal_FIFO_INP_0_READ_ENABLE;
-	internal_CHIPSCOPE_ILA(57)            <= internal_FIFO_INP_0_WRITE_ENABLE;
-	internal_CHIPSCOPE_ILA(58)            <= internal_FIFO_INP_0_VALID;
-	internal_CHIPSCOPE_ILA(90 downto 59)  <= internal_FIBER_0_RX_DATA_LSB_TO_MSB;
-	internal_CHIPSCOPE_ILA(91)            <= internal_FIBER_0_TX_READ_ENABLE;
-	internal_CHIPSCOPE_ILA(92)            <= internal_FIBER_0_TX_DATA_TVALID;
-	internal_CHIPSCOPE_ILA(124 downto 93) <= internal_FIFO_OUT_0_READ_DATA;
-	internal_CHIPSCOPE_ILA(125)           <= internal_FIBER_0_TX_DATA_TREADY;
-	internal_CHIPSCOPE_ILA(126)           <= internal_FIBER_0_RX_DATA_TVALID;
-	internal_CHIPSCOPE_ILA(127)           <= internal_FIBER_0_LINK_ERR;
+--	
+--	i_ila : entity work.s6_ila
+--	port map(
+--		CONTROL => internal_CHIPSCOPE_CONTROL,
+--		CLK     => internal_FIFO_CLOCK,
+--		TRIG0   => internal_CHIPSCOPE_ILA
+--	);
+--
+--	internal_CHIPSCOPE_SYNC_IN(0)  <= internal_TOGGLE_DAQ_TO_FIBER;
+--	internal_CHIPSCOPE_SYNC_IN(1)  <= internal_FIFO_OUT_0_EMPTY;
+--	internal_CHIPSCOPE_SYNC_IN(2)  <= internal_FIFO_OUT_1_EMPTY;
+--	internal_CHIPSCOPE_SYNC_IN(3)  <= internal_FIFO_INP_0_FULL;
+--	internal_CHIPSCOPE_SYNC_IN(4)  <= internal_FIFO_INP_1_FULL;
+--	internal_CHIPSCOPE_SYNC_IN(5)  <= internal_USB_EP2_FULL;
+--	internal_CHIPSCOPE_SYNC_IN(6)  <= internal_USB_EP2_EMPTY;
+--	internal_CHIPSCOPE_SYNC_IN(7)  <= internal_USB_EP4_FULL;
+--	internal_CHIPSCOPE_SYNC_IN(8)  <= internal_USB_EP4_EMPTY;
+--	internal_CHIPSCOPE_SYNC_IN(9)  <= internal_USB_EP6_FULL;
+--	internal_CHIPSCOPE_SYNC_IN(10) <= internal_USB_EP6_EMPTY;
+--	internal_CHIPSCOPE_SYNC_IN(11) <= internal_USB_EP8_FULL;
+--	internal_CHIPSCOPE_SYNC_IN(12) <= internal_USB_EP8_EMPTY;
+--	internal_CHIPSCOPE_SYNC_IN(28 downto 13) <= internal_USB_EP2_DATA_16BIT;
+--	internal_CHIPSCOPE_SYNC_IN(44 downto 29) <= internal_USB_EP6_DATA_16BIT;
+--
+--	internal_CHIPSCOPE_ILA(0)             <= internal_TOGGLE_DAQ_TO_FIBER;
+--	internal_CHIPSCOPE_ILA(1)             <= internal_FIFO_OUT_0_EMPTY;
+--	internal_CHIPSCOPE_ILA(2)             <= internal_FIFO_OUT_0_FULL;
+--	internal_CHIPSCOPE_ILA(3)             <= internal_FIFO_OUT_0_READ_ENABLE;
+--	internal_CHIPSCOPE_ILA(4)             <= internal_FIFO_OUT_0_WRITE_ENABLE;
+--	internal_CHIPSCOPE_ILA(5)             <= internal_FIFO_OUT_0_VALID;
+--	internal_CHIPSCOPE_ILA(19 downto 18)  <= internal_FIBER_0_TX_DATA_TVALID_NEXT_STATE;
+--	internal_CHIPSCOPE_ILA(21 downto 20)  <= internal_FIBER_0_TX_DATA_TVALID_STATE_reg;
+--	internal_CHIPSCOPE_ILA(53 downto 22)  <= internal_FIFO_INP_0_WRITE_DATA;
+--	internal_CHIPSCOPE_ILA(54)            <= internal_FIFO_INP_0_EMPTY;
+--	internal_CHIPSCOPE_ILA(55)            <= internal_FIFO_INP_0_FULL;
+--	internal_CHIPSCOPE_ILA(56)            <= internal_FIFO_INP_0_READ_ENABLE;
+--	internal_CHIPSCOPE_ILA(57)            <= internal_FIFO_INP_0_WRITE_ENABLE;
+--	internal_CHIPSCOPE_ILA(58)            <= internal_FIFO_INP_0_VALID;
+--	internal_CHIPSCOPE_ILA(90 downto 59)  <= internal_FIBER_0_RX_DATA_LSB_TO_MSB;
+--	internal_CHIPSCOPE_ILA(91)            <= internal_FIBER_0_TX_READ_ENABLE;
+--	internal_CHIPSCOPE_ILA(92)            <= internal_FIBER_0_TX_DATA_TVALID;
+--	internal_CHIPSCOPE_ILA(124 downto 93) <= internal_FIFO_OUT_0_READ_DATA;
+--	internal_CHIPSCOPE_ILA(125)           <= internal_FIBER_0_TX_DATA_TREADY;
+--	internal_CHIPSCOPE_ILA(126)           <= internal_FIBER_0_RX_DATA_TVALID;
+--	internal_CHIPSCOPE_ILA(127)           <= internal_FIBER_0_LINK_ERR;
 
 
 end Behavioral;
