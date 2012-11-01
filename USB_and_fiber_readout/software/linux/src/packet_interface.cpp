@@ -1,5 +1,6 @@
 #include "packet_interface.h"
 #include <stdio.h>
+char sanitize_char(char mychar);
 
 using namespace std;
 
@@ -89,7 +90,11 @@ void packet::PrintPacket() {
 		for (int j = 0; j < 4; ++j) {
 			words[j] = (data[i] & (0xFF << (j*8))) >> (j*8);
 		}
+		for (int j=0; j<4; j++) {
+			words[j] = sanitize_char(words[j]);
+		}
 		printf("[%04d]: %08x\t%c%c%c%c\n",i,data[i],words[3],words[2],words[1],words[0]);
 	}
 	delete [] data;
 }
+

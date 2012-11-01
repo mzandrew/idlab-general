@@ -88,10 +88,7 @@ int main(){
 					mask = mask & inbuf[j];
 					mask = mask >> (k*8);
 					char this_char= (char) mask;
-					     if ('A' <= this_char && this_char <= 'Z') { }
-					else if ('a' <= this_char && this_char <= 'z') { }
-					else if ('0' <= this_char && this_char <= '9') { }
-					else { this_char = ' '; }
+					this_char = sanitize_char(this_char);
 					printf("%c",this_char);
 				}
 				printf("\n");
