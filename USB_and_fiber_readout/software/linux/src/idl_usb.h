@@ -20,4 +20,5 @@ void list_endpoints(libusb_device *desc);
 void usb_ClearEndpnt(unsigned char endpoint, unsigned char* data, int length, unsigned int timeout);
 int usb_XferData(unsigned char endpoint, unsigned char* data, int length, unsigned int timeout);
 void close_usb(void);
+char sanitize_char(char mychar);
 
