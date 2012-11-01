@@ -79,7 +79,18 @@ We have some old software that compiles with wxwidgets, but it needs to be updat
 The software that corresponds to the new method of talking to the cypress does not currently work (and needs visual c++ installed).
 
 ===install readout software on linux (Ubuntu)===
-  # Make sure libusb-1.0-0 and g++ are installed.  If not, run {{{sudo apt-get install libusb-1.0-0; sudo apt-get install build-essential}}}
-  # Put the following line in the file /etc/udev/rules.d/idlab.rules:  {{{SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device",SYSFS{idVendor}=="04b4" , SYSFS{idProduct}=="1004", MODE="0666"}}} and then {{{sudo udevadm control --reload-rules}}}
+  # Make sure libusb-1.0-0 and g++ are installed.  If not, run
+{{{
+sudo apt-get install libusb-1.0-0; sudo apt-get install build-essential
+}}}
+  # Put the following line in the file /etc/udev/rules.d/idlab.rules:
+{{{
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device",SYSFS{idVendor}=="04b4" , SYSFS{idProduct}=="1004", MODE="0666"
+}}}
+  and then
+{{{
+sudo udevadm control --reload-rules
+}}}
+  (or use [http://idlab-general.googlecode.com/files/make_cypress_device_world_readable_with_udev_rule this script]).
   # In the directory of the software, run 'make' compile the executables.
   # Type './bin/SCROD_test' or './bin/universal_eval_test' to run the executable.  (you may have to load the cypress firmware and/or the FPGA firmware before this will work).
