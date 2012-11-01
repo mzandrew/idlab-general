@@ -13,29 +13,31 @@
 #General SCROD clocking
 NET BOARD_CLOCKP LOC=U25;
 NET BOARD_CLOCKN LOC=U26;
+NET "internal_BOARD_CLOCK" TNM_NET = BOARD_CLOCK;
+TIMESPEC "TS_BOARD_CLOCK" = PERIOD "BOARD_CLOCK" 4 ns HIGH 50%;
 
 #Diagnostics on LEDs (3.3 V)
-NET FIBER_0_LINK_UP  LOC=F18 | IOSTANDARD = LVCMOS33; #LEDS<0>
-NET FIBER_1_LINK_UP  LOC=E18 | IOSTANDARD = LVCMOS33; #LEDS<1>
-#NET  LOC=G16 | IOSTANDARD = LVCMOS33; #LEDS<2>
-#NET  LOC=F17 | IOSTANDARD = LVCMOS33; #LEDS<3>
-NET FIBER_0_LINK_ERR LOC=F20 | IOSTANDARD = LVCMOS33; #LEDS<4>
-NET FIBER_1_LINK_ERR LOC=E20 | IOSTANDARD = LVCMOS33; #LEDS<5>
-#NET  LOC=H17 | IOSTANDARD = LVCMOS33; #LEDS<6>
-#NET  LOC=G17 | IOSTANDARD = LVCMOS33; #LEDS<7>
-#NET  LOC=C21 | IOSTANDARD = LVCMOS33; #LEDS<8>
-#NET  LOC=B21 | IOSTANDARD = LVCMOS33; #LEDS<9>
-#NET  LOC=H18 | IOSTANDARD = LVCMOS33; #LEDS<10>
-#NET  LOC=H19 | IOSTANDARD = LVCMOS33; #LEDS<11>
-#NET  LOC=B22 | IOSTANDARD = LVCMOS33; #LEDS<12>
-#NET  LOC=A22 | IOSTANDARD = LVCMOS33; #LEDS<13>
-#NET  LOC=G19 | IOSTANDARD = LVCMOS33; #LEDS<14>
-NET PLL_LOCKED LOC=F19 | IOSTANDARD = LVCMOS33; #LEDS<15>
+NET LEDS<0>  LOC=F18 | IOSTANDARD = LVCMOS33; #LEDS<0>
+NET LEDS<1>  LOC=E18 | IOSTANDARD = LVCMOS33; #LEDS<1>
+NET LEDS<2>  LOC=G16 | IOSTANDARD = LVCMOS33; #LEDS<2>
+NET LEDS<3>  LOC=F17 | IOSTANDARD = LVCMOS33; #LEDS<3>
+NET LEDS<4>  LOC=F20 | IOSTANDARD = LVCMOS33; #LEDS<4>
+NET LEDS<5>  LOC=E20 | IOSTANDARD = LVCMOS33; #LEDS<5>
+NET LEDS<6>  LOC=H17 | IOSTANDARD = LVCMOS33; #LEDS<6>
+NET LEDS<7>  LOC=G17 | IOSTANDARD = LVCMOS33; #LEDS<7>
+NET LEDS<8>  LOC=C21 | IOSTANDARD = LVCMOS33; #LEDS<8>
+NET LEDS<9>  LOC=B21 | IOSTANDARD = LVCMOS33; #LEDS<9>
+NET LEDS<10> LOC=H18 | IOSTANDARD = LVCMOS33; #LEDS<10>
+NET LEDS<11> LOC=H19 | IOSTANDARD = LVCMOS33; #LEDS<11>
+NET LEDS<12> LOC=B22 | IOSTANDARD = LVCMOS33; #LEDS<12>
+NET LEDS<13> LOC=A22 | IOSTANDARD = LVCMOS33; #LEDS<13>
+NET LEDS<14> LOC=G19 | IOSTANDARD = LVCMOS33; #LEDS<14>
+NET LEDS<15> LOC=F19 | IOSTANDARD = LVCMOS33; #LEDS<15>
 
 ####################USB IOs and timing constraints###########################
 
 NET USB_IFCLK   LOC = "b14" | IOSTANDARD = LVCMOS33; # on SCROD revA2, IFCLK is connected to b14
-NET "map_daq_fifo_layer/internal_USB_CLOCK" TNM_NET = IFCLK_48M;
+NET "map_readout_interfaces/map_daq_fifo_layer/internal_USB_CLOCK" TNM_NET = IFCLK_48M;
 TIMESPEC "TS_IFCLK_48M" = PERIOD "IFCLK_48M" 20.833 ns HIGH 50%;
 NET USB_CLKOUT  LOC = "e13" | IOSTANDARD = LVCMOS33; # on SCROD revA2, CLKOUT is connected to e13
 NET USB_FDD<0>  LOC = "f5"  | IOSTANDARD = LVCMOS33;
@@ -91,27 +93,18 @@ NET FIBER_1_DISABLE_TRANSCEIVER LOC=G13 | IOSTANDARD = LVCMOS33;
 
 ## UCF generated for xc6slx150t-fgg676-3 device
 # 156.25MHz GTP Reference clock constraint 
-NET "map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/GTPD2_left_i" TNM_NET = GT_REFCLK; 
+NET "map_readout_interfaces/map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/GTPD2_left_i" TNM_NET = GT_REFCLK; 
 TIMESPEC TS_GTPD2_LEFT_I = PERIOD "GT_REFCLK" 156.25 MHz HIGH 50%;
 
 # User Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (4-Byte)
-NET "map_daq_fifo_layer/internal_FIBER_USER_CLOCK" TNM_NET = USER_CLK;
+NET "map_readout_interfaces/map_daq_fifo_layer/internal_FIBER_USER_CLOCK" TNM_NET = USER_CLK;
 TIMESPEC TS_USER_CLK_I = PERIOD "USER_CLK" 78.125 MHz HIGH 50%;
-NET "map_daq_fifo_layer/internal_FIFO_CLOCK" TNM_NET = FIFO_CLK;
+NET "map_readout_interfaces/map_daq_fifo_layer/internal_FIFO_CLOCK" TNM_NET = FIFO_CLK;
 TIMESPEC TS_FIFO_CLK_I = PERIOD "FIFO_CLK" 78.125 MHz HIGH 50%;
 
 # Sync Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (4-Byte)
-NET "map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/sync_clk_0_i" TNM_NET = SYNC_CLK;
+NET "map_readout_interfaces/map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/sync_clk_0_i" TNM_NET = SYNC_CLK;
 TIMESPEC TS_SYNC_CLK_0 = PERIOD "SYNC_CLK" 312.5 MHz HIGH 50%;
 
-#Site specifications.  Only the GTPA dual site is strictly necessary.
-#The others here were from some other experiments.
-INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/aurora_module_i/gtp_wrapper_i/gtp_tile_inst/gtpa1_dual_i LOC=GTPA1_DUAL_X0Y1;
-# PLL Constraints from initial testing with two transceivers running Aurora example designs
-# and no other internal logic.
-#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_0_i/pll_adv_i LOC=PLL_ADV_X0Y3;
-#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_1_i/pll_adv_i LOC=PLL_ADV_X0Y4;
-#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_0_i/user_clk_net_i LOC=BUFGMUX_X2Y4;
-#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_1_i/user_clk_net_i LOC=BUFGMUX_X2Y2;
-#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_0_i/sync_clk_net_i LOC=BUFGMUX_X3Y13;
-#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_1_i/sync_clk_net_i LOC=BUFGMUX_X2Y3;
+#Site specifications.  Only the GTPA dual site is strictly necessary, as far as I know.
+INST map_readout_interfaces/map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/aurora_module_i/gtp_wrapper_i/gtp_tile_inst/gtpa1_dual_i LOC=GTPA1_DUAL_X0Y1;
