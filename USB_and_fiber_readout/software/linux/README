@@ -1,3 +1,9 @@
+To use this readout software, please read the instructions posted here:
+
+http://code.google.com/p/idlab-general/wiki/USBReadoutSetupInstructions
+
+You might need to run the following to get this to work:
 sudo apt-get install libusb-1.0
-# if you run any of the programs directly from the repository version and it says, "file not found", then it means it is linked against a different version of a shared library and you should build the software again (with "make -B")
+
+if you run any of the programs directly from the repository version and it says, "file not found", then it means it is linked against a different version of a shared library and you should build the software again (with "make -B")
 
