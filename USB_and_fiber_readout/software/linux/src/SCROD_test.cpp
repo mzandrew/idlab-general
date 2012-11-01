@@ -81,13 +81,17 @@ int main(){
 		while (retval > 0) {
 			byte_reverse(inbuf,retval/4);
 			for(j=0;j<retval/4;j++) {
-	       	 		printf("inbuf[%d]=0x%.8X\t",j,inbuf[j]);
+	       	 		printf("inbuf[%2d]=0x%.8X\t",j,inbuf[j]);
 				for (int k = 3; k >= 0; --k) {
 					unsigned int mask = 0x000000FF;
 					mask = mask << (k*8);
 					mask = mask & inbuf[j];
 					mask = mask >> (k*8);
 					char this_char= (char) mask;
+					     if ('A' <= this_char && this_char <= 'Z') { }
+					else if ('a' <= this_char && this_char <= 'z') { }
+					else if ('0' <= this_char && this_char <= '9') { }
+					else { this_char = ' '; }
 					printf("%c",this_char);
 				}
 				printf("\n");
