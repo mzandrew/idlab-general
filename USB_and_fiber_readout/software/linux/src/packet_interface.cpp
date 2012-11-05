@@ -1,15 +1,20 @@
 #include "packet_interface.h"
 #include <stdio.h>
+
 using namespace std;
 
 packet::packet() {}
 packet::~packet() {}
 
+void packet::ClearPacket() {
+	payload_data.clear();
+}
+
 void packet::CreateCommandPacket(unsigned int base_command_id, unsigned short int board_id) {
 	command_id = base_command_id;
 	//This is a command packet, so start adding to the payload...
 	payload_data.push_back(PACKET_TYPE_COMMAND);
-	payload_data.push_back( (unsigned int) board_id );
+	payload_data.push_back( board_id );
 }
 
 void packet::AddPingToPacket() {
@@ -88,9 +93,6 @@ void packet::PrintPacket() {
 		for (int j = 0; j < 4; ++j) {
 			words[j] = (data[i] & (0xFF << (j*8))) >> (j*8);
 		}
-		for (int j=0; j<4; j++) {
-			words[j] = sanitize_char(words[j]);
-		}
 		printf("[%04d]: %08x\t%c%c%c%c\n",i,data[i],words[3],words[2],words[1],words[0]);
 	}
 	delete [] data;
@@ -104,5 +106,4 @@ char sanitize_char(char mychar) {
 	else { mychar = ' '; }
 	return mychar;
 }
-
 

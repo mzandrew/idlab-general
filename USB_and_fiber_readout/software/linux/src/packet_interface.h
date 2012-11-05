@@ -21,8 +21,10 @@ class packet {
 		////////COMMANDS TO CREATE PACKETS//////////////////////
 		//Create a skeleton command packet with no commands
 		//The default arguments set command ID to 0 and the board_id to 0x0000
+		//Reset the current packet
+		void ClearPacket();
 		//So the first command will have ID = 1 and be a broadcast command
-		void CreateCommandPacket(unsigned int base_command_id = 0, unsigned short int board_id = 0x0000);
+		void CreateCommandPacket(unsigned int base_command_id = 0, unsigned short int board_id = 0);
 		//Add a command to the packet
 		void AddPingToPacket();
 		void AddReadToPacket(unsigned short int reg_id);
