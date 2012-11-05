@@ -1,26 +1,21 @@
-/* Filename: test2.cpp
-* Notes
-* EP    Type            Work?
-* 2     USB2FPGA        n
-* 4     USB2FPGA        y
-* 6     FPGA2USB
-* 8     FPGA2USB        y
-*
-*
+/* Filename: SCROD_LED_test.cpp
+Simple program to send commands that cycle through
+an LED pattern on SCROD.  This assumes that the 
+LEDs are set to general purpose register 0, which is
+the default for the USB_and_fiber_readout branch.
 */
 
 #include "idl_usb.h"
 #include <stdio.h>
 #include <time.h>
 
-#define OUT_SIZE (4)
-#define IN_SIZE (4)
-//#define TM_OUT (500)
-#define LOOP (1)
+//Endpoints 2 and 6 are the primary data path for this
+//firmware branch.
 #define IN_ADDR (0x86)          //Endpoint 6 (FPGA2USB Endpoint)
 #define OUT_ADDR (0x02)         //Endpoint 2 (USB2FPGA Endpoint)
-//#define in_addr (0x88)          //Endpoint 8 (FPGA2USB Endpoint)
-//#define out_addr (0x04)         //Endpoint 4 (USB2FPGA Endpoint)
+//Endpoints 4 and 8 are connected via a simple loop-back.
+//#define IN_ADDR (0x88)          //Endpoint 8 (FPGA2USB Endpoint)
+//#define OUT_ADDR (0x04)         //Endpoint 4 (USB2FPGA Endpoint)
 
 #include "packet_interface.h"
 
@@ -36,14 +31,8 @@ int main(){
 	bool increasing = true;
 
 	int counter = 0;
-//	unsigned short int pattern[5] = {0xF00F,
-//                                       0x0FF0,
-//	                                 0x000F,
-//	                                 0x00F0,
-//	                                 0x0F00};
 
 	while(1) {
-//	for (int i = 0; i < 1; ++i) {
 
 		if (a == 0xE000) {
 			increasing = false;
@@ -56,17 +45,13 @@ int main(){
 		} else {
 			a = a >> 1;
 		}
-//		a = pattern[(counter++)%5];
 
 		int size = 0;
 		unsigned int *outbuf;
 		packet command_stack;
-		command_stack.CreateCommandPacket(12); // this means SCROD rev 'A2'
-		command_stack.AddPingToPacket();
+		command_stack.CreateCommandPacket(12);
 		command_stack.AddWriteToPacket(0, a);
 		command_stack.AddReadToPacket(0);
-		command_stack.AddReadToPacket(1);
-		command_stack.AddReadToPacket(2);
 		command_stack.PrintPacket();
 		outbuf = command_stack.AssemblePacket(size);
 
@@ -83,14 +68,13 @@ int main(){
 		while (retval > 0) {
 			byte_reverse(inbuf,retval/4);
 			for(j=0;j<retval/4;j++) {
-	       	 		printf("inbuf[%2d]=0x%.8X\t",j,inbuf[j]);
+	       	 		printf("inbuf[%d]=0x%.8X\t",j,inbuf[j]);
 				for (int k = 3; k >= 0; --k) {
 					unsigned int mask = 0x000000FF;
 					mask = mask << (k*8);
 					mask = mask & inbuf[j];
 					mask = mask >> (k*8);
 					char this_char= (char) mask;
-					this_char = sanitize_char(this_char);
 					printf("%c",this_char);
 				}
 				printf("\n");
