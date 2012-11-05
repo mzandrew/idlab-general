@@ -32,9 +32,10 @@ Commands and responses are consistent with the posted [https://www.phys.hawaii.e
 
 The command interpreter implementation is contained in the file "command_interpreter.psm".  It contains assembly code that performs the following actions:
 
-  # On startup, interface with the I2C EEPROM on bus A to read the SCROD ID from memory address 0 and revision from memory address 1. This determines the ID that SCROD will respond to for subsequent commands.
-  # On startup, interface with the I2C temperature sensor on bus A to turn off the I2C timeout feature.
-  # Enter an infinite loop to search for data from the input FIFO and parse commands as needed.
+  # Startup: interface with the I2C EEPROM on bus A to read the SCROD ID from memory address 0 and revision from memory address 1. This determines the ID that SCROD will respond to for subsequent commands.
+  # Startup: display the SCROD revision and ID just read on the LEDs.
+  # Startup: interface with the I2C temperature sensor on bus A to turn off the I2C timeout feature.
+  # Normal operatoin: enter an infinite loop to search for data from the input FIFO and parse commands and send applicable responses as data is detected.
 
 Summary of the PicoBlaze register functions and scratch space in the command interpreter code is contained in [http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/scrod_readout_interface/picoblaze_registers_and_memory.xlsx [this spreadsheet]].
 
@@ -97,10 +98,30 @@ The following devices are on the three implemented I2C buses:
 
 This firmware simply loops back the input FIFO to the output FIFO.  For SCROD-based systems in Belle II, this interface is anticipated to be used as a trigger path.  For general use, this interface could be used as the primary event data path, to avoid having to multiplex waveform data with command data on a single interface.
 
+== Extra installation instructions ==
+
+  * The PicoBlaze microcontroller source is not included in the repository due to licensing restrictions.  It is, however, freely available [http://www.xilinx.com/products/intellectual-property/picoblaze.htm [here]], using the "download" link on the upper left of the page.
+    * After download, place "kcpsm6.vhd" in "firmware/FPGA/src/picoblaze/"
+    * Place "ROM_form.vhd" in "firmware/FPGA/src/command_interpreter/"
+    * If you would like to edit any assembly code, use the assembler contained in the distributed zip file from Xilinx.  A JTAG loader is also included, to allow loading new programs to the PicoBlaze without a full ISE recompile.
+  * To change the number of general or read registers, edit "firmware/FPGA/src/readout_definitions.vhd"
+There are general purpose registers (GPR) and read registers (RR).  The first N_GPR registers are mapped back to the read registers in order, with the idea that you can always read back any register that you can set.  Any extra read registers after that can be used for whatever you'd like to read in from elsewhere in the firmware.  Because the command interpreter assembly code uses I2C devices on startup, and these devices are matched to specific register numbers, changes to N_GPR and N_RR can impact startup functionality, and may require reassembly of the command interpreter.
+
+== Example software ==
+
+The "software/linux" directory contains example code to flash a pattern on the LEDs, read out temperature values from the STTS751 via an I2C transaction, or write a SCROD ID to the EEPROM via an I2C transaction.  Much of the code for I2C transactions could/should be encapsulated into a separate interface for ease of use.  The given examples are simply the way to perform such a transaction in "raw" form.
+
+== Known issues and limitations ==
+
+  * The fiberoptic interface seems to accumulate significant numbers of errors unless the size of the outgoing data for loopback is limited to ~100 kB.  This may be due to the sizing of the FIFOs in the design or the interface logic to the Aurora channels, which are occasionally unavailable due to clock compensation cycles.
+  * The USB interface will accumulate significant numbers of errors unless the size of the outgoing data for loopback is limited to ~512 bytes or less.  This may be due to the sizing of the FIFOs in the design.
+  * The multiplex selects should only really be utilized at the time of FPGA programming.  Trying to switch interfaces during operation results in both interfaces failing to properly send data after the switch.  I believe this could be handled by properly tying signals for the unused interface low during the appropriate multiplex select condition.  However, for now this has not been addressed since the primary goal was to allow selection of the interface without recompiling, which this certainly accomplishes.
+
 == Changes anticipated for use with Universal Eval (Rev A or B) ==
 
 The project as posted should synthesize and implement for the SCROD Revision A2.  The project is intended also for use in the Universal Eval, though it requires a number of changes.  *Anyone who would like to modify the existing code and commit changes is encouraged to do so.*  This should preferably be done in a way that allows compilation for both systems using generics.  The following changes are noted, though they may not be complete:
 
+  * The command interpreter will need to be reassembled using kcpsm3, a Spartan-3 optimized version of the PicoBlaze.  An attempt was made to use only instructions supported by kcpsm3 and kcpsm6 so that no changes would be necessary, but this must be verified.
   * The generic "INCLUDE_AURORA" should be set to 0 at the daq_top.vhd level.  This will keep any Aurora primitives from attempting to be instantiated, and is necessary since the Universal Eval uses a Spartan-3.
   * The target FPGA for the design should be changed to the appropriate Spartan-3.
   * A new ucf file should be created to match the pin mappings for the Universal Eval.  If the existing SCROD ucf is used as a template, the fiberoptic pieces of the ucf file should be commented out or removed.
@@ -109,9 +130,3 @@ The project as posted should synthesize and implement for the SCROD Revision A2.
   * General clocking generation interface should be changed to Spartan-3 compatible version.
   * Force USB/fiber selection bits?
   * Regenerate all cores for Spartan-3 compatibility.
-
-== Known issues and limitations ==
-
-  * The fiberoptic interface seems to accumulate significant numbers of errors unless the size of the outgoing data for loopback is limited to ~100 kB.  This may be due to the sizing of the FIFOs in the design or the interface logic to the Aurora channels, which are occasionally unavailable due to clock compensation cycles.
-  * The USB interface will accumulate significant numbers of errors unless the size of the outgoing data for loopback is limited to ~512 bytes or less.  This may be due to the sizing of the FIFOs in the design.
-  * The multiplex selects should only really be utilized at the time of FPGA programming.  Trying to switch interfaces during operation results in both interfaces failing to properly send data after the switch.  I believe this could be handled by properly tying signals for the unused interface low during the appropriate multiplex select condition.  However, for now this has not been addressed since the primary goal was to allow selection of the interface without recompiling, which this certainly accomplishes.
