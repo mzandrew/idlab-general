@@ -1,7 +1,5 @@
 #include "packet_interface.h"
 #include <stdio.h>
-char sanitize_char(char mychar);
-
 using namespace std;
 
 packet::packet() {}
@@ -97,4 +95,14 @@ void packet::PrintPacket() {
 	}
 	delete [] data;
 }
+
+//General purpose utilities
+char sanitize_char(char mychar) {
+	if ('A' <= mychar && mychar <= 'Z') { }
+	else if ('a' <= mychar && mychar <= 'z') { }
+	else if ('0' <= mychar && mychar <= '9') { }
+	else { mychar = ' '; }
+	return mychar;
+}
+
 
