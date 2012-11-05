@@ -187,11 +187,3 @@ void close_usb(void){
         libusb_exit(ctx);                       //Close libusb session
 }       
 
-char sanitize_char(char mychar) {
-		 if ('A' <= mychar && mychar <= 'Z') { }
-	else if ('a' <= mychar && mychar <= 'z') { }
-	else if ('0' <= mychar && mychar <= '9') { }
-	else { mychar = ' '; }
-	return mychar;
-}
-

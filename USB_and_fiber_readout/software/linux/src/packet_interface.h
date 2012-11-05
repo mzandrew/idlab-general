@@ -44,4 +44,7 @@ class packet {
 		unsigned int command_id;
 };
 
+//Some extra utilities that are outside of the class definition
+char sanitize_char(char mychar);
+
 #endif
