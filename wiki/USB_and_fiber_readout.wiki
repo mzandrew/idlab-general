@@ -111,6 +111,8 @@ There are general purpose registers (GPR) and read registers (RR).  The first N_
 
 The "software/linux" directory contains example code to flash a pattern on the LEDs, read out temperature values from the STTS751 via an I2C transaction, or write a SCROD ID to the EEPROM via an I2C transaction.  Much of the code for I2C transactions could/should be encapsulated into a separate interface for ease of use.  The given examples are simply the way to perform such a transaction in "raw" form.
 
+For further instructions on how to read out, see [http://code.google.com/p/idlab-general/wiki/USBReadoutSetupInstructions here].
+
 == Known issues and limitations ==
 
   * The fiberoptic interface seems to accumulate significant numbers of errors unless the size of the outgoing data for loopback is limited to ~100 kB.  This may be due to the sizing of the FIFOs in the design or the interface logic to the Aurora channels, which are occasionally unavailable due to clock compensation cycles.
