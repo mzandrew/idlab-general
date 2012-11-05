@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------
--- Module Name:      USB_and_fiber_readout
+-- Module Name:      readout_interface.vhd
 -- Target Devices:   SCROD (Spartan-6 XC6SLX150T) & 
 --                   Universal Eval Rev A/B (Spartan-3 XC3S400)
 -- Tool versions:    Developed in ISE 13.2
@@ -255,7 +255,7 @@ begin
 	------General register logic (reading/writing) -----
 	--Read from the read registers (asynchronous mux)
 	process(internal_GPR_ADDRESS, internal_RR) 
-		variable address : integer range 0 to N_GPR-1;
+		variable address : integer range 0 to N_RR-1;
 	begin
 		address := to_integer(unsigned(internal_GPR_ADDRESS));
 		internal_RR_DATA_OUT <= (others => '0');

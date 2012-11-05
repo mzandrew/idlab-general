@@ -38,7 +38,7 @@ architecture Behavioral of i2c_master is
 	signal internal_BIT_COUNTER               : integer range 0 to 7 := 0;
 	signal internal_BIT_COUNTER_ENABLE        : std_logic := '0';
 	signal internal_BIT_COUNTER_RESET         : std_logic := '1';
-	type i2c_state is (IDLE, START, SETUP_REPEAT_START, REPEAT_START, WAIT_FOR_COMMAND, PREPARE_BYTE, PREPARE_BIT, SEND_BIT, PREPARE_TO_CHECK_ACK, CHECK_ACK, PREPARE_TO_RECEIVE, RECEIVE_BIT, PREPARE_TO_GENERATE_ACK, GENERATE_ACK, STOP);
+	type i2c_state is (IDLE, START, SETUP_REPEAT_START, REPEAT_START, WAIT_FOR_COMMAND, PREPARE_BYTE, PREPARE_BIT, SEND_BIT, PREPARE_TO_CHECK_ACK, CHECK_ACK, ARM_RECEIVE, PREPARE_TO_RECEIVE, RECEIVE_BIT, PREPARE_TO_GENERATE_ACK, GENERATE_ACK, STOP);
 	signal internal_I2C_STATE_reg             : i2c_state := IDLE;
 	signal internal_I2C_NEXT_STATE            : i2c_state := IDLE;
 	signal internal_ACKNOWLEDGED_reg          : std_logic;
@@ -137,20 +137,29 @@ begin
 				SDA <= 'Z';
 				SCL <= 'Z';
 				internal_ACKNOWLEDGED_READ_ENABLE <= '1';
+			when ARM_RECEIVE =>
+				--Coming in from WAIT_FOR_COMMAND state, hold SCL low
+				SCL <= '0';
+				--Prepare SDA in high impedance so that the device presents data on bus
+				SDA <= 'Z';
+				--Read the bit in on the next cycle
+				internal_BIT_RECEIVE_READ_ENABLE <= '1';
+				--internal_BIT_COUNTER_ENABLE <= '1'; --This is an intentional comment out... since we're using a 3 bit counter we shouldn't count the first bit in.
 			when PREPARE_TO_RECEIVE =>
-				--Let SCL toggle high so that data is ready
+				--Bring SCL low, slave will change output bus data
 				SCL <= '0';
 				--SDA should be high impedance for reading
 				SDA <= 'Z';
-				--Enable the bit counter
-				internal_BIT_COUNTER_ENABLE <= '1';
+				--Receive at the next cycle and count up
+				if (internal_BIT_COUNTER < 7) then
+					internal_BIT_RECEIVE_READ_ENABLE <= '1';
+					internal_BIT_COUNTER_ENABLE <= '1';
+				end if;
 			when RECEIVE_BIT =>
-				--Keep SDA in its previous state
-				SDA <= 'Z';
-				--Bring SCL low again to prep for the next bit
+				--Bring SCL high.
 				SCL <= 'Z';
-				--Read the bit from the bus
-				internal_BIT_RECEIVE_READ_ENABLE <= '1';
+				--Keep SDA high impedance during the read
+				SDA <= 'Z';
 			when PREPARE_TO_GENERATE_ACK =>
 				--Hold SDA low to indicate data has been acknowledged (if desired)
 				if (internal_SEND_ACK_reg = '1') then
@@ -158,6 +167,8 @@ begin
 				else 
 					SDA <= 'Z';
 				end if;
+				--Let SCL go high so that the slave sees our ack (or no-ack)
+				SCL <= 'Z';
 				--Register the data that was just read
 				internal_BYTE_RECEIVED_READ_ENABLE <= '1';
 			when GENERATE_ACK =>
@@ -194,7 +205,7 @@ begin
 				if (internal_SEND_BYTE = '1') then
 					internal_I2C_NEXT_STATE <= PREPARE_BYTE;
 				elsif (internal_READ_BYTE = '1') then
-					internal_I2C_NEXT_STATE <= RECEIVE_BIT;
+					internal_I2C_NEXT_STATE <= ARM_RECEIVE;
 				elsif (internal_SEND_STOP = '1') then
 					internal_I2C_NEXT_STATE <= STOP;
 				elsif (internal_SEND_START = '1') then
@@ -216,6 +227,8 @@ begin
 				internal_I2C_NEXT_STATE <= CHECK_ACK;
 			when CHECK_ACK =>
 				internal_I2C_NEXT_STATE <= WAIT_FOR_COMMAND;
+			when ARM_RECEIVE =>
+				internal_I2C_NEXT_STATE <= RECEIVE_BIT;
 			when PREPARE_TO_RECEIVE =>
 				if (internal_BIT_COUNTER < 7) then
 					internal_I2C_NEXT_STATE <= RECEIVE_BIT;
@@ -261,11 +274,12 @@ begin
 	process(CLOCK, CLOCK_ENABLE, internal_BIT_RECEIVE_READ_ENABLE, internal_BIT_COUNTER) begin
 		if (internal_BIT_RECEIVE_READ_ENABLE = '1' and CLOCK_ENABLE = '1') then
 			if (rising_edge(CLOCK)) then
-				for i in 0 to 7 loop
-					if (internal_BIT_COUNTER = i) then
-						internal_BYTE_RECEIVED(7-i) <= SDA;
-					end if;
-				end loop;				
+				internal_BYTE_RECEIVED <= internal_BYTE_RECEIVED(6 downto 0) & SDA;
+--				for i in 0 to 7 loop
+--					if (i = to_integer(internal_BIT_COUNTER)) then
+--						internal_BYTE_RECEIVED(7-i) <= SDA;
+--					end if;
+--				end loop;
 			end if;
 		end if;
 	end process;

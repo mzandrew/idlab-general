@@ -18,7 +18,7 @@ package readout_definitions is
 	--The first N_GPR of these are directly connected to the general
 	--purpose registers to allow readback of any values.
 	--This means N_RR should be >= N_GPR.
-	constant N_RR  : integer := 512;
+	constant N_RR  : integer := 260;
 	--Widths of both of these types of registers are set to 16 bits.
 	type GPR is array(N_GPR-1 downto 0) of std_logic_vector(15 downto 0);
 	type RR is array(N_RR-1 downto 0) of std_logic_vector(15 downto 0);
