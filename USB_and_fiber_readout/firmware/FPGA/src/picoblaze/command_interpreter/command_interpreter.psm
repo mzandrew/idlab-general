@@ -20,6 +20,15 @@ CONSTANT out_GPR_DATA0, 07 ;Bits 7:0 of the GPR address to write
 CONSTANT out_GPR_DATA1, 08 ;Bits 15:8 of the GPR address to write
 CONSTANT out_GPR_WRITE_ENABLE, 09 ;Strobes the write enable for the GPRs
 
+;Constants for the I2C interface(s) [these are in the GPR address space]
+CONSTANT out_I2C_BUSA_GPR_ADDRESS1, 00
+CONSTANT out_I2C_BUSA_GPR_ADDRESS0, 01
+CONSTANT  in_I2C_BUSA_GPR_ADDRESS1, 01
+CONSTANT  in_I2C_BUSA_GPR_ADDRESS0, 00
+;Constants for the LED output interface [in the GPR address space]
+CONSTANT out_LED_GPR_ADDRESS0, 00
+CONSTANT out_LED_GPR_ADDRESS1, 00
+
 CONSTANT state_FIND_HEADER, 00
 CONSTANT state_READ_PACKET_SIZE, 01
 CONSTANT state_READ_PACKET_TYPE, 02
@@ -49,9 +58,14 @@ CONSTANT error_bit_BAD_PACKET_CHECKSUM,     00100000'b
 ;;;;;;;;;;;;;;;;;STARTUP;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 start: 
 	;Add any startup activities here.
+	CALL delay_300ms ;Give some startup time
+	;TODO: Do we want to add the fiber reset here?
+
 	;For SCROD, we should read the SCROD ID by I2C and store it in the scratchpad.
-	;TODO: add I2C transactions to read the EEPROM
-	CALL read_eeprom_id ;This sets a fixed ID 0xA201	
+	CALL read_eeprom_id ;Reads SCROD_ID from I2C BUS
+
+	;We also disable the temperature sensor I2C timeout feature
+	CALL disable_stts_timeout
 
 	;Register sF will store the current state of the command reading.
 	LOAD sF, 00
@@ -865,14 +879,175 @@ start_packet_checksum:
 	LOAD sE, packet_HEADER3
 	RETURN
 
-;A stub that sets a fixed value for the EEPROM ID
-;and stores it in scratchpad space 00 and 01
+;Reads two bytes from I2C BUSA and stores it in 
+;scratchpad space 00 and 01.
 read_eeprom_id:
-	LOAD s0, A2
-	STORE s0, 01
-	LOAD s0, 01
-	STORE s0, 00 ;We're just using ID 0xA201 for now.
+	;I2C transaction steps (to register 1)
+	;everything is sent to register 1, so set that up
+	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1	
+	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
+	CALL set_current_GPR
+	;(Allow waits of 200 us between steps.)
+	;1. Send start:                     0x0100
+	LOAD s1, 01	
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;2. Setup send device addr + write: 0x00A0
+	LOAD s1, 00
+	LOAD s0, A0
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send device addr + write: 0x02A0
+	LOAD s1, 02
+	LOAD s0, A0
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;3. Setup send address byte high  : 0x0000
+	LOAD s1, 00
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send address byte high  : 0x0200
+	LOAD s1, 02
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;4. Setup send address byte low   : 0x0000
+	LOAD s1, 00
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send address byte low   : 0x0200
+	LOAD s1, 02
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;5. Repeated start:               : 0x0100
+	LOAD s1, 01
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;6. Setup send device addr + read : 0x00A1
+	LOAD s1, 00
+	LOAD s0, A1
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send device addr + read : 0x02A1
+	LOAD s1, 02
+	LOAD s0, A1
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;7. Read byte with acknowledge    : 0x0C00
+	LOAD s1, 0C
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;8. Store the byte that is read back to scratchpad
+	LOAD s1, in_I2C_BUSA_GPR_ADDRESS1
+	LOAD s0, in_I2C_BUSA_GPR_ADDRESS0
+	CALL set_current_GPR
+	INPUT s0, in_GPR_DATA0
+	STORE s0, 00
+	;9. Setup to read byte
+	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1
+	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
+	CALL set_current_GPR
+	LOAD s1, 00
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	;            read byte w/o ack    : 0x0400
+	LOAD s1, 04
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;10. Store the byte that is read back to scratchpad
+	LOAD s0, in_I2C_BUSA_GPR_ADDRESS0
+	LOAD s1, in_I2C_BUSA_GPR_ADDRESS1
+	CALL set_current_GPR
+	INPUT s0, in_GPR_DATA0
+	STORE s0, 01	
+	;11. Send stop                     : 0x1000
+	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
+	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1
+	CALL set_current_GPR
+	LOAD s1, 10
+	LOAD s0, 00
+	CALL write_to_current_GPR
+
+	;Finish by displaying the Rev & ID on the LEDs
+	LOAD s0, out_LED_GPR_ADDRESS0
+	LOAD s1, out_LED_GPR_ADDRESS1
+	CALL set_current_GPR
+	FETCH s0, 00
+	FETCH s1, 01
+	OUTPUT s0, out_GPR_DATA0
+	OUTPUT s1, out_GPR_DATA1
+	OUTPUT s1, out_GPR_WRITE_ENABLE
+	
 	RETURN
+
+;Disables the timeout feature on the STTS I2C temperature sensor
+disable_stts_timeout:
+	;I2C transaction steps (to register 1)
+	;everything is sent to register 1, so set that up
+	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1	
+	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
+	CALL set_current_GPR
+	;(Allow waits of 200 us between steps.)
+	;1. Send start:                     0x0100
+	LOAD s1, 01	
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;2. Setup send device addr + write: 0x0094
+	LOAD s1, 00
+	LOAD s0, 94
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send device addr + write: 0x0294
+	LOAD s1, 02
+	LOAD s0, 94
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;3. Setup send register address   : 0x0003
+	LOAD s1, 00
+	LOAD s0, 03
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send register address   : 0x0203
+	LOAD s1, 02
+	LOAD s0, 03
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;4. Setup send register data      : 0x000C
+	LOAD s1, 00
+	LOAD s0, 0C
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send address byte low   : 0x020C
+	LOAD s1, 02
+	LOAD s0, 0C
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;5. Send stop                     : 0x1000
+	LOAD s1, 10
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	RETURN
+
+;Writes s0 and s1 out on GPR_ADDRESS0 and GPR_ADDRESS1
+set_current_GPR:
+	OUTPUT s1, out_GPR_ADDRESS1
+	OUTPUT s0, out_GPR_ADDRESS0
+	RETURN
+;Writes s0 and s1 out on GPR_DATA0 and GPR_DATA1 to current GPR_ADDRESS
+write_to_current_GPR:
+	OUTPUT s1, out_GPR_DATA1
+	OUTPUT s0, out_GPR_DATA0
+	OUTPUT s0, out_GPR_WRITE_ENABLE	
+	RETURN		
+
 ;Sends the ID stored in the scratchpad space out through the FIFO
 send_scrod_id:
 	FETCH s0, 00
@@ -882,15 +1057,27 @@ send_scrod_id:
 	CALL send_word
 	RETURN
 
-;Make a fixed amount of delay
+;Make fixed amounts of delay
 ;Clock rate is 50 MHz, so 25 MIPS
-;2.5 million instructions = 100 ms
-;4 instructions per iteration, 625000 = 0x098968
-delay_100ms: LOAD s2, 09
-             LOAD s1, 89
-             LOAD s0, 68
-delay_loop:  SUB s0, 1'd
-             SUBCY s1, 0'd
-             SUBCY s2, 0'd
-             JUMP NZ, delay_loop
-             RETURN
+;4 instructions in delay_loop per iteration
+
+;7.5 M instructions = 300 ms
+;4 instructions per iteration 1.875 M = 1C9C38
+delay_300ms:
+	LOAD s2, 1C
+	LOAD s1, 9C
+	LOAD s0, 38
+	JUMP delay_loop
+;5000 instructions = 200 us
+;4 instructions per iteration, 1250 = 0x04E2
+delay_200us:
+	LOAD s2, 00
+	LOAD s1, 04
+	LOAD s0, E2
+	JUMP delay_loop
+delay_loop:  
+	SUB   s0, 1'd
+	SUBCY s1, 0'd
+	SUBCY s2, 0'd
+	JUMP NZ, delay_loop
+	RETURN
