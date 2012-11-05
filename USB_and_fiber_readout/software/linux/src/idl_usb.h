@@ -10,7 +10,7 @@ using namespace std;
 #define SCROD_USB_PID (0x1004)
 #define USB_IN_ENDPNT (0x88)
 #define USB_OUT_ENDPNT (0x04)
-#define TM_OUT  (100)  //100 ms timeout period
+#define TM_OUT  (10)  //100 ms timeout period
 
 extern libusb_device_handle *dev_handle;
 

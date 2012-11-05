@@ -19,7 +19,7 @@ void byte_reverse(unsigned int *, int);
 
 int main(){
 	unsigned short int revision_to_write = 0x00A2;
-	unsigned short int board_id_to_write = 0x0055;
+	unsigned short int board_id_to_write = 0x0014;
 
         setup_usb();
         unsigned int inbuf[512];
