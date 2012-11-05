@@ -30,9 +30,13 @@ Commands and responses are consistent with the posted [https://www.phys.hawaii.e
   * Read from register
   * Write to register
 
-The command interpreter implementation is contained in the file "command_interpreter.psm".  It contains assembly code that 
+The command interpreter implementation is contained in the file "command_interpreter.psm".  It contains assembly code that performs the following actions:
 
-Details 
+  # On startup, interface with the I2C EEPROM on bus A to read the SCROD ID from memory address 0 and revision from memory address 1. This determines the ID that SCROD will respond to for subsequent commands.
+  # On startup, interface with the I2C temperature sensor on bus A to turn off the I2C timeout feature.
+  # Enter an infinite loop to search for data from the input FIFO and parse commands as needed.
+
+Summary of the PicoBlaze register functions and scratch space in the command interpreter code is contained in [http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/scrod_readout_interface/picoblaze_registers_and_memory.xlsx [this spreadsheet]].
 
 === Read and Write Registers ===
 
@@ -52,6 +56,8 @@ Register mappings are handled in "scrod_top.vhd" near the end of the file.  Cust
   * 257: I2C read interface from bus B
   * 258: I2C read interface from bus C
   * 259-511: Unused (available)
+
+Note that changing the addresses for I2C devices will impact the startup code for the command interpreter, so corresponding changes may need to be made to the assembly code.
 
 === I2C Interfaces ===
 
@@ -98,12 +104,11 @@ The project as posted should synthesize and implement for the SCROD Revision A2.
   * The generic "INCLUDE_AURORA" should be set to 0 at the daq_top.vhd level.  This will keep any Aurora primitives from attempting to be instantiated, and is necessary since the Universal Eval uses a Spartan-3.
   * The target FPGA for the design should be changed to the appropriate Spartan-3.
   * A new ucf file should be created to match the pin mappings for the Universal Eval.  If the existing SCROD ucf is used as a template, the fiberoptic pieces of the ucf file should be commented out or removed.
-  * The FIFO sizes may have to be changed to fit within Spartan-3 resources.  The main offender is likely to be the "event/waveform" output FIFO, which is very large in the original project.
-  * The chipscope cores need to be regenerated for a Spartan-3, since they are by default generated for a Spartan-6.
-
-== Other potential applications ==
-
-This firmware would be relatively easily modified to allow sending data to the FPGA via USB and having the data be looped back by fiberoptic.  This would allow for testing .  The modifications should be made at the daq_fifo_layer.vhd level of the hierarchy.
+  * The FIFO sizes may have to be reduced to fit within Spartan-3 resources.  The main offender is likely to be the "event/waveform" output FIFO, which is very large in the original project.
+  * The chipscope cores need to be removed or regenerated for a Spartan-3, since they are by default generated for a Spartan-6.
+  * General clocking generation interface should be changed to Spartan-3 compatible version.
+  * Force USB/fiber selection bits?
+  * Regenerate all cores for Spartan-3 compatibility.
 
 == Known issues and limitations ==
 
