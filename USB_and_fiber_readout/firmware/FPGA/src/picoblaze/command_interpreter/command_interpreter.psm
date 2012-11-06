@@ -51,6 +51,28 @@ CONSTANT error_bit_BAD_COMMAND_TYPE,        00001000'b
 CONSTANT error_bit_BAD_COMMAND_CHECKSUM,    00010000'b
 CONSTANT error_bit_BAD_PACKET_CHECKSUM,     00100000'b
 
+;Scratchpad address space mapping
+CONSTANT sp_addr_SCROD_ID0, 00
+CONSTANT sp_addr_SCROD_ID1, 01
+CONSTANT sp_addr_SCROD_REV, 02
+;Address 03 is reserved
+CONSTANT sp_addr_CHECKSUM0, 04
+CONSTANT sp_addr_CHECKSUM1, 05
+CONSTANT sp_addr_CHECKSUM2, 06
+CONSTANT sp_addr_CHECKSUM3, 07
+CONSTANT sp_addr_COMMAND_ID0, 08
+CONSTANT sp_addr_COMMAND_ID1, 09
+CONSTANT sp_addr_COMMAND_ID2, 0A
+CONSTANT sp_addr_COMMAND_ID3, 0B
+CONSTANT sp_addr_TEMP_SPACE0, 10
+CONSTANT sp_addr_TEMP_SPACE1, 11
+CONSTANT sp_addr_TEMP_SPACE2, 12
+CONSTANT sp_addr_TEMP_SPACE3, 13
+CONSTANT sp_addr_COMMAND_DATA0, 1A
+CONSTANT sp_addr_COMMAND_DATA1, 1B
+CONSTANT sp_addr_COMMAND_DATA2, 1C
+CONSTANT sp_addr_COMMAND_DATA3, 1D
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;PRIMARY STATE MACHINE;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -63,7 +85,7 @@ start:
 
 	;For SCROD, we should read the SCROD ID by I2C and store it in the scratchpad.
 	CALL read_eeprom_id ;Reads SCROD_ID from I2C BUS
-
+	CALL delay_200us
 	;We also disable the temperature sensor I2C timeout feature
 	CALL disable_stts_timeout
 
@@ -74,15 +96,6 @@ start:
 main:
 	;The main event loop just reads data from the input FIFO
 	CALL check_for_data
-	
-;	;Write the current state to the LEDs
-;	LOAD s0, 01
-;	OUTPUT s0, out_GPR_ADDRESS0
-;	LOAD s0, 00
-;	OUTPUT s0, out_GPR_ADDRESS1
-;	OUTPUT sF, out_GPR_DATA0
-;	OUTPUT s0, out_GPR_DATA1
-;	OUTPUT s0, out_GPR_WRITE_ENABLE
 
 	;Repeat event loop
 	JUMP main
@@ -199,13 +212,16 @@ read_destination:
 	;00 00 is the global address, so respond to that
 	SUB   s1, 00
 	SUBCY s2, 00
+	SUBCY s3, 00
 	JUMP Z, read_destination_success
 	;Or compare to our own address
 	CALL fetch_fifo_word
-	FETCH s3, 00
-	FETCH s4, 01
-	SUB s1, s3
-	SUBCY s2, s4
+	FETCH s4, sp_addr_SCROD_ID0
+	FETCH s5, sp_addr_SCROD_ID1
+	FETCH s6, sp_addr_SCROD_REV
+	SUB s1, s4
+	SUBCY s2, s5
+	SUBCY s3, s6	
 	JUMP Z, read_destination_success
 
 	;Otherwise we failed
@@ -283,7 +299,7 @@ read_command_type_write:
 	JUMP read_command_type_success
 read_command_type_success:
 	;Starting address for command data in scratchpad is 1A
-	LOAD s5, 1A
+	LOAD s5, sp_addr_COMMAND_DATA0
 	CALL set_z
 	RETURN
 ;;;;;;;;;;;;;;;;;;;;;READ COMMAND DATA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -376,22 +392,22 @@ read_packet_checksum_matches:
 
 perform_read:
 	;Grab the read register from allocated scratchpad space
-	FETCH s0, 1A
-	FETCH s1, 1B
+	FETCH s0, sp_addr_COMMAND_DATA0
+	FETCH s1, sp_addr_COMMAND_DATA1
 	;Perform the read and store the data as upper bits of scratch space
 	OUTPUT s0, out_GPR_ADDRESS0
 	OUTPUT s1, out_GPR_ADDRESS1
 	INPUT s0, in_GPR_DATA0
 	INPUT s1, in_GPR_DATA1
-	STORE s0, 1C
-	STORE s1, 1D
+	STORE s0, sp_addr_COMMAND_DATA2
+	STORE s1, sp_addr_COMMAND_DATA3
 	RETURN
 perform_write:
 	;Grab the write register and data from the allocated scratchpad space
-	FETCH s0, 1A
-	FETCH s1, 1B
-	FETCH s2, 1C
-	FETCH s3, 1D
+	FETCH s0, sp_addr_COMMAND_DATA0
+	FETCH s1, sp_addr_COMMAND_DATA1
+	FETCH s2, sp_addr_COMMAND_DATA2
+	FETCH s3, sp_addr_COMMAND_DATA3
 	OUTPUT s0, out_GPR_ADDRESS0
 	OUTPUT s1, out_GPR_ADDRESS1
 	OUTPUT s2, out_GPR_DATA0
@@ -501,7 +517,7 @@ send_write_response:
 ;;;;;;;;;;;;;;;SEND ERROR RESPONSE PACKET;;;;;;;;;;;;;;;;;;;;;;;;;
 send_error_packet:
 	;Store the error bits in the scratch space
-	STORE s0, 10
+	STORE s0, sp_addr_TEMP_SPACE0
 	;Zero out the checksum
 	CALL zero_checksum
 	;Word 0: packet header
@@ -524,7 +540,7 @@ send_error_packet:
 	CALL send_command_id
 	CALL add_output_word_to_checksum
 	;Word 5: bad command flags
-	FETCH s0, 10
+	FETCH s0, sp_addr_TEMP_SPACE0
 	LOAD s1, 00
 	LOAD s2, 00
 	LOAD s3, 00
@@ -567,10 +583,10 @@ add_output_word_to_checksum:
 
 add_command_checksum_to_packet_checksum:
 	;Fetch the packet checksum into working registers
-	FETCH s0, 02
-	FETCH s1, 03
-	FETCH s2, 04
-	FETCH s3, 05
+	FETCH s0, sp_addr_CHECKSUM0
+	FETCH s1, sp_addr_CHECKSUM1
+	FETCH s2, sp_addr_CHECKSUM2
+	FETCH s3, sp_addr_CHECKSUM3
 	;Multiply command checksum by 2 (to account for also adding the packet checksum to total checksum)
 	SL0 sB
 	SLA sC
@@ -582,10 +598,10 @@ add_command_checksum_to_packet_checksum:
 	ADDCY s2, sD
 	ADDCY s3, sE
 	;Store the packet checksum into scratchpad
-	STORE s0, 02
-	STORE s1, 03
-	STORE s2, 04
-	STORE s3, 05
+	STORE s0, sp_addr_CHECKSUM0
+	STORE s1, sp_addr_CHECKSUM1
+	STORE s2, sp_addr_CHECKSUM2
+	STORE s3, sp_addr_CHECKSUM3
 	;Zero the command checksum sB-sE for next command
 	CALL zero_checksum
 	RETURN
@@ -605,44 +621,44 @@ store_command_data:
 
 ;Utiltiy to place the current FIFO word into the scratchpad
 store_fifo_word:
-	STORE s1, 10
-	STORE s2, 11
-	STORE s3, 12
-	STORE s4, 13
+	STORE s1, sp_addr_TEMP_SPACE0
+	STORE s2, sp_addr_TEMP_SPACE1
+	STORE s3, sp_addr_TEMP_SPACE2
+	STORE s4, sp_addr_TEMP_SPACE3
 	RETURN
 ;Utility to grab back the FIFO word from the scratchpad
 fetch_fifo_word:
-	FETCH s1, 10
-	FETCH s2, 11
-	FETCH s3, 12
-	FETCH s4, 13
+	FETCH s1, sp_addr_TEMP_SPACE0
+	FETCH s2, sp_addr_TEMP_SPACE1
+	FETCH s3, sp_addr_TEMP_SPACE2
+	FETCH s4, sp_addr_TEMP_SPACE3
 	RETURN
 ;Store the checksum in scratchpad
 store_checksum:
-	STORE sB, 02
-	STORE sC, 03
-	STORE sD, 04
-	STORE sE, 05
+	STORE sB, sp_addr_CHECKSUM0
+	STORE sC, sp_addr_CHECKSUM1
+	STORE sD, sp_addr_CHECKSUM2
+	STORE sE, sp_addr_CHECKSUM3
 	RETURN
 fetch_checksum:
-	FETCH sB, 02
-	FETCH sC, 03
-	FETCH sD, 04
-	FETCH sE, 05
+	FETCH sB, sp_addr_CHECKSUM0
+	FETCH sC, sp_addr_CHECKSUM1
+	FETCH sD, sp_addr_CHECKSUM2
+	FETCH sE, sp_addr_CHECKSUM3
 	RETURN
 ;Store the command ID from input FIFO into the scratchpad
 store_command_id:
-	STORE s1, 06
-	STORE s2, 07
-	STORE s3, 08
-	STORE s4, 09
+	STORE s1, sp_addr_COMMAND_ID0
+	STORE s2, sp_addr_COMMAND_ID1
+	STORE s3, sp_addr_COMMAND_ID2
+	STORE s4, sp_addr_COMMAND_ID3
 	RETURN
 ;Send command ID through the output FIFO
 send_command_id:
-	FETCH s0, 06
-	FETCH s1, 07
-	FETCH s2, 08
-	FETCH s3, 09
+	FETCH s0, sp_addr_COMMAND_ID0
+	FETCH s1, sp_addr_COMMAND_ID1
+	FETCH s2, sp_addr_COMMAND_ID2
+	FETCH s3, sp_addr_COMMAND_ID3
 	CALL send_word
 	RETURN
 
@@ -805,7 +821,7 @@ send_write_command_type:
 
 
 reset_command_data_pointer:
-	LOAD s5, 1A
+	LOAD s5, sp_addr_COMMAND_DATA0
 	RETURN
 send_command_data:
 	FETCH s0, (s5)
@@ -948,8 +964,27 @@ read_eeprom_id:
 	LOAD s0, in_I2C_BUSA_GPR_ADDRESS0
 	CALL set_current_GPR
 	INPUT s0, in_GPR_DATA0
-	STORE s0, 00
+	STORE s0, sp_addr_SCROD_ID0
+
 	;9. Setup to read byte
+	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1
+	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
+	CALL set_current_GPR
+	LOAD s1, 00
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	;            read byte w/ ack     : 0x0C00
+	LOAD s1, 0C
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;10. Store the byte that is read back to scratchpad
+	LOAD s0, in_I2C_BUSA_GPR_ADDRESS0
+	LOAD s1, in_I2C_BUSA_GPR_ADDRESS1
+	CALL set_current_GPR
+	INPUT s0, in_GPR_DATA0
+	STORE s0, sp_addr_SCROD_ID1	
+	;11. Setup to read byte
 	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1
 	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
 	CALL set_current_GPR
@@ -961,13 +996,13 @@ read_eeprom_id:
 	LOAD s0, 00
 	CALL write_to_current_GPR
 	CALL delay_200us
-	;10. Store the byte that is read back to scratchpad
+	;12. Store the byte that is read back to scratchpad
 	LOAD s0, in_I2C_BUSA_GPR_ADDRESS0
 	LOAD s1, in_I2C_BUSA_GPR_ADDRESS1
 	CALL set_current_GPR
 	INPUT s0, in_GPR_DATA0
-	STORE s0, 01	
-	;11. Send stop                     : 0x1000
+	STORE s0, sp_addr_SCROD_REV
+	;13. Send stop                     : 0x1000
 	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
 	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1
 	CALL set_current_GPR
@@ -975,12 +1010,12 @@ read_eeprom_id:
 	LOAD s0, 00
 	CALL write_to_current_GPR
 
-	;Finish by displaying the Rev & ID on the LEDs
+	;Finish by displaying the SCROD ID on the LEDs
 	LOAD s0, out_LED_GPR_ADDRESS0
 	LOAD s1, out_LED_GPR_ADDRESS1
 	CALL set_current_GPR
-	FETCH s0, 00
-	FETCH s1, 01
+	FETCH s0, sp_addr_SCROD_ID0
+	FETCH s1, sp_addr_SCROD_ID1
 	OUTPUT s0, out_GPR_DATA0
 	OUTPUT s1, out_GPR_DATA1
 	OUTPUT s1, out_GPR_WRITE_ENABLE
@@ -1010,24 +1045,24 @@ disable_stts_timeout:
 	LOAD s0, 94
 	CALL write_to_current_GPR
 	CALL delay_200us
-	;3. Setup send register address   : 0x0003
+	;3. Setup send register address   : 0x0022
 	LOAD s1, 00
-	LOAD s0, 03
+	LOAD s0, 22
 	CALL write_to_current_GPR
 	CALL delay_200us
-	;         Send register address   : 0x0203
+	;         Send register address   : 0x0222
 	LOAD s1, 02
-	LOAD s0, 03
+	LOAD s0, 22
 	CALL write_to_current_GPR
 	CALL delay_200us
-	;4. Setup send register data      : 0x000C
+	;4. Setup send register data      : 0x0000
 	LOAD s1, 00
-	LOAD s0, 0C
+	LOAD s0, 00
 	CALL write_to_current_GPR
 	CALL delay_200us
-	;         Send address byte low   : 0x020C
+	;         Send register data      : 0x0200
 	LOAD s1, 02
-	LOAD s0, 0C
+	LOAD s0, 00
 	CALL write_to_current_GPR
 	CALL delay_200us
 	;5. Send stop                     : 0x1000
@@ -1050,9 +1085,9 @@ write_to_current_GPR:
 
 ;Sends the ID stored in the scratchpad space out through the FIFO
 send_scrod_id:
-	FETCH s0, 00
-	FETCH s1, 01
-	LOAD s2, 00
+	FETCH s0, sp_addr_SCROD_ID0
+	FETCH s1, sp_addr_SCROD_ID1
+	FETCH s2, sp_addr_SCROD_REV
 	LOAD s3, 00
 	CALL send_word
 	RETURN
