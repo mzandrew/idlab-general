@@ -27,12 +27,12 @@ int main(){
 	unsigned int *outbuf;
 	packet command_stack;
 	unsigned int command_id  = 10;
-	unsigned short int board_id = 0x0000;  //Broadcast ID
-//	unsigned short int board_id = 0xA214;  //Try sending to your specific board
+//	unsigned int board_id = 0x00000000;  //Broadcast ID
+	unsigned int board_id = 0x00A2000E;  //Try sending to your specific board
 	unsigned short int command_reg = 1;
 	unsigned short int read_reg = 256;
 	//I2C command stack here
-	int N_commands = 10;
+	int N_commands = 0;
 	unsigned short int command_data[10]= {0x0100,  //1. start
 	                                      0x0094,  //2. setup send
 	                                      0x0294,  //   send addr + write

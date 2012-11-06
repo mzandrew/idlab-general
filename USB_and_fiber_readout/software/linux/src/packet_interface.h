@@ -24,7 +24,7 @@ class packet {
 		//Reset the current packet
 		void ClearPacket();
 		//So the first command will have ID = 1 and be a broadcast command
-		void CreateCommandPacket(unsigned int base_command_id = 0, unsigned short int board_id = 0);
+		void CreateCommandPacket(unsigned int base_command_id = 0, unsigned int board_id = 0);
 		//Add a command to the packet
 		void AddPingToPacket();
 		void AddReadToPacket(unsigned short int reg_id);
