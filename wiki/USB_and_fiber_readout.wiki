@@ -32,10 +32,13 @@ Commands and responses are consistent with the posted [https://www.phys.hawaii.e
 
 The command interpreter implementation is contained in the file "command_interpreter.psm".  It contains assembly code that performs the following actions:
 
-  # Startup: interface with the I2C EEPROM on bus A to read the SCROD ID from memory address 0 and revision from memory address 1. This determines the ID that SCROD will respond to for subsequent commands.
-  # Startup: display the SCROD revision and ID just read on the LEDs.
-  # Startup: interface with the I2C temperature sensor on bus A to turn off the I2C timeout feature.
-  # Normal operatoin: enter an infinite loop to search for data from the input FIFO and parse commands and send applicable responses as data is detected.
+*Startup sequence*
+  # Wait 300 ms
+  # Interface with the I2C EEPROM on bus A to read the SCROD ID from memory addresses 0 and 1 and revision from memory address 2. This determines the ID that SCROD will respond to for subsequent commands.
+  # Display the SCROD ID that was just read on the LEDs.
+  # Interface with the I2C temperature sensor on bus A to turn off the I2C timeout feature.
+*Normal operation*
+  # Infinite loop to search for data from the input FIFO and parse commands and send applicable responses as data is detected.
 
 Summary of the PicoBlaze register functions and scratch space in the command interpreter code is contained in [http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/scrod_readout_interface/picoblaze_registers_and_memory.xlsx this spreadsheet].
 
