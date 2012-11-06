@@ -10,7 +10,7 @@ void packet::ClearPacket() {
 	payload_data.clear();
 }
 
-void packet::CreateCommandPacket(unsigned int base_command_id, unsigned short int board_id) {
+void packet::CreateCommandPacket(unsigned int base_command_id, unsigned int board_id) {
 	command_id = base_command_id;
 	//This is a command packet, so start adding to the payload...
 	payload_data.push_back(PACKET_TYPE_COMMAND);
