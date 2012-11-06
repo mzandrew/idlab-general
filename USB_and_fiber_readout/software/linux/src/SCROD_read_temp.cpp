@@ -32,7 +32,7 @@ int main(){
 	unsigned short int command_reg = 1;
 	unsigned short int read_reg = 256;
 	//I2C command stack here
-	int N_commands = 0;
+	int N_commands = 10;
 	unsigned short int command_data[10]= {0x0100,  //1. start
 	                                      0x0094,  //2. setup send
 	                                      0x0294,  //   send addr + write
