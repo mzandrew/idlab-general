@@ -285,10 +285,10 @@ begin
 	                                    internal_USB_RX_1_WRITE_ENABLE when (internal_TOGGLE_DAQ_TO_FIBER = '0') else
 												  'X';
 	internal_FIFO_INP_0_WRITE_DATA  <=  internal_FIBER_0_RX_DATA_MSB_TO_LSB when (internal_TOGGLE_DAQ_TO_FIBER = '1') else
-	                                    internal_USB_EP2_DATA_32BIT when (internal_TOGGLE_DAQ_TO_FIBER = '0') else
+	                                    (internal_USB_EP2_DATA_32BIT(15 downto 0) & internal_USB_EP2_DATA_32BIT(31 downto 16)) when (internal_TOGGLE_DAQ_TO_FIBER = '0') else
 													(others => 'X');
 	internal_FIFO_INP_1_WRITE_DATA  <=  internal_FIBER_1_RX_DATA_MSB_TO_LSB when (internal_TOGGLE_DAQ_TO_FIBER = '1') else
-	                                    internal_USB_EP4_DATA_32BIT when (internal_TOGGLE_DAQ_TO_FIBER = '0') else
+	                                    (internal_USB_EP4_DATA_32BIT(15 downto 0) & internal_USB_EP4_DATA_32BIT(31 downto 16))  when (internal_TOGGLE_DAQ_TO_FIBER = '0') else
 													(others => 'X');
 
 	
@@ -474,14 +474,20 @@ begin
 			end if;
 		end process;		
 		--The bit ordering of AXI is the reverse of the FIFO (and what we usually use)
-		internal_FIBER_0_TX_DATA_MSB_TO_LSB <= internal_FIFO_OUT_0_READ_DATA;
-		internal_FIBER_1_TX_DATA_MSB_TO_LSB <= internal_FIFO_OUT_1_READ_DATA;
+		internal_FIBER_0_TX_DATA_MSB_TO_LSB <= internal_FIFO_OUT_0_READ_DATA;  
+		internal_FIBER_1_TX_DATA_MSB_TO_LSB <= internal_FIFO_OUT_1_READ_DATA;  
 		--We need to do some bit reversing since the Aurora protocol goes LSB to MSB, and 
 		--we typically go the other way around.
-		internal_FIBER_0_TX_DATA_LSB_TO_MSB <= reverse(internal_FIBER_0_TX_DATA_MSB_TO_LSB);
-		internal_FIBER_1_TX_DATA_LSB_TO_MSB <= reverse(internal_FIBER_1_TX_DATA_MSB_TO_LSB);
-		internal_FIBER_0_RX_DATA_MSB_TO_LSB <= reverse(internal_FIBER_0_RX_DATA_LSB_TO_MSB);
-		internal_FIBER_1_RX_DATA_MSB_TO_LSB <= reverse(internal_FIBER_1_RX_DATA_LSB_TO_MSB);
+			--2012-11-06: data is coming out bit reversed... does Aurora do this reverse for us?  Removing the reverses.
+			--            This fixed the problem.  But I still would like to delve into Aurora to see why this isn't necessary.  -KN
+--		internal_FIBER_0_TX_DATA_LSB_TO_MSB <= reverse(internal_FIBER_0_TX_DATA_MSB_TO_LSB);
+--		internal_FIBER_1_TX_DATA_LSB_TO_MSB <= reverse(internal_FIBER_1_TX_DATA_MSB_TO_LSB);
+--		internal_FIBER_0_RX_DATA_MSB_TO_LSB <= reverse(internal_FIBER_0_RX_DATA_LSB_TO_MSB);
+--		internal_FIBER_1_RX_DATA_MSB_TO_LSB <= reverse(internal_FIBER_1_RX_DATA_LSB_TO_MSB);
+		internal_FIBER_0_TX_DATA_LSB_TO_MSB <= internal_FIBER_0_TX_DATA_MSB_TO_LSB;
+		internal_FIBER_1_TX_DATA_LSB_TO_MSB <= internal_FIBER_1_TX_DATA_MSB_TO_LSB;
+		internal_FIBER_0_RX_DATA_MSB_TO_LSB <= internal_FIBER_0_RX_DATA_LSB_TO_MSB;
+		internal_FIBER_1_RX_DATA_MSB_TO_LSB <= internal_FIBER_1_RX_DATA_LSB_TO_MSB;
 		--Combine the diagnostic signals into single bits (this can be undone later if we really need
 		--access to the individual bits
 		internal_FIBER_0_LINK_UP  <= internal_FIBER_0_LANE_UP and internal_FIBER_0_CHANNEL_UP;
@@ -589,7 +595,7 @@ begin
 			rst    => internal_USB_RESET,
 			wr_clk => internal_USB_CLOCK,
 			rd_clk => internal_USB_CLOCK,
-			din    => internal_USB_EP6_DATA_32BIT,
+			din    => (internal_USB_EP6_DATA_32BIT(15 downto 0) & internal_USB_EP6_DATA_32BIT(31 downto 16)),
 			wr_en  => internal_USB_EP6_WRITE_ENABLE_reg,
 			rd_en  => internal_USB_EP6_READ_ENABLE,
 			dout   => internal_USB_EP6_DATA_16BIT,
@@ -611,7 +617,7 @@ begin
 			rst    => internal_USB_RESET,
 			wr_clk => internal_USB_CLOCK,
 			rd_clk => internal_USB_CLOCK,
-			din    => internal_USB_EP8_DATA_32BIT,
+			din    => (internal_USB_EP8_DATA_32BIT(15 downto 0) & internal_USB_EP8_DATA_32BIT(31 downto 16)),
 			wr_en  => internal_USB_EP8_WRITE_ENABLE_reg,
 			rd_en  => internal_USB_EP8_READ_ENABLE,
 			dout   => internal_USB_EP8_DATA_16BIT,
