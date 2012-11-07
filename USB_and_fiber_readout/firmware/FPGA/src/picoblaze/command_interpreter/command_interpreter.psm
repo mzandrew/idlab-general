@@ -110,6 +110,13 @@ check_for_data:
 	;If there is data in the FIFO, read a word into registers s1-4...
 	CALL read_fifo_word
 
+;	LOAD s0, 00
+;	OUTPUT s0, out_GPR_ADDRESS0
+;	OUTPUT s0, out_GPR_ADDRESS1
+;	OUTPUT s3, out_GPR_DATA0
+;	OUTPUT s4, out_GPR_DATA1
+;	OUTPUT s0, out_GPR_WRITE_ENABLE
+
 	;What we do here depends on the current state.
 	COMPARE sF, state_FIND_HEADER
 	CALL Z, read_header
