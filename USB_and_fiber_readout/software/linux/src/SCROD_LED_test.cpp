@@ -55,18 +55,18 @@ int main(){
 		command_stack.PrintPacket();
 		outbuf = command_stack.AssemblePacket(size);
 
-		byte_reverse(outbuf,command_stack.GetTotalSize());
+//		byte_reverse(outbuf,command_stack.GetTotalSize());
  
 	        int stat_chk,j;
 
         	usb_XferData((OUT_ADDR | LIBUSB_ENDPOINT_OUT), (unsigned char *) outbuf, size*4, TM_OUT);
-
+		usleep(50000);
 
 	        //RX
  	       int retval = usb_XferData((IN_ADDR | LIBUSB_ENDPOINT_IN), p_inbuf, 512*sizeof(unsigned int), TM_OUT);
 		cout << "Read out " << retval << " bytes." << endl;
 		while (retval > 0) {
-			byte_reverse(inbuf,retval/4);
+//			byte_reverse(inbuf,retval/4);
 			for(j=0;j<retval/4;j++) {
 	       	 		printf("inbuf[%d]=0x%.8X\t",j,inbuf[j]);
 				for (int k = 3; k >= 0; --k) {
