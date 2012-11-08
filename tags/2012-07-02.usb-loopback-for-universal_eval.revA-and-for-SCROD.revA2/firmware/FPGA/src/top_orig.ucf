@@ -1,0 +1,164 @@
+#Using on-board 250 MHz oscillator
+#NET BOARD_CLOCK_250MHz_P	LOC = "U25" | IOSTANDARD = LVDS_25;
+#NET BOARD_CLOCK_250MHz_N	LOC = "U26" | IOSTANDARD = LVDS_25;
+
+#USB related
+#hay wire @ ae13 for IFCLK
+#NET "IFCLK" LOC= "ae13" | IOSTANDARD=LVCMOS33;
+#NET "IFCLK" LOC= "g12" | IOSTANDARD=LVCMOS33 | CLOCK_DEDICATED_ROUTE = FALSE;
+NET "IFCLK"	 LOC = "b14"  | IOSTANDARD = LVCMOS33; # on SCROD revA2, IFCLK is connected to b14
+NET "IFCLK" TNM_NET="IFCLK_48M";
+TIMESPEC "TS_IFCLK_48M" = PERIOD "IFCLK_48M" 20.833 ns HIGH 50%;
+
+#NET "CLKOUT"  LOC = "e10" | IOSTANDARD=LVCMOS33 ; 
+NET CLKOUT     	LOC = "e13"  | IOSTANDARD = LVCMOS33; # on SCROD revA2, CLKOUT is connected to e13
+NET "WAKEUP"  LOC = "f11" | IOSTANDARD=LVCMOS33 ;
+#NET "WAKEUP_OUT" LOC = "J17" | IOSTANDARD=LVCMOS33; #just to prevent Wakeup from being trimmed
+
+NET "FDD<0>"  LOC = "f5"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<10>"  LOC = "c5"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<11>"  LOC = "h10"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<12>"  LOC = "g10"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<13>"  LOC = "b4"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<14>"  LOC = "a4"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<15>"  LOC = "f10"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<1>"  LOC = "e6"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<2>"  LOC = "e5"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<3>"  LOC = "h9"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<4>"  LOC = "g9"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<5>"  LOC = "a3"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<6>"  LOC = "a2"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<7>"  LOC = "f9"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<8>"  LOC = "e8"  | IOSTANDARD=LVCMOS33 ;
+NET "FDD<9>"  LOC = "d5"  | IOSTANDARD=LVCMOS33 ;
+NET "CTL0"  LOC = "f12" | IOSTANDARD=LVCMOS33 ; #flagA
+NET "CTL1"  LOC = "e12" | IOSTANDARD=LVCMOS33 ; #flagB
+NET "CTL2"  LOC = "j11" | IOSTANDARD=LVCMOS33; #flagC
+NET "PA0"  LOC = "g7"  | IOSTANDARD=LVCMOS33;
+NET "PA1"  LOC = "h8"  | IOSTANDARD=LVCMOS33;
+NET "PA2"  LOC = "g8"  | IOSTANDARD=LVCMOS33; #SLOE
+NET "PA3"  LOC = "f7"  | IOSTANDARD=LVCMOS33;
+NET "PA4"  LOC = "f6"  | IOSTANDARD=LVCMOS33; #FIFO ADR0
+NET "PA5"  LOC = "c3"  | IOSTANDARD=LVCMOS33; #FIFO ADR1
+NET "PA6"  LOC = "b3"  | IOSTANDARD=LVCMOS33; #PKTEND
+NET "PA7"  LOC = "g6"  | IOSTANDARD=LVCMOS33; #flagD 
+NET "RDY0"  LOC = "g11"  | IOSTANDARD=LVCMOS33; #SLRD
+NET "RDY1"  LOC = "h12"  | IOSTANDARD=LVCMOS33; #SLWR
+
+##Internal clocks
+#
+#NET "BCLK"  LOC = "p79";
+#NET "FCLK"  LOC = "p76"  ;
+#NET "FCLK_N"  LOC = "p77"  ;
+#
+##TARGET related
+#
+#NET "ALL_ROW"  LOC = "p4";
+#NET "ASUM"  LOC = "p10";
+#NET "MUX_RAW"  LOC = "p13";
+#NET "RAMP"  LOC = "p18";
+#NET "SGN"  LOC = "p15";
+#NET "TRG_SUM"  LOC = "p12";
+#
+#NET "BOUT<0>"  LOC = "p39"  ;
+#NET "BOUT<10>"  LOC = "p26"  ;
+#NET "BOUT<11>"  LOC = "p24"  ;
+#NET "BOUT<12>"  LOC = "p22"  ;
+#NET "BOUT<13>"  LOC = "p21"  ;
+#NET "BOUT<14>"  LOC = "p20"  ;
+#NET "BOUT<15>"  LOC = "p19"  ;
+#NET "BOUT<1>"  LOC = "p37"  ;
+#NET "BOUT<2>"  LOC = "p36"  ;
+#NET "BOUT<3>"  LOC = "p35"  ;
+#NET "BOUT<4>"  LOC = "p34"  ;
+#NET "BOUT<5>"  LOC = "p33"  ;
+#NET "BOUT<6>"  LOC = "p31"  ;
+#NET "BOUT<7>"  LOC = "p29"  ;
+#NET "BOUT<8>"  LOC = "p28"  ;
+#NET "BOUT<9>"  LOC = "p27"  ;
+#
+#NET "TOUT<0>"  LOC = "p169"  ;
+#NET "TOUT<10>"  LOC = "p184"  ;
+#NET "TOUT<11>"  LOC = "p185"  ;
+#NET "TOUT<12>"  LOC = "p187"  ;
+#NET "TOUT<13>"  LOC = "p189"  ;
+#NET "TOUT<14>"  LOC = "p190"  ;
+#NET "TOUT<15>"  LOC = "p191"  ;
+#NET "TOUT<1>"  LOC = "p171"  ;
+#NET "TOUT<2>"  LOC = "p172"  ;
+#NET "TOUT<3>"  LOC = "p175"  ;
+#NET "TOUT<4>"  LOC = "p176"  ;
+#NET "TOUT<5>"  LOC = "p178"  ;
+#NET "TOUT<6>"  LOC = "p180"  ;
+#NET "TOUT<7>"  LOC = "p181"  ;
+#NET "TOUT<8>"  LOC = "p182"  ;
+#NET "TOUT<9>"  LOC = "p183"  ;
+#
+#NET "BTSA<0>"  LOC = "p44"  ;
+#NET "BTSA<1>"  LOC = "p43"  ;
+#NET "BTSA<2>"  LOC = "p42"  ;
+#NET "BTSA<3>"  LOC = "p40"  ;
+#
+#NET "COL_S<0>"  LOC = "p194"  ;
+#NET "COL_S<1>"  LOC = "p196"  ;
+#NET "COL_S<2>"  LOC = "p197"  ;
+#NET "COL_S<3>"  LOC = "p198"  ;
+#NET "COL_S<4>"  LOC = "p199"  ;
+#
+#NET "RCO"  LOC = "p9"  ;
+#
+#NET "TSA_IN<0>"  LOC = "p5"  ;
+#NET "TSA_IN<1>"  LOC = "p7"  ;
+#
+#NET "TTSA<0>"  LOC = "p165"  ;
+#NET "TTSA<1>"  LOC = "p166"  ;
+#NET "TTSA<2>"  LOC = "p167"  ;
+#NET "TTSA<3>"  LOC = "p168"  ;
+#
+#NET "RF_SEL<0>"  LOC = "p162"  ;
+#NET "RF_SEL<1>"  LOC = "p161"  ;
+#NET "RF_SEL<2>"  LOC = "p45"  ;
+#
+#NET "ROW_S<0>"  LOC = "p200"  ;
+#NET "ROW_S<1>"  LOC = "p203"  ;
+#NET "ROW_S<2>"  LOC = "p204"  ;
+#NET "ROW_S<3>"  LOC = "p205"  ;
+#NET "ROW_S<4>"  LOC = "p2"  ;
+#NET "ROW_S<5>"  LOC = "p3"  ;
+#
+##AD related
+#
+#NET "DIN1"  LOC = "p57";
+#NET "SCLK"  LOC = "p58";
+#NET "SYNC"  LOC = "p61";
+#NET "VTHR_ASUM"  LOC = "p11"  ;
+#
+##Isolator related
+#
+#NET "DIN_TTL"  LOC = "p149"  ;
+#NET "SCLK_TTL"  LOC = "p106"  ;
+#NET "SYNC_TTL"  LOC = "p150"  ;
+#
+##External trigger
+#
+#NET "EXT_TRIG"  LOC = "p102"  ;
+#
+##Monitor
+#
+#NET "MON<0>"  LOC = "p72"  ;
+#NET "MON<10>"  LOC = "p94"  ;
+#NET "MON<11>"  LOC = "p95"  ;
+#NET "MON<12>"  LOC = "p96"  ;
+#NET "MON<13>"  LOC = "p97"  ;
+#NET "MON<14>"  LOC = "p100"  ;
+#NET "MON<15>"  LOC = "p101"  ;
+#NET "MON<1>"  LOC = "p74"  ;
+#NET "MON<2>"  LOC = "p78"  ;
+#NET "MON<3>"  LOC = "p80"  ;
+#NET "MON<4>"  LOC = "p81"  ;
+#NET "MON<5>"  LOC = "p85"  ;
+#NET "MON<6>"  LOC = "p86"  ;
+#NET "MON<7>"  LOC = "p87"  ;
+#NET "MON<8>"  LOC = "p90"  ;
+#NET "MON<9>"  LOC = "p93"  ;
+#

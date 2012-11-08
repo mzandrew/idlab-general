@@ -1,0 +1,1125 @@
+; Constants for the input/output ports
+CONSTANT in_FIFO_FLAGS, 00
+CONSTANT mask_EVT_INP_FIFO_EMPTY, 01  ;LSB of port 00 is INP_FIFO_EMPTY
+CONSTANT in_FIFO_READ_ENABLE, 01 ;Asserts the input FIFO read enable
+CONSTANT in_FIFO_DATA0, 02 ;Bits 7:0 of input FIFO & read enable
+CONSTANT in_FIFO_DATA1, 03 ;Bits 15:8
+CONSTANT in_FIFO_DATA2, 04 ;Bits 23:16
+CONSTANT in_FIFO_DATA3, 05 ;Bits 31:24
+CONSTANT in_GPR_DATA0, 06  ;Bits 7:0 of general purpose register output
+CONSTANT in_GPR_DATA1, 07  ;Bits 15:8 of general purpose register output
+CONSTANT out_FIFO_DATA0, 00 ;Bits 7:0 of output FIFO
+CONSTANT out_FIFO_DATA1, 01 ;Bits 15:8 of output FIFO
+CONSTANT out_FIFO_DATA2, 02 ;Bits 23:16 of output FIFO
+CONSTANT out_FIFO_DATA3, 03 ;Bits 31:24 of output FIFO
+CONSTANT out_FIFO_WRITE_ENABLE, 04 ;Asserts the write strobe for the output FIFO
+                                   ;This port works regardless of output data
+CONSTANT out_GPR_ADDRESS0, 05 ;Bits 7:0 of the GPR address to read/write
+CONSTANT out_GPR_ADDRESS1, 06 ;Bits 15:8 of the GPR address to read/write
+CONSTANT out_GPR_DATA0, 07 ;Bits 7:0 of the GPR address to write
+CONSTANT out_GPR_DATA1, 08 ;Bits 15:8 of the GPR address to write
+CONSTANT out_GPR_WRITE_ENABLE, 09 ;Strobes the write enable for the GPRs
+
+;Constants for the I2C interface(s) [these are in the GPR address space]
+CONSTANT out_I2C_BUSA_GPR_ADDRESS1, 00
+CONSTANT out_I2C_BUSA_GPR_ADDRESS0, 01
+CONSTANT  in_I2C_BUSA_GPR_ADDRESS1, 01
+CONSTANT  in_I2C_BUSA_GPR_ADDRESS0, 00
+;Constants for the LED output interface [in the GPR address space]
+CONSTANT out_LED_GPR_ADDRESS0, 00
+CONSTANT out_LED_GPR_ADDRESS1, 00
+
+CONSTANT state_FIND_HEADER, 00
+CONSTANT state_READ_PACKET_SIZE, 01
+CONSTANT state_READ_PACKET_TYPE, 02
+CONSTANT state_READ_DESTINATION, 03
+CONSTANT state_READ_COMMAND_ID, 04
+CONSTANT state_READ_COMMAND_TYPE, 05
+CONSTANT state_READ_COMMAND_DATA, 06
+CONSTANT state_READ_COMMAND_CHECKSUM, 07
+CONSTANT state_READ_PACKET_CHECKSUM, 08
+
+CONSTANT MAX_PACKET_SIZE0, FF ;This is the current maximum packet size.  We can change it later
+CONSTANT MAX_PACKET_SIZE1, 00
+CONSTANT MAX_PACKET_SIZE2, 00
+CONSTANT MAX_PACKET_SIZE3, 00
+
+CONSTANT error_bit_PACKET_SIZE_OVER_LIMIT,  00000001'b
+CONSTANT error_bit_BAD_PACKET_TYPE,         00000010'b
+CONSTANT error_bit_BAD_COMMAND_DESTINATION, 00000100'b
+CONSTANT error_bit_BAD_COMMAND_TYPE,        00001000'b
+CONSTANT error_bit_BAD_COMMAND_CHECKSUM,    00010000'b
+CONSTANT error_bit_BAD_PACKET_CHECKSUM,     00100000'b
+
+;Scratchpad address space mapping
+CONSTANT sp_addr_SCROD_ID0, 00
+CONSTANT sp_addr_SCROD_ID1, 01
+CONSTANT sp_addr_SCROD_REV, 02
+;Address 03 is reserved
+CONSTANT sp_addr_CHECKSUM0, 04
+CONSTANT sp_addr_CHECKSUM1, 05
+CONSTANT sp_addr_CHECKSUM2, 06
+CONSTANT sp_addr_CHECKSUM3, 07
+CONSTANT sp_addr_COMMAND_ID0, 08
+CONSTANT sp_addr_COMMAND_ID1, 09
+CONSTANT sp_addr_COMMAND_ID2, 0A
+CONSTANT sp_addr_COMMAND_ID3, 0B
+CONSTANT sp_addr_TEMP_SPACE0, 10
+CONSTANT sp_addr_TEMP_SPACE1, 11
+CONSTANT sp_addr_TEMP_SPACE2, 12
+CONSTANT sp_addr_TEMP_SPACE3, 13
+CONSTANT sp_addr_COMMAND_DATA0, 1A
+CONSTANT sp_addr_COMMAND_DATA1, 1B
+CONSTANT sp_addr_COMMAND_DATA2, 1C
+CONSTANT sp_addr_COMMAND_DATA3, 1D
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;PRIMARY STATE MACHINE;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;STARTUP;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+start: 
+	;Add any startup activities here.
+	CALL delay_300ms ;Give some startup time
+	;TODO: Do we want to add the fiber reset here?
+
+	;For SCROD, we should read the SCROD ID by I2C and store it in the scratchpad.
+	CALL read_eeprom_id ;Reads SCROD_ID from I2C BUS
+	CALL delay_200us
+	;We also disable the temperature sensor I2C timeout feature
+	CALL disable_stts_timeout
+
+	;Register sF will store the current state of the command reading.
+	LOAD sF, 00
+
+;;;;;;;;;;;;;;;;;Main event loop;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+main:
+	;The main event loop just reads data from the input FIFO
+	CALL check_for_data
+
+	;Repeat event loop
+	JUMP main
+
+;;;;;;;;;;;;;;;;;Reads a word from FIFO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+check_for_data: 
+	;First step is to check whether the FIFO is empty
+	INPUT s0, in_FIFO_FLAGS
+	AND s0, mask_EVT_INP_FIFO_EMPTY
+	;If there's no data in the FIFO, the comparison yields 1, so just return
+	RETURN NZ
+	;If there is data in the FIFO, read a word into registers s1-4...
+	CALL read_fifo_word
+
+;	LOAD s0, 00
+;	OUTPUT s0, out_GPR_ADDRESS0
+;	OUTPUT s0, out_GPR_ADDRESS1
+;	OUTPUT s3, out_GPR_DATA0
+;	OUTPUT s4, out_GPR_DATA1
+;	OUTPUT s0, out_GPR_WRITE_ENABLE
+
+	;What we do here depends on the current state.
+	COMPARE sF, state_FIND_HEADER
+	CALL Z, read_header
+	RETURN Z
+	COMPARE sF, state_READ_PACKET_SIZE
+	CALL Z, read_packet_size
+	RETURN Z
+	COMPARE sF, state_READ_PACKET_TYPE
+	CALL Z, read_packet_type
+	RETURN Z
+	COMPARE sF, state_READ_DESTINATION
+	CALL Z, read_destination
+	RETURN Z
+	COMPARE sF, state_READ_COMMAND_ID
+	CALL Z, read_command_id
+	RETURN Z
+	COMPARE sF, state_READ_COMMAND_TYPE
+	CALL Z, read_command_type
+	RETURN Z
+	COMPARE sF, state_READ_COMMAND_DATA
+	CALL Z, read_command_data
+	RETURN Z
+	COMPARE sF, state_READ_COMMAND_CHECKSUM
+	CALL Z, read_command_checksum
+	RETURN Z
+	COMPARE sF, state_READ_PACKET_CHECKSUM
+	CALL Z, read_packet_checksum
+	RETURN Z
+
+	RETURN
+
+;States for the various phases of reading in command packets
+;Each of these should make sure they return a  Z flag is set when returning.
+;;;;;;;;;;;;;;;;;;;;;;READ HEADER;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+read_header:
+	CALL parse_fifo_word_for_header
+	COMPARE s0, 01
+	LOAD s0, state_READ_PACKET_SIZE
+	CALL Z, set_current_state
+	CALL Z, start_packet_checksum
+	CALL set_z
+	RETURN
+;;;;;;;;;;;;;;;;;;;;;READ PACKET SIZE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+read_packet_size:
+	;Add to the packet checksum
+	CALL add_fifo_word_to_checksum	
+	;Check if the packet size is larger than the maximum allowed
+	CALL store_fifo_word
+	SUB   s1, MAX_PACKET_SIZE0
+	SUBCY s2, MAX_PACKET_SIZE1
+	SUBCY s3, MAX_PACKET_SIZE2
+	SUBCY s4, MAX_PACKET_SIZE3
+	JUMP C, read_packet_size_success
+	;If the packet size is too large, carry flag will not be set
+	;So send an error packet and set the state back to scan for 
+	;headers
+	LOAD s0, error_bit_PACKET_SIZE_OVER_LIMIT
+	CALL send_error_packet
+	LOAD s0, state_FIND_HEADER
+	CALL set_current_state
+	CALL set_z
+	RETURN
+read_packet_size_success:
+	;Otherwise, grab the fifo word back and store it in s8-s9 
+	;                      (only 16 bits supported right now)
+	;And set the state to read packet type
+	CALL fetch_fifo_word
+	LOAD s8, s1
+	LOAD s9, s2
+	LOAD s0, state_READ_PACKET_TYPE
+ 	CALL set_current_state
+	CALL set_z
+	RETURN
+;;;;;;;;;;;;;;;;;;;;;READ PACKET TYPE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+read_packet_type:
+	CALL decrement_word_count
+	CALL add_fifo_word_to_checksum		
+	;Check that this is a command word (currently the only supported packet type)
+	CALL parse_fifo_word_for_command
+	COMPARE s0, 02
+	JUMP Z, read_packet_type_success
+	LOAD s0, error_bit_BAD_PACKET_TYPE
+	CALL send_error_packet
+	LOAD s0, state_FIND_HEADER
+	CALL set_current_state
+	CALL set_z
+	RETURN 
+read_packet_type_success:	
+	LOAD s0, state_READ_DESTINATION
+	CALL set_current_state
+	
+	CALL set_z
+	RETURN
+;;;;;;;;;;;;;;;;;;;;;READ DESTINATION;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+read_destination:
+	CALL decrement_word_count
+	CALL add_fifo_word_to_checksum
+		
+	CALL store_fifo_word
+	;00 00 is the global address, so respond to that
+	SUB   s1, 00
+	SUBCY s2, 00
+	SUBCY s3, 00
+	JUMP Z, read_destination_success
+	;Or compare to our own address
+	CALL fetch_fifo_word
+	FETCH s4, sp_addr_SCROD_ID0
+	FETCH s5, sp_addr_SCROD_ID1
+	FETCH s6, sp_addr_SCROD_REV
+	SUB s1, s4
+	SUBCY s2, s5
+	SUBCY s3, s6	
+	JUMP Z, read_destination_success
+
+	;Otherwise we failed
+	LOAD s0, error_bit_BAD_COMMAND_DESTINATION
+	CALL send_error_packet
+	LOAD s0, state_FIND_HEADER
+	CALL set_current_state
+
+	CALL set_z
+	RETURN
+read_destination_success:
+	LOAD s0, state_READ_COMMAND_ID
+	CALL set_current_state
+	;This is the last word before repetitive packet structure, save the
+	;checksum here so we can continue.
+	CALL store_checksum
+	;Zero out the checksum to calculate command checksums	
+	CALL zero_checksum
+	
+	CALL set_z
+	RETURN
+;;;;;;;;;;;;;;;;;;;;;READ COMMAND ID#;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+read_command_id:
+	CALL decrement_word_count
+	CALL add_fifo_word_to_checksum
+	;Store the command ID in the scratch space for rebroadcast later
+	CALL store_command_id
+	;Move onto read command type
+	LOAD s0, state_READ_COMMAND_TYPE
+	CALL set_current_state
+
+	CALL set_z
+	RETURN
+;;;;;;;;;;;;;;;;;;;;;READ COMMAND TYPE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+read_command_type:
+	CALL decrement_word_count
+	CALL add_fifo_word_to_checksum
+	;See if the word is any known command
+	CALL parse_fifo_word_for_ping
+	COMPARE s0, 03
+	JUMP Z, read_command_type_ping
+	COMPARE s0, 04
+	JUMP Z, read_command_type_read
+	COMPARE s0, 05
+	JUMP Z, read_command_type_write
+	;If not, send an error status back
+	LOAD s0, error_bit_BAD_COMMAND_TYPE
+	CALL send_error_packet
+	LOAD s0, state_FIND_HEADER
+	CALL set_current_state
+	CALL set_z
+	RETURN	
+;Use s7 to store the command we're currently executing
+;Use s6 to countdown how many command words to read
+;Use s5 to store the next address for storing command data
+;Set the next state to read command data unless there is none, in which case send it to read command checksum
+read_command_type_ping:	
+	LOAD s7, 00
+	LOAD s6, 00
+	;We don't expect any command data so next state is command checksum
+	LOAD s0, state_READ_COMMAND_CHECKSUM
+	CALL set_current_state
+	JUMP read_command_type_success
+read_command_type_read:
+	LOAD s7, 01
+	LOAD s6, 01	
+	LOAD s0, state_READ_COMMAND_DATA
+	CALL set_current_state
+	JUMP read_command_type_success
+read_command_type_write:
+	LOAD s7, 02
+	LOAD s6, 01	
+	LOAD s0, state_READ_COMMAND_DATA
+	CALL set_current_state
+	JUMP read_command_type_success
+read_command_type_success:
+	;Starting address for command data in scratchpad is 1A
+	LOAD s5, sp_addr_COMMAND_DATA0
+	CALL set_z
+	RETURN
+;;;;;;;;;;;;;;;;;;;;;READ COMMAND DATA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+read_command_data:
+	CALL decrement_word_count
+	CALL add_fifo_word_to_checksum
+	;Add this word to the scratch pad in location given by s5
+	CALL store_command_data
+	;Decrement the counter for tracking command words	
+	SUB s6, 01;
+	;If we've hit zero, we're done here, move to next state
+	LOAD s0, state_READ_COMMAND_CHECKSUM
+	CALL Z, set_current_state
+	;If not, just return and we'll end up here again
+	CALL set_z
+	RETURN
+;;;;;;;;;;;;;;;;;;;;;READ COMMAND CHECKSUM;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+read_command_checksum:
+	CALL decrement_word_count
+	;Compare the checksum we've just read to the calculated one
+	SUB s1, sB
+	SUBCY s2, sC
+	SUBCY s3, sD
+	SUBCY s4, sE
+	;If these two match, execute the command
+	JUMP Z, read_command_checksum_matches
+	;If not, send an error response and return to idle state
+	LOAD s0, error_bit_BAD_COMMAND_CHECKSUM
+	CALL send_error_packet
+	LOAD s0, state_FIND_HEADER
+	CALL set_current_state	
+	CALL set_z
+	RETURN
+read_command_checksum_matches:
+	CALL add_command_checksum_to_packet_checksum
+	;Execute the command! What was the command?  Check from s7
+	;;;;;;Ping command;;;;;;
+	COMPARE s7, 00 
+	CALL Z, send_ping_response
+	JUMP Z, read_command_check_for_more
+	;;;;;;Read register;;;;;;
+	COMPARE s7, 01
+	CALL Z, perform_read
+	CALL Z, send_read_response
+	JUMP Z, read_command_check_for_more
+	;;;;;;Write register;;;;;;
+	COMPARE s7, 02
+	CALL Z, perform_write
+	CALL Z, send_write_response
+	JUMP Z, read_command_check_for_more		
+read_command_check_for_more:	
+	;Is this is the second to last word? Compare to 1 and check Z.
+	LOAD s0, s8
+	LOAD s1, s9
+	SUB  s0, 01
+	SUBCY s1, 00
+	;If we're at the second to last word, the next should be the packet checksum
+	LOAD s0, state_READ_PACKET_CHECKSUM
+	CALL Z, set_current_state
+	JUMP Z, read_command_done
+	;Otherwise, move to reading the next command
+	CALL zero_checksum
+	LOAD s0, state_READ_COMMAND_ID
+	CALL set_current_state
+read_command_done:	
+	CALL set_z
+	RETURN
+;;;;;;;;;;;;;;;;;;;;;READ PACKET CHECKSUM;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+read_packet_checksum:
+	CALL fetch_checksum
+	;Compare the checksum we've just read to the calculated one
+	SUB s1, sB
+	SUBCY s2, sC
+	SUBCY s3, sD
+	SUBCY s4, sE
+	;If these two match, we're all good
+	JUMP Z, read_packet_checksum_matches
+	;If not, send an error response and return to idle state
+	LOAD s0, error_bit_BAD_PACKET_CHECKSUM
+	CALL send_error_packet
+read_packet_checksum_matches:
+	LOAD s0, state_FIND_HEADER
+	CALL set_current_state	
+	CALL set_z
+	RETURN
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;PERFORM ACTUAL COMMANDS HERE;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+perform_read:
+	;Grab the read register from allocated scratchpad space
+	FETCH s0, sp_addr_COMMAND_DATA0
+	FETCH s1, sp_addr_COMMAND_DATA1
+	;Perform the read and store the data as upper bits of scratch space
+	OUTPUT s0, out_GPR_ADDRESS0
+	OUTPUT s1, out_GPR_ADDRESS1
+	INPUT s0, in_GPR_DATA0
+	INPUT s1, in_GPR_DATA1
+	STORE s0, sp_addr_COMMAND_DATA2
+	STORE s1, sp_addr_COMMAND_DATA3
+	RETURN
+perform_write:
+	;Grab the write register and data from the allocated scratchpad space
+	FETCH s0, sp_addr_COMMAND_DATA0
+	FETCH s1, sp_addr_COMMAND_DATA1
+	FETCH s2, sp_addr_COMMAND_DATA2
+	FETCH s3, sp_addr_COMMAND_DATA3
+	OUTPUT s0, out_GPR_ADDRESS0
+	OUTPUT s1, out_GPR_ADDRESS1
+	OUTPUT s2, out_GPR_DATA0
+	OUTPUT s3, out_GPR_DATA1
+	OUTPUT s3, out_GPR_WRITE_ENABLE
+	RETURN
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;RESPONSE PACKETS;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;SEND PING RESPONSE PACKET;;;;;;;;;;;;;;;;;;;;;;;;;
+send_ping_response:
+	;Zero out the checksum
+	CALL zero_checksum
+	;Word 0: packet header
+	CALL send_packet_header
+	CALL add_output_word_to_checksum
+	;Word 1: length of everything after this
+	LOAD s0, 5'd ;Response is 5 words long
+	LOAD s1, 00
+	LOAD s2, 00
+	LOAD s3, 00
+	CALL send_word
+	CALL add_output_word_to_checksum
+	;Word 2: "okay"
+	CALL send_acknowledge_packet_type
+	CALL add_output_word_to_checksum
+	;Word 3: source (SCROD ID)
+	CALL send_scrod_id
+	CALL add_output_word_to_checksum
+	;Word 4: command ID
+	CALL send_command_id
+	CALL add_output_word_to_checksum
+	;Word 5: command type
+	CALL send_ping_command_type
+	CALL add_output_word_to_checksum
+	;Word 6: checksum
+	CALL send_checksum
+	RETURN
+;;;;;;;;;;;;;;;SEND READ RESPONSE PACKET;;;;;;;;;;;;;;;;;;;;;;;;;
+send_read_response:
+	;Zero out the checksum
+	CALL zero_checksum
+	;Word 0: packet header
+	CALL send_packet_header
+	CALL add_output_word_to_checksum
+	;Word 1: length of everything after this
+	LOAD s0, 6'd ;Response is 6 words long
+	LOAD s1, 00
+	LOAD s2, 00
+	LOAD s3, 00
+	CALL send_word
+	CALL add_output_word_to_checksum
+	;Word 2: "okay"
+	CALL send_acknowledge_packet_type
+	CALL add_output_word_to_checksum
+	;Word 3: source (SCROD ID)
+	CALL send_scrod_id
+	CALL add_output_word_to_checksum
+	;Word 4: command ID
+	CALL send_command_id
+	CALL add_output_word_to_checksum
+	;Word 5: command type
+	CALL send_read_command_type
+	CALL add_output_word_to_checksum
+	;Word 6: command data (just one word)
+	CALL reset_command_data_pointer
+	CALL send_command_data
+	CALL add_output_word_to_checksum
+	;Word 7: checksum
+	CALL send_checksum
+	RETURN
+;;;;;;;;;;;;;;;SEND WRITE RESPONSE PACKET;;;;;;;;;;;;;;;;;;;;;;;;;
+send_write_response:
+	;Zero out the checksum
+	CALL zero_checksum
+	;Word 0: packet header
+	CALL send_packet_header
+	CALL add_output_word_to_checksum
+	;Word 1: length of everything after this
+	LOAD s0, 6'd ;Response is 6 words long
+	LOAD s1, 00
+	LOAD s2, 00
+	LOAD s3, 00
+	CALL send_word
+	CALL add_output_word_to_checksum
+	;Word 2: "okay"
+	CALL send_acknowledge_packet_type
+	CALL add_output_word_to_checksum
+	;Word 3: source (SCROD ID)
+	CALL send_scrod_id
+	CALL add_output_word_to_checksum
+	;Word 4: command ID
+	CALL send_command_id
+	CALL add_output_word_to_checksum
+	;Word 5: command type
+	CALL send_write_command_type
+	CALL add_output_word_to_checksum
+	;Word 6: command data (just one word)
+	CALL reset_command_data_pointer
+	CALL send_command_data
+	CALL add_output_word_to_checksum
+	;Word 7: checksum
+	CALL send_checksum
+	RETURN
+;;;;;;;;;;;;;;;SEND ERROR RESPONSE PACKET;;;;;;;;;;;;;;;;;;;;;;;;;
+send_error_packet:
+	;Store the error bits in the scratch space
+	STORE s0, sp_addr_TEMP_SPACE0
+	;Zero out the checksum
+	CALL zero_checksum
+	;Word 0: packet header
+	CALL send_packet_header
+	CALL add_output_word_to_checksum
+	;Word 1: length of everything after this
+	LOAD s0, 5'd ;Response is 5 words long
+	LOAD s1, 00
+	LOAD s2, 00
+	LOAD s3, 00
+	CALL send_word
+	CALL add_output_word_to_checksum
+	;Word 2: "wha?"
+	CALL send_error_packet_type
+	CALL add_output_word_to_checksum
+	;Word 3: source (SCROD ID)
+	CALL send_scrod_id
+	CALL add_output_word_to_checksum
+	;Word 4: command ID
+	CALL send_command_id
+	CALL add_output_word_to_checksum
+	;Word 5: bad command flags
+	FETCH s0, sp_addr_TEMP_SPACE0
+	LOAD s1, 00
+	LOAD s2, 00
+	LOAD s3, 00
+	CALL send_word
+	CALL add_output_word_to_checksum
+	;Word 6: checksum
+	CALL send_checksum
+	RETURN
+
+
+
+
+
+;;;;;;;;;;Utilities;;;;;;;;;;;;;;;;;;;;;;;;;;
+decrement_word_count:
+	SUB s8, 01
+	SUBCY s9, 00
+	RETURN
+
+;;;;;;;;;;;;Set the current state to whatever is in s0;;;;;;;;;;;;;
+set_current_state:
+	LOAD sF, s0
+	RETURN
+
+;Add word to checksum
+add_fifo_word_to_checksum:
+	ADD   sB, s1
+	ADDCY sC, s2
+	ADDCY sD, s3
+	ADDCY sE, s4
+	RETURN
+
+;Add lowest word to checksum
+add_output_word_to_checksum:
+	ADD   sB, s0
+	ADDCY sC, s1
+	ADDCY sD, s2
+	ADDCY sE, s3
+	RETURN
+
+add_command_checksum_to_packet_checksum:
+	;Fetch the packet checksum into working registers
+	FETCH s0, sp_addr_CHECKSUM0
+	FETCH s1, sp_addr_CHECKSUM1
+	FETCH s2, sp_addr_CHECKSUM2
+	FETCH s3, sp_addr_CHECKSUM3
+	;Multiply command checksum by 2 (to account for also adding the packet checksum to total checksum)
+	SL0 sB
+	SLA sC
+	SLA sD
+	SLA sE
+	;Add the command checksum to packet checksum
+	ADD s0, sB
+	ADDCY s1, sC
+	ADDCY s2, sD
+	ADDCY s3, sE
+	;Store the packet checksum into scratchpad
+	STORE s0, sp_addr_CHECKSUM0
+	STORE s1, sp_addr_CHECKSUM1
+	STORE s2, sp_addr_CHECKSUM2
+	STORE s3, sp_addr_CHECKSUM3
+	;Zero the command checksum sB-sE for next command
+	CALL zero_checksum
+	RETURN
+
+
+;Store command data and increment command data pointer
+store_command_data:
+	STORE s1, (s5)
+	ADD s5, 01
+	STORE s2, (s5)
+	ADD s5, 01
+	STORE s3, (s5)
+	ADD s5, 01
+	STORE s4, (s5)
+	ADD s5, 01
+	RETURN
+
+;Utiltiy to place the current FIFO word into the scratchpad
+store_fifo_word:
+	STORE s1, sp_addr_TEMP_SPACE0
+	STORE s2, sp_addr_TEMP_SPACE1
+	STORE s3, sp_addr_TEMP_SPACE2
+	STORE s4, sp_addr_TEMP_SPACE3
+	RETURN
+;Utility to grab back the FIFO word from the scratchpad
+fetch_fifo_word:
+	FETCH s1, sp_addr_TEMP_SPACE0
+	FETCH s2, sp_addr_TEMP_SPACE1
+	FETCH s3, sp_addr_TEMP_SPACE2
+	FETCH s4, sp_addr_TEMP_SPACE3
+	RETURN
+;Store the checksum in scratchpad
+store_checksum:
+	STORE sB, sp_addr_CHECKSUM0
+	STORE sC, sp_addr_CHECKSUM1
+	STORE sD, sp_addr_CHECKSUM2
+	STORE sE, sp_addr_CHECKSUM3
+	RETURN
+fetch_checksum:
+	FETCH sB, sp_addr_CHECKSUM0
+	FETCH sC, sp_addr_CHECKSUM1
+	FETCH sD, sp_addr_CHECKSUM2
+	FETCH sE, sp_addr_CHECKSUM3
+	RETURN
+;Store the command ID from input FIFO into the scratchpad
+store_command_id:
+	STORE s1, sp_addr_COMMAND_ID0
+	STORE s2, sp_addr_COMMAND_ID1
+	STORE s3, sp_addr_COMMAND_ID2
+	STORE s4, sp_addr_COMMAND_ID3
+	RETURN
+;Send command ID through the output FIFO
+send_command_id:
+	FETCH s0, sp_addr_COMMAND_ID0
+	FETCH s1, sp_addr_COMMAND_ID1
+	FETCH s2, sp_addr_COMMAND_ID2
+	FETCH s3, sp_addr_COMMAND_ID3
+	CALL send_word
+	RETURN
+
+;Utility function to set the Z flag (overwrites s0)
+set_z:
+	LOAD s0, 00
+	COMPARE s0, 00
+	RETURN
+
+;Load the next word in the FIFO into registers s0-s3
+;C and Z are unaffected
+read_fifo_word:
+	INPUT s0, in_FIFO_READ_ENABLE
+	INPUT s1, in_FIFO_DATA0
+	INPUT s2, in_FIFO_DATA1
+	INPUT s3, in_FIFO_DATA2
+	INPUT s4, in_FIFO_DATA3
+	RETURN
+	
+loop_fifo_word:
+	OUTPUT s1, out_FIFO_DATA0
+	OUTPUT s2, out_FIFO_DATA1
+	OUTPUT s3, out_FIFO_DATA2
+	OUTPUT s4, out_FIFO_DATA3
+	OUTPUT s4, out_FIFO_WRITE_ENABLE
+	RETURN	
+
+;This function should parse whether a word is a given known type
+;Headers, packet types, etc.
+;This function will overwrite s0, C, and Z
+parse_fifo_word:
+;Return value is s0 = 00 if the word wasn't recognized
+;Return value is s0 = 01 for HEADER
+CONSTANT packet_HEADER3, 00
+CONSTANT packet_HEADER2, BE
+CONSTANT packet_HEADER1, 11
+CONSTANT packet_HEADER0, E2
+;Return value is s0 = 02 for COMMAND header
+CONSTANT packet_type_COMMAND3, 64 ;"d"
+CONSTANT packet_type_COMMAND2, 6F ;"o"
+CONSTANT packet_type_COMMAND1, 69 ;"i"
+CONSTANT packet_type_COMMAND0, 74 ;"t"
+;Return value is s0 = 03 for PING command
+CONSTANT command_type_PING3, 70  ;"p"
+CONSTANT command_type_PING2, 69  ;"i"
+CONSTANT command_type_PING1, 6E  ;"n"
+CONSTANT command_type_PING0, 67  ;"g"
+;Return value is s0 = 04 for READ command
+CONSTANT command_type_READ3, 72  ;"r"
+CONSTANT command_type_READ2, 65  ;"e"
+CONSTANT command_type_READ1, 61  ;"a"
+CONSTANT command_type_READ0, 64  ;"d"
+;Return value is s0 = 05 for WRITE command
+CONSTANT command_type_WRITE3, 72 ;"r"
+CONSTANT command_type_WRITE2, 69 ;"i"
+CONSTANT command_type_WRITE1, 74 ;"t"
+CONSTANT command_type_WRITE0, 65 ;"e"
+;Outgoing packet types
+;Command acknowledged
+CONSTANT packet_type_ACKNOWLEDGE3, 6F;"o"
+CONSTANT packet_type_ACKNOWLEDGE2, 6B;"k"
+CONSTANT packet_type_ACKNOWLEDGE1, 61;"a"
+CONSTANT packet_type_ACKNOWLEDGE0, 79;"y"
+;Interpreter error
+CONSTANT packet_type_ERROR3, 77;"w"
+CONSTANT packet_type_ERROR2, 68;"h"
+CONSTANT packet_type_ERROR1, 61;"a"
+CONSTANT packet_type_ERROR0, 3F;"?"
+
+
+parse_fifo_word_for_header:
+	;First check against the header
+	COMPARE s1, packet_HEADER0
+	JUMP NZ, parse_fifo_word_for_command
+	COMPARE s2, packet_HEADER1
+	JUMP NZ, parse_fifo_word_for_command
+	COMPARE s3, packet_HEADER2
+	JUMP NZ, parse_fifo_word_for_command
+	COMPARE s4, packet_HEADER3
+	JUMP NZ, parse_fifo_word_for_command
+	;If we got this far, it's a header => set s0 = 01
+	LOAD s0, 01
+	RETURN
+parse_fifo_word_for_command:	
+	;Next check against the command word
+	COMPARE s1, packet_type_COMMAND0
+	JUMP NZ, parse_fifo_word_for_ping
+	COMPARE s2, packet_type_COMMAND1
+	JUMP NZ, parse_fifo_word_for_ping
+	COMPARE s3, packet_type_COMMAND2
+	JUMP NZ, parse_fifo_word_for_ping
+	COMPARE s4, packet_type_COMMAND3
+	JUMP NZ, parse_fifo_word_for_ping
+	LOAD s0, 02
+	RETURN
+parse_fifo_word_for_ping:	
+	;Next check against the ping command word
+	COMPARE s1, command_type_PING0
+	JUMP NZ, parse_fifo_word_for_read
+	COMPARE s2, command_type_PING1
+	JUMP NZ, parse_fifo_word_for_read
+	COMPARE s3, command_type_PING2
+	JUMP NZ, parse_fifo_word_for_read
+	COMPARE s4, command_type_PING3
+	JUMP NZ, parse_fifo_word_for_read
+	LOAD s0, 03
+	RETURN
+parse_fifo_word_for_read:	
+	;Next check against the read command word
+	COMPARE s1, command_type_READ0
+	JUMP NZ, parse_fifo_word_for_write
+	COMPARE s2, command_type_READ1
+	JUMP NZ, parse_fifo_word_for_write
+	COMPARE s3, command_type_READ2
+	JUMP NZ, parse_fifo_word_for_write
+	COMPARE s4, command_type_READ3
+	JUMP NZ, parse_fifo_word_for_write
+	LOAD s0, 04
+	RETURN
+parse_fifo_word_for_write:
+	;Next check against the write command word
+	COMPARE s1, command_type_WRITE0
+	JUMP NZ, parse_fifo_word_not_recognized
+	COMPARE s2, command_type_WRITE1
+	JUMP NZ, parse_fifo_word_not_recognized
+	COMPARE s3, command_type_WRITE2
+	JUMP NZ, parse_fifo_word_not_recognized
+	COMPARE s4, command_type_WRITE3
+	JUMP NZ, parse_fifo_word_not_recognized
+	LOAD s0, 05
+	RETURN
+parse_fifo_word_not_recognized:
+	LOAD s0, 00
+	RETURN
+	
+;;;;;;;;;;;;;;;SEND PING WORD;;;;;;;;;;;;;;;;;;;;;;;;;
+send_ping_command_type:
+	LOAD s0, command_type_PING0
+	LOAD s1, command_type_PING1
+	LOAD s2, command_type_PING2
+	LOAD s3, command_type_PING3
+	CALL send_word
+	RETURN;
+;;;;;;;;;;;;;;SEND READ WORD;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+send_read_command_type:
+	LOAD s0, command_type_READ0
+	LOAD s1, command_type_READ1
+	LOAD s2, command_type_READ2
+	LOAD s3, command_type_READ3
+	CALL send_word
+	RETURN;
+;;;;;;;;;;;;;;SEND READ WORD;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+send_write_command_type:
+	LOAD s0, command_type_WRITE0
+	LOAD s1, command_type_WRITE1
+	LOAD s2, command_type_WRITE2
+	LOAD s3, command_type_WRITE3
+	CALL send_word
+	RETURN;
+
+
+reset_command_data_pointer:
+	LOAD s5, sp_addr_COMMAND_DATA0
+	RETURN
+send_command_data:
+	FETCH s0, (s5)
+	ADD s5, 01
+	FETCH s1, (s5)
+	ADD s5, 01
+	FETCH s2, (s5)
+	ADD s5, 01
+	FETCH s3, (s5)
+	ADD s5, 01
+	CALL send_word
+	RETURN
+
+send_word:
+	OUTPUT s0, out_FIFO_DATA0
+	OUTPUT s1, out_FIFO_DATA1
+	OUTPUT s2, out_FIFO_DATA2
+	OUTPUT s3, out_FIFO_DATA3
+	OUTPUT s3, out_FIFO_WRITE_ENABLE
+	RETURN	
+
+send_packet_header:
+	LOAD s0, packet_HEADER0
+	OUTPUT s0, out_FIFO_DATA0
+	LOAD s1, packet_HEADER1
+	OUTPUT s1, out_FIFO_DATA1
+	LOAD s2, packet_HEADER2
+	OUTPUT s2, out_FIFO_DATA2
+	LOAD s3, packet_HEADER3
+	OUTPUT s3, out_FIFO_DATA3
+	OUTPUT s3, out_FIFO_WRITE_ENABLE
+	RETURN	
+
+send_acknowledge_packet_type:
+	LOAD s0, packet_type_ACKNOWLEDGE0
+	LOAD s1, packet_type_ACKNOWLEDGE1
+	LOAD s2, packet_type_ACKNOWLEDGE2
+	LOAD s3, packet_type_ACKNOWLEDGE3
+	CALL send_word
+	RETURN	
+
+send_error_packet_type:
+	LOAD s0, packet_type_ERROR0
+	LOAD s1, packet_type_ERROR1
+	LOAD s2, packet_type_ERROR2
+	LOAD s3, packet_type_ERROR3
+	CALL send_word
+	RETURN
+
+send_checksum:
+	OUTPUT sB, out_FIFO_DATA0
+	OUTPUT sC, out_FIFO_DATA1
+	OUTPUT sD, out_FIFO_DATA2
+	OUTPUT sE, out_FIFO_DATA3
+	OUTPUT sE, out_FIFO_WRITE_ENABLE
+	RETURN	
+
+;Zeroes out the checksum registers
+;No change to C or Z
+zero_checksum:
+	LOAD sB, 00
+	LOAD sC, 00
+	LOAD sD, 00
+	LOAD sE, 00
+	RETURN
+;A packet checksum begins with the header
+start_packet_checksum:
+	LOAD sB, packet_HEADER0
+	LOAD sC, packet_HEADER1
+	LOAD sD, packet_HEADER2
+	LOAD sE, packet_HEADER3
+	RETURN
+
+;Reads two bytes from I2C BUSA and stores it in 
+;scratchpad space 00 and 01.
+read_eeprom_id:
+	;I2C transaction steps (to register 1)
+	;everything is sent to register 1, so set that up
+	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1	
+	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
+	CALL set_current_GPR
+	;(Allow waits of 200 us between steps.)
+	;1. Send start:                     0x0100
+	LOAD s1, 01	
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;2. Setup send device addr + write: 0x00A0
+	LOAD s1, 00
+	LOAD s0, A0
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send device addr + write: 0x02A0
+	LOAD s1, 02
+	LOAD s0, A0
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;3. Setup send address byte high  : 0x0000
+	LOAD s1, 00
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send address byte high  : 0x0200
+	LOAD s1, 02
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;4. Setup send address byte low   : 0x0000
+	LOAD s1, 00
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send address byte low   : 0x0200
+	LOAD s1, 02
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;5. Repeated start:               : 0x0100
+	LOAD s1, 01
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;6. Setup send device addr + read : 0x00A1
+	LOAD s1, 00
+	LOAD s0, A1
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send device addr + read : 0x02A1
+	LOAD s1, 02
+	LOAD s0, A1
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;7. Read byte with acknowledge    : 0x0C00
+	LOAD s1, 0C
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;8. Store the byte that is read back to scratchpad
+	LOAD s1, in_I2C_BUSA_GPR_ADDRESS1
+	LOAD s0, in_I2C_BUSA_GPR_ADDRESS0
+	CALL set_current_GPR
+	INPUT s0, in_GPR_DATA0
+	STORE s0, sp_addr_SCROD_ID0
+
+	;9. Setup to read byte
+	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1
+	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
+	CALL set_current_GPR
+	LOAD s1, 00
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	;            read byte w/ ack     : 0x0C00
+	LOAD s1, 0C
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;10. Store the byte that is read back to scratchpad
+	LOAD s0, in_I2C_BUSA_GPR_ADDRESS0
+	LOAD s1, in_I2C_BUSA_GPR_ADDRESS1
+	CALL set_current_GPR
+	INPUT s0, in_GPR_DATA0
+	STORE s0, sp_addr_SCROD_ID1	
+	;11. Setup to read byte
+	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1
+	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
+	CALL set_current_GPR
+	LOAD s1, 00
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	;            read byte w/o ack    : 0x0400
+	LOAD s1, 04
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;12. Store the byte that is read back to scratchpad
+	LOAD s0, in_I2C_BUSA_GPR_ADDRESS0
+	LOAD s1, in_I2C_BUSA_GPR_ADDRESS1
+	CALL set_current_GPR
+	INPUT s0, in_GPR_DATA0
+	STORE s0, sp_addr_SCROD_REV
+	;13. Send stop                     : 0x1000
+	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
+	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1
+	CALL set_current_GPR
+	LOAD s1, 10
+	LOAD s0, 00
+	CALL write_to_current_GPR
+
+	;Finish by displaying the SCROD ID on the LEDs
+	LOAD s0, out_LED_GPR_ADDRESS0
+	LOAD s1, out_LED_GPR_ADDRESS1
+	CALL set_current_GPR
+	FETCH s0, sp_addr_SCROD_ID0
+	FETCH s1, sp_addr_SCROD_ID1
+	OUTPUT s0, out_GPR_DATA0
+	OUTPUT s1, out_GPR_DATA1
+	OUTPUT s1, out_GPR_WRITE_ENABLE
+	
+	RETURN
+
+;Disables the timeout feature on the STTS I2C temperature sensor
+disable_stts_timeout:
+	;I2C transaction steps (to register 1)
+	;everything is sent to register 1, so set that up
+	LOAD s1, out_I2C_BUSA_GPR_ADDRESS1	
+	LOAD s0, out_I2C_BUSA_GPR_ADDRESS0
+	CALL set_current_GPR
+	;(Allow waits of 200 us between steps.)
+	;1. Send start:                     0x0100
+	LOAD s1, 01	
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;2. Setup send device addr + write: 0x0094
+	LOAD s1, 00
+	LOAD s0, 94
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send device addr + write: 0x0294
+	LOAD s1, 02
+	LOAD s0, 94
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;3. Setup send register address   : 0x0022
+	LOAD s1, 00
+	LOAD s0, 22
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send register address   : 0x0222
+	LOAD s1, 02
+	LOAD s0, 22
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;4. Setup send register data      : 0x0000
+	LOAD s1, 00
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;         Send register data      : 0x0200
+	LOAD s1, 02
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	CALL delay_200us
+	;5. Send stop                     : 0x1000
+	LOAD s1, 10
+	LOAD s0, 00
+	CALL write_to_current_GPR
+	RETURN
+
+;Writes s0 and s1 out on GPR_ADDRESS0 and GPR_ADDRESS1
+set_current_GPR:
+	OUTPUT s1, out_GPR_ADDRESS1
+	OUTPUT s0, out_GPR_ADDRESS0
+	RETURN
+;Writes s0 and s1 out on GPR_DATA0 and GPR_DATA1 to current GPR_ADDRESS
+write_to_current_GPR:
+	OUTPUT s1, out_GPR_DATA1
+	OUTPUT s0, out_GPR_DATA0
+	OUTPUT s0, out_GPR_WRITE_ENABLE	
+	RETURN		
+
+;Sends the ID stored in the scratchpad space out through the FIFO
+send_scrod_id:
+	FETCH s0, sp_addr_SCROD_ID0
+	FETCH s1, sp_addr_SCROD_ID1
+	FETCH s2, sp_addr_SCROD_REV
+	LOAD s3, 00
+	CALL send_word
+	RETURN
+
+;Make fixed amounts of delay
+;Clock rate is 50 MHz, so 25 MIPS
+;4 instructions in delay_loop per iteration
+
+;7.5 M instructions = 300 ms
+;4 instructions per iteration 1.875 M = 1C9C38
+delay_300ms:
+	LOAD s2, 1C
+	LOAD s1, 9C
+	LOAD s0, 38
+	JUMP delay_loop
+;5000 instructions = 200 us
+;4 instructions per iteration, 1250 = 0x04E2
+delay_200us:
+	LOAD s2, 00
+	LOAD s1, 04
+	LOAD s0, E2
+	JUMP delay_loop
+delay_loop:  
+	SUB   s0, 1'd
+	SUBCY s1, 0'd
+	SUBCY s2, 0'd
+	JUMP NZ, delay_loop
+	RETURN
