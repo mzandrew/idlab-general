@@ -1,0 +1,123 @@
+###########################################################################
+#Pin mappings and timing constraints here are based on the SCROD_revA2.   #
+#Please update the pin mappings if using a different board, and add the   #
+#file with a new name in the repository.                                  #
+#If you are not compiling in USB or fiberoptic functionality, you will    #
+#have to comment out the appropriate portion below.  I hope these regions #
+#are self explanatory.                                                    #
+###########################################################################
+
+
+####################General SCROD IOs######################################
+
+#General SCROD clocking
+NET BOARD_CLOCKP LOC=U25;
+NET BOARD_CLOCKN LOC=U26;
+NET "internal_BOARD_CLOCK" TNM_NET = BOARD_CLOCK;
+TIMESPEC "TS_BOARD_CLOCK" = PERIOD "BOARD_CLOCK" 4 ns HIGH 50%;
+
+#Diagnostics on LEDs (3.3 V)
+NET LEDS<0>  LOC=F18 | IOSTANDARD = LVCMOS33; #LEDS<0>
+NET LEDS<1>  LOC=E18 | IOSTANDARD = LVCMOS33; #LEDS<1>
+NET LEDS<2>  LOC=G16 | IOSTANDARD = LVCMOS33; #LEDS<2>
+NET LEDS<3>  LOC=F17 | IOSTANDARD = LVCMOS33; #LEDS<3>
+NET LEDS<4>  LOC=F20 | IOSTANDARD = LVCMOS33; #LEDS<4>
+NET LEDS<5>  LOC=E20 | IOSTANDARD = LVCMOS33; #LEDS<5>
+NET LEDS<6>  LOC=H17 | IOSTANDARD = LVCMOS33; #LEDS<6>
+NET LEDS<7>  LOC=G17 | IOSTANDARD = LVCMOS33; #LEDS<7>
+NET LEDS<8>  LOC=C21 | IOSTANDARD = LVCMOS33; #LEDS<8>
+NET LEDS<9>  LOC=B21 | IOSTANDARD = LVCMOS33; #LEDS<9>
+NET LEDS<10> LOC=H18 | IOSTANDARD = LVCMOS33; #LEDS<10>
+NET LEDS<11> LOC=H19 | IOSTANDARD = LVCMOS33; #LEDS<11>
+NET LEDS<12> LOC=B22 | IOSTANDARD = LVCMOS33; #LEDS<12>
+NET LEDS<13> LOC=A22 | IOSTANDARD = LVCMOS33; #LEDS<13>
+NET LEDS<14> LOC=G19 | IOSTANDARD = LVCMOS33; #LEDS<14>
+NET LEDS<15> LOC=F19 | IOSTANDARD = LVCMOS33; #LEDS<15>
+
+####I2C Pin Mappings#######
+#Bus A - SCROD general purpose EEPROM and temp sensor
+NET I2C_BUSA_SCL LOC=B23 | IOSTANDARD = LVCMOS33;
+NET I2C_BUSA_SDA LOC=A23 | IOSTANDARD = LVCMOS33;
+#Bus B handles SCROD fiberoptic transceiver 0
+NET I2C_BUSB_SCL LOC=C13 | IOSTANDARD = LVCMOS33;
+NET I2C_BUSB_SDA LOC=D13 | IOSTANDARD = LVCMOS33;
+#Bus C handles SCROD fiberoptic transceiver 1
+NET I2C_BUSC_SCL LOC=K12 | IOSTANDARD = LVCMOS33;
+NET I2C_BUSC_SDA LOC=A14 | IOSTANDARD = LVCMOS33;
+#Timing constraints for I2C (multi-cycle)
+#NET "map_i2c_bus*/*CLOCK_ENABLE*" TNM_NET = FFS "I2C_ENABLES";
+#TIMESPEC TS_I2C_ENABLES = FROM "I2C_ENABLES" TO "I2C_ENABLES" TS_BOARD_CLOCK*40;
+####################USB IOs and timing constraints###########################
+
+NET USB_IFCLK   LOC = "b14" | IOSTANDARD = LVCMOS33; # on SCROD revA2, IFCLK is connected to b14
+NET "map_readout_interfaces/map_daq_fifo_layer/internal_USB_CLOCK" TNM_NET = IFCLK_48M;
+TIMESPEC "TS_IFCLK_48M" = PERIOD "IFCLK_48M" 20.833 ns HIGH 50%;
+NET USB_CLKOUT  LOC = "e13" | IOSTANDARD = LVCMOS33; # on SCROD revA2, CLKOUT is connected to e13
+NET USB_FDD<0>  LOC = "f5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<1>  LOC = "e6"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<2>  LOC = "e5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<3>  LOC = "h9"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<4>  LOC = "g9"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<5>  LOC = "a3"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<6>  LOC = "a2"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<7>  LOC = "f9"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<8>  LOC = "e8"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<9>  LOC = "d5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<10> LOC = "c5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<11> LOC = "h10" | IOSTANDARD = LVCMOS33;
+NET USB_FDD<12> LOC = "g10" | IOSTANDARD = LVCMOS33;
+NET USB_FDD<13> LOC = "b4"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<14> LOC = "a4"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<15> LOC = "f10" | IOSTANDARD = LVCMOS33;
+NET USB_PA0     LOC = "g7"  | IOSTANDARD = LVCMOS33;
+NET USB_PA1     LOC = "h8"  | IOSTANDARD = LVCMOS33;
+NET USB_PA2     LOC = "g8"  | IOSTANDARD = LVCMOS33;
+NET USB_PA3     LOC = "f7"  | IOSTANDARD = LVCMOS33;
+NET USB_PA4     LOC = "f6"  | IOSTANDARD = LVCMOS33;
+NET USB_PA5     LOC = "c3"  | IOSTANDARD = LVCMOS33;
+NET USB_PA6     LOC = "b3"  | IOSTANDARD = LVCMOS33;
+NET USB_PA7     LOC = "g6"  | IOSTANDARD = LVCMOS33;
+NET USB_CTL0    LOC = "f12" | IOSTANDARD = LVCMOS33;
+NET USB_CTL1    LOC = "e12" | IOSTANDARD = LVCMOS33;
+NET USB_CTL2    LOC = "j11" | IOSTANDARD = LVCMOS33;
+NET USB_RDY0    LOC = "g11" | IOSTANDARD = LVCMOS33;
+NET USB_RDY1    LOC = "h12" | IOSTANDARD = LVCMOS33;
+NET USB_WAKEUP  LOC = "f11" | IOSTANDARD = LVCMOS33;
+
+####################Fiberoptic IOs and timing constraints########################
+
+#RX and TX for transceiver 0
+NET FIBER_0_RXP LOC=D7;
+NET FIBER_0_RXN LOC=C7;
+NET FIBER_0_TXP LOC=B6;
+NET FIBER_0_TXN LOC=A6;
+#RX and TX for transceiver 1
+NET FIBER_1_RXP LOC=D9;
+NET FIBER_1_RXN LOC=C9;
+NET FIBER_1_TXP LOC=B8;
+NET FIBER_1_TXN LOC=A8;
+# GT REFCLK for both transceivers
+NET FIBER_REFCLKP LOC=B10; 
+NET FIBER_REFCLKN LOC=A10; 
+
+#Transceiver signals (3.3 V)
+NET FIBER_0_DISABLE_TRANSCEIVER LOC=E10 | IOSTANDARD = LVCMOS33;
+NET FIBER_1_DISABLE_TRANSCEIVER LOC=G13 | IOSTANDARD = LVCMOS33;
+
+## UCF generated for xc6slx150t-fgg676-3 device
+# 156.25MHz GTP Reference clock constraint 
+NET "map_readout_interfaces/map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/GTPD2_left_i" TNM_NET = GT_REFCLK; 
+TIMESPEC TS_GTPD2_LEFT_I = PERIOD "GT_REFCLK" 156.25 MHz HIGH 50%;
+
+# User Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (4-Byte)
+NET "map_readout_interfaces/map_daq_fifo_layer/internal_FIBER_USER_CLOCK" TNM_NET = USER_CLK;
+TIMESPEC TS_USER_CLK_I = PERIOD "USER_CLK" 78.125 MHz HIGH 50%;
+NET "map_readout_interfaces/map_daq_fifo_layer/internal_FIFO_CLOCK" TNM_NET = FIFO_CLK;
+TIMESPEC TS_FIFO_CLK_I = PERIOD "FIFO_CLK" 78.125 MHz HIGH 50%;
+
+# Sync Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (4-Byte)
+NET "map_readout_interfaces/map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/sync_clk_0_i" TNM_NET = SYNC_CLK;
+TIMESPEC TS_SYNC_CLK_0 = PERIOD "SYNC_CLK" 312.5 MHz HIGH 50%;
+
+#Site specifications.  Only the GTPA dual site is strictly necessary, as far as I know.
+INST map_readout_interfaces/map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/aurora_module_i/gtp_wrapper_i/gtp_tile_inst/gtpa1_dual_i LOC=GTPA1_DUAL_X0Y1;
