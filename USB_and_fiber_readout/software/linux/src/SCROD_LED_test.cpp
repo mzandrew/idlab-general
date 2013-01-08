@@ -17,15 +17,14 @@ the default for the USB_and_fiber_readout branch.
 //#define IN_ADDR (0x88)          //Endpoint 8 (FPGA2USB Endpoint)
 //#define OUT_ADDR (0x04)         //Endpoint 4 (USB2FPGA Endpoint)
 
+#include "generic.h"
 #include "packet_interface.h"
 
-void byte_reverse(unsigned int *, int);
-
 int main(){
-        setup_usb();
-        unsigned int inbuf[512];
+	setup_usb();
+	unsigned int inbuf[512];
 	unsigned char *p_inbuf = (unsigned char*) &inbuf[0];
-        usb_ClearEndpnt((IN_ADDR | LIBUSB_ENDPOINT_IN), p_inbuf, 512, TM_OUT);    //Clear input buffer
+	usb_ClearEndpnt((IN_ADDR | LIBUSB_ENDPOINT_IN), p_inbuf, 512, TM_OUT);    //Clear input buffer
 
 	unsigned short int a = 0x7;
 	bool increasing = true;
@@ -57,12 +56,12 @@ int main(){
 
 //		byte_reverse(outbuf,command_stack.GetTotalSize());
  
-	        int stat_chk,j;
+		int stat_chk,j;
 
-        	usb_XferData((OUT_ADDR | LIBUSB_ENDPOINT_OUT), (unsigned char *) outbuf, size*4, TM_OUT);
+		usb_XferData((OUT_ADDR | LIBUSB_ENDPOINT_OUT), (unsigned char *) outbuf, size*4, TM_OUT);
 		usleep(50000);
 
-	        //RX
+		//RX
  	       int retval = usb_XferData((IN_ADDR | LIBUSB_ENDPOINT_IN), p_inbuf, 512*sizeof(unsigned int), TM_OUT);
 		cout << "Read out " << retval << " bytes." << endl;
 		while (retval > 0) {
@@ -79,14 +78,9 @@ int main(){
 				}
 				printf("\n");
 			}
-	        	retval = usb_XferData((IN_ADDR | LIBUSB_ENDPOINT_IN), p_inbuf, 512*sizeof(unsigned int), TM_OUT);
+			retval = usb_XferData((IN_ADDR | LIBUSB_ENDPOINT_IN), p_inbuf, 512*sizeof(unsigned int), TM_OUT);
 		}
 	}
-        close_usb();
+	close_usb();
 }
 
-void byte_reverse(unsigned int *input, int size) {
-	for (int i = 0; i < size; ++i) {
-		input[i] = ((input[i] & 0x0000FFFF) << 16) | ((input[i] & 0xFFFF0000) >> 16);
-	}
-}
