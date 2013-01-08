@@ -1,3 +1,4 @@
+#include "generic.h"
 #include "packet_interface.h"
 #include <stdio.h>
 
@@ -93,17 +94,10 @@ void packet::PrintPacket() {
 		for (int j = 0; j < 4; ++j) {
 			words[j] = (data[i] & (0xFF << (j*8))) >> (j*8);
 		}
-		printf("[%04d]: %08x\t%c%c%c%c\n",i,data[i],words[3],words[2],words[1],words[0]);
+		printf("[%04d]: %08x\t%c%c%c%c\n", i, data[i], \
+			sanitize_char(words[3]), sanitize_char(words[2]), \
+			sanitize_char(words[1]), sanitize_char(words[0]));
 	}
 	delete [] data;
-}
-
-//General purpose utilities
-char sanitize_char(char mychar) {
-	if ('A' <= mychar && mychar <= 'Z') { }
-	else if ('a' <= mychar && mychar <= 'z') { }
-	else if ('0' <= mychar && mychar <= '9') { }
-	else { mychar = ' '; }
-	return mychar;
 }
 

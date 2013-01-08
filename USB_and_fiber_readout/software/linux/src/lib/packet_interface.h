@@ -11,8 +11,8 @@
 #define COMMAND_TYPE_READ       (0x72656164) //ascii:"read"
 #define COMMAND_TYPE_WRITE      (0x72697465) //ascii:"rite"
 
-enum packet_type {COMMAND,ACKNOWLEDGE,ERROR};
-enum command_type {PING,READ,WRITE};
+//enum packet_type {COMMAND,ACKNOWLEDGE,ERROR} asdf;
+//enum command_type {PING,READ,WRITE} blah;
 
 class packet {
 	public:
@@ -29,7 +29,7 @@ class packet {
 		void AddPingToPacket();
 		void AddReadToPacket(unsigned short int reg_id);
 		void AddWriteToPacket(unsigned short int reg_id, 
-                                      unsigned short int reg_data);
+		                      unsigned short int reg_data);
 		//Return the total size or payload size
 		int GetTotalSize();
 		int GetPayloadSize();
@@ -46,7 +46,5 @@ class packet {
 		unsigned int command_id;
 };
 
-//Some extra utilities that are outside of the class definition
-char sanitize_char(char mychar);
-
 #endif
+

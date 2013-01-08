@@ -10,16 +10,15 @@ register 0x00.  This has the upper bits of the temperature.
 #define IN_ADDR (0x86)          //Endpoint 6 (FPGA2USB Endpoint)
 #define OUT_ADDR (0x02)         //Endpoint 2 (USB2FPGA Endpoint)
 
+#include "generic.h"
 #include "packet_interface.h"
 
-void byte_reverse(unsigned int *, int);
-
 int main(){
-        setup_usb();
-        unsigned int inbuf[512];
+	setup_usb();
+	unsigned int inbuf[512];
 	unsigned char *p_inbuf = (unsigned char*) &inbuf[0];
 	//Clear the input buffer
-        usb_ClearEndpnt((IN_ADDR | LIBUSB_ENDPOINT_IN), p_inbuf, 512, TM_OUT);
+	usb_ClearEndpnt((IN_ADDR | LIBUSB_ENDPOINT_IN), p_inbuf, 512, TM_OUT);
 
 	int stat_chk,j;
 
@@ -55,7 +54,7 @@ int main(){
 		outbuf = command_stack.AssemblePacket(size);
 //		byte_reverse(outbuf,command_stack.GetTotalSize());
 
-	        usb_XferData((OUT_ADDR | LIBUSB_ENDPOINT_OUT), (unsigned char *) outbuf, size*4, TM_OUT);
+		usb_XferData((OUT_ADDR | LIBUSB_ENDPOINT_OUT), (unsigned char *) outbuf, size*4, TM_OUT);
 		delete[] outbuf;
 
 		//RX
@@ -91,7 +90,7 @@ int main(){
 		outbuf = command_stack.AssemblePacket(size);
 //		byte_reverse(outbuf,command_stack.GetTotalSize());
 
-	        usb_XferData((OUT_ADDR | LIBUSB_ENDPOINT_OUT), (unsigned char *) outbuf, size*4, TM_OUT);
+		usb_XferData((OUT_ADDR | LIBUSB_ENDPOINT_OUT), (unsigned char *) outbuf, size*4, TM_OUT);
 		delete[] outbuf;
 
 		//RX
@@ -114,11 +113,6 @@ int main(){
 	       		retval = usb_XferData((IN_ADDR | LIBUSB_ENDPOINT_IN), p_inbuf, 512*sizeof(unsigned int), TM_OUT);
 		}
 	}
-        close_usb();
+	close_usb();
 }
 
-void byte_reverse(unsigned int *input, int size) {
-	for (int i = 0; i < size; ++i) {
-		input[i] = ((input[i] & 0x0000FFFF) << 16) | ((input[i] & 0xFFFF0000) >> 16);
-	}
-}
