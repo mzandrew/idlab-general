@@ -7,3 +7,14 @@ sudo apt-get install libusb-1.0
 
 if you run any of the programs directly from the repository version and it says, "file not found", then it means it is linked against a different version of a shared library and you should build the software again (with "make -B")
 
+There are several #defines that are defined in the Makefile (a la -DUSE_USB to enable USB readout mode):
+
+USE_USB
+USE_CPCI
+USE_FINESSE
+FAKE_IT (don't compile in the actual calls to perform the IO operations - useful for testing when no hardware is present)
+
+These are present in the makefile variable COMPILE_FLAGS:
+
+COMPILE_FLAGS = -Isrc/lib -I/usr/include/libusb-1.0 -DUSE_USB -DFAKE_IT
+
