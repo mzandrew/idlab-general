@@ -4,5 +4,6 @@
 void initialize_io_interface(unsigned char *input_buffer);
 void send_data(unsigned char *output_buffer, unsigned int size_in_bytes);
 int receive_data(unsigned char *input_buffer, unsigned int size_in_bytes);
+int receive_packet(unsigned char *input_buffer);
 void close_io_interface(void);
 
