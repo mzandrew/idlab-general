@@ -1,11 +1,23 @@
 #include "generic.h"
 #include "packet_interface.h"
+#include "DebugInfoWarningError.h"
 #include <stdio.h>
 
 using namespace std;
 
-packet::packet() {}
+packet::packet() {
+	packet_type_is_acknowledge = false;
+}
+
+packet::packet(unsigned int *initial_array, unsigned int length) {
+	for (int i=0; i<length; i++) {
+		payload_data.push_back(initial_array[i]);
+	}
+	packet_type_is_acknowledge = false;
+}
+
 packet::~packet() {}
+
 
 void packet::ClearPacket() {
 	payload_data.clear();
@@ -15,7 +27,7 @@ void packet::CreateCommandPacket(unsigned int base_command_id, unsigned int boar
 	command_id = base_command_id;
 	//This is a command packet, so start adding to the payload...
 	payload_data.push_back(PACKET_TYPE_COMMAND);
-	payload_data.push_back( board_id );
+	payload_data.push_back(board_id);
 }
 
 void packet::AddPingToPacket() {
@@ -99,5 +111,84 @@ void packet::PrintPacket() {
 			sanitize_char(words[1]), sanitize_char(words[0]));
 	}
 	delete [] data;
+	CheckPacket();
 }
+
+bool packet::CheckSumMatches() {
+	int size = 0;
+	unsigned int *data = this->AssemblePacket(size);
+	unsigned int packet_checksum = 0;
+	for (int i = 0; i < size - 1; ++i) {
+		packet_checksum += data[i];
+	}
+	unsigned int checksum_from_packet = data[size-1];
+	delete [] data;
+	if (packet_checksum == checksum_from_packet) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+unsigned int packet_type[] = { PACKET_TYPE_COMMAND, PACKET_TYPE_ACKNOWLEDGE, PACKET_TYPE_ERROR };
+unsigned int number_of_packet_types = sizeof(packet_type) / sizeof(packet_type[0]);
+
+bool packet::ContainsAPlausiblyValidStructure() {
+	int errors = 0;
+	bool valid_type = false;
+	packet_type_is_acknowledge = false;
+	int size = 0;
+	unsigned int packet_checksum = 0;
+	unsigned int *data = this->AssemblePacket(size);
+	if (size<3) { errors++; }
+	for (int i=0; i<size; i++) {
+		if (i!=size-1) {
+			packet_checksum += data[i];
+		}
+		// ------------------------------------------------------------------
+		if (i==0) {
+			if (data[0] != PACKET_HEADER) { errors++; }
+		} else if (i==1) {
+			if (data[i] > MAXIMUM_PACKET_SIZE) { errors++; }
+		} else if (i==2) {
+			for (int j=0; j<number_of_packet_types; j++) {
+				if (data[i] == packet_type[j]) {
+					valid_type = true;
+					if (data[i] == PACKET_TYPE_ACKNOWLEDGE) {
+						packet_type_is_acknowledge = true;
+					}
+				}
+			}
+			if (!valid_type) { errors++; }
+		} else if (i>=2 && i<size-1) {
+		} else if (i==size-1) {
+			if (packet_checksum != data[i]) { errors++; }
+			//if (!CheckSumMatches()) { errors++; } // this could be made slightly more efficient
+		}
+		// ------------------------------------------------------------------
+	}
+	delete [] data;
+	return errors ? false : true;
+}
+
+void packet::CheckPacket() {
+//	if (!CheckSumMatches()) {
+//		fprintf(error, "ERROR:  checksum does not match!\n");
+//	}
+	if (!ContainsAPlausiblyValidStructure()) {
+		fprintf(error, "ERROR:  packet does not seem to be valid!\n");
+	}
+}
+
+bool packet::CommandWasExecutedSuccessfully() {
+	ContainsAPlausiblyValidStructure();
+	return packet_type_is_acknowledge ? true : false;
+}
+
+/*
+things that should be done, perhaps:
+	change all 512's to MAX_PACKET_SIZE
+	change all unsigned int's that correspond to the basic datatype to a typedef (typedef unsigned int my_datatype; etc)
+	DebugInfoWarningError should be c++'ed so that it's info << "this is my informational message" << endl; and error << "ERROR:  you didn't sanitize your inputs, did you? " << endl; with default constructors so it doesn't segfault if you don't run the init function...
+*/
 

@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#define MAXIMUM_PACKET_SIZE (10000)
+
 #define PACKET_HEADER           (0x00BE11E2) //hex:BELLE2
 #define PACKET_TYPE_COMMAND     (0x646f6974) //ascii:"doit"
 #define PACKET_TYPE_ACKNOWLEDGE (0x6f6b6179) //ascii:"okay"
@@ -17,6 +19,7 @@
 class packet {
 	public:
 		packet();
+		packet(unsigned int *initial_array, unsigned int length);
 		~packet();
 		////////COMMANDS TO CREATE PACKETS//////////////////////
 		//Create a skeleton command packet with no commands
@@ -39,11 +42,16 @@ class packet {
 		unsigned int* AssemblePacket(int &total_size_in_words);
 		/////////GENERIC COMMANDS/////////////////////////////
 		void PrintPacket();
+		bool CheckSumMatches();
+		bool ContainsAPlausiblyValidStructure();
+		void CheckPacket();
+		bool CommandWasExecutedSuccessfully();
 		/////////COMMANDS TO READ PACKETS////////////////////
 		void ReadPacket(unsigned int *data);
 	private:
 		std::vector<unsigned int> payload_data;
 		unsigned int command_id;
+		bool packet_type_is_acknowledge;
 };
 
 #endif
