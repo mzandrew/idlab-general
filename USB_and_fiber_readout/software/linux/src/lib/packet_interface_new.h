@@ -64,8 +64,7 @@ class packet {
 class command_packet : public packet {
 	public:
 		//////CONSTRUCTORS/////
-		//Single command constructor
-		//Defaults are scrod_id = 0 (broadcast), command_id = 0, verbosity = 0 (do not suppress response)
+		//Single command constructor with a command 
 		//Examples:
 		//	1) ping broadcast                    : command_packet a(kPING);
 		//  2) ping to SCROD 32                  : command_packet a(kPING,32);
@@ -74,7 +73,7 @@ class command_packet : public packet {
 		//  5) as above with response suppressed : command_packet a(kQUIETWRITE,32,23,1027);
 		//  6) quiet broadcast write 1 to reg 21 : command_packet a(kQUIETWRITE,0,21,1);
 		//Command IDs are taken from a global variable that increments when a new command is created
-		command_packet(command_type command, unsigned int scrod_id = 0);
+		command_packet(command_type command, unsigned int scrod_id = 0, unsigned short int reg_id = 0, unsigned short int reg_val = 0);
 
 		/////MULTI-COMMAND SUPPORT////
 		//Not implemented at the moment.
