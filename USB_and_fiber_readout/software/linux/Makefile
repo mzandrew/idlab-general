@@ -1,4 +1,5 @@
-COMPILE_FLAGS = -Isrc/lib -I/usr/include/libusb-1.0 -DUSE_USB -DFAKE_IT
+COMPILE_FLAGS = -Isrc/lib -I/usr/include/libusb-1.0 -DUSE_USB
+#COMPILE_FLAGS = -Isrc/lib -I/usr/include/libusb-1.0 -DUSE_USB -DFAKE_IT
 #COMPILE_FLAGS = -Icontrib -DUSE_FIBER
 LINK_OPTIONS = -L/usr/lib/i386-linux-gnu -lusb-1.0
 

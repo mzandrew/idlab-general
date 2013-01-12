@@ -80,21 +80,24 @@ int packet::GetPayloadSize() {
 }
 
 unsigned int *packet::AssemblePacket(int &total_size_in_words) {
-	total_size_in_words = this->GetTotalSize();
+	total_size_in_words = NakedPacket ? this->GetPayloadSize() : this->GetTotalSize();
 	unsigned int *packet_data = new unsigned int[total_size_in_words];
-	unsigned int packet_checksum = 0;
-	packet_data[0] = PACKET_HEADER;
-	packet_data[1] = this->GetPayloadSize();
-	int counter = 2;
+	if (!NakedPacket) {
+		packet_data[0] = PACKET_HEADER;
+		packet_data[1] = this->GetPayloadSize();
+	}
+	int counter = NakedPacket ? 0 : 2;
 	for (vector<unsigned int>::iterator i = payload_data.begin();
-	     i != payload_data.end(); ++i) {
+	     i != payload_data.end(); ++i, counter++) {
 		packet_data[counter] = (*i);
-		counter++;
 	}
-	for (int i = 0; i < counter; ++i) {
-		packet_checksum += packet_data[i];
+	if (!NakedPacket) {
+		unsigned int packet_checksum = 0;
+		for (int i = 0; i < counter; ++i) {
+			packet_checksum += packet_data[i];
+		}
+		packet_data[counter] = packet_checksum;
 	}
-	packet_data[counter] = packet_checksum;
 	return packet_data;
 }
 
@@ -104,9 +107,10 @@ void packet::PrintPacket() {
 	for (int i = 0; i < size; ++i) {
 		char words[4];
 		for (int j = 0; j < 4; ++j) {
-			words[j] = (data[i] & (0xFF << (j*8))) >> (j*8);
+//			words[j] = (data[i] & (0xFF << (j*8))) >> (j*8);
+			words[j] = (data[i] >> (j*8)) & 0x000000ff;
 		}
-		printf("[%04d]: %08x\t%c%c%c%c\n", i, data[i], \
+		printf("buffer[%04d] 0x%08x %c%c%c%c\n", i, data[i], \
 			sanitize_char(words[3]), sanitize_char(words[2]), \
 			sanitize_char(words[1]), sanitize_char(words[0]));
 	}
@@ -124,8 +128,10 @@ bool packet::CheckSumMatches() {
 	unsigned int checksum_from_packet = data[size-1];
 	delete [] data;
 	if (packet_checksum == checksum_from_packet) {
+//		fprintf(debug, "checksum matches\n");
 		return true;
 	} else {
+//		fprintf(debug, "checksum does not match\n");
 		return false;
 	}
 }
@@ -151,6 +157,7 @@ bool packet::ContainsAPlausiblyValidStructure() {
 		} else if (i==1) {
 			if (data[i] > MAXIMUM_PACKET_SIZE) { errors++; }
 		} else if (i==2) {
+//			fprintf(debug, "packet type is 0x%08x\n", data[i]);
 			for (int j=0; j<number_of_packet_types; j++) {
 				if (data[i] == packet_type[j]) {
 					valid_type = true;
@@ -163,7 +170,6 @@ bool packet::ContainsAPlausiblyValidStructure() {
 		} else if (i>=2 && i<size-1) {
 		} else if (i==size-1) {
 			if (packet_checksum != data[i]) { errors++; }
-			//if (!CheckSumMatches()) { errors++; } // this could be made slightly more efficient
 		}
 		// ------------------------------------------------------------------
 	}
