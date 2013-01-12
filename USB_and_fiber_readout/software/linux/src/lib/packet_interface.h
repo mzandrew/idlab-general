@@ -49,6 +49,7 @@ class packet {
 		/////////COMMANDS TO READ PACKETS////////////////////
 		void ReadPacket(unsigned int *data);
 	private:
+		bool NakedPacket; // whether we are building a packet (=false) or parsing a packet (=true)
 		std::vector<unsigned int> payload_data;
 		unsigned int command_id;
 		bool packet_type_is_acknowledge;

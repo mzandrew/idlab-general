@@ -19,9 +19,9 @@ void write_board_id(unsigned short int board_id_to_write, unsigned short int boa
 unsigned short int read_board_id(void);
 
 int main(){
-	verbosity = 3;
+	verbosity = 5;
 	setup_DebugInfoWarningError();
-	unsigned short int board_id_to_write = 14;
+	unsigned short int board_id_to_write = 34;
 	write_board_id(board_id_to_write);
 	unsigned short int board_id_read_back = read_board_id();
 	if (board_id_to_write != board_id_read_back) {
@@ -63,7 +63,7 @@ void write_board_id(unsigned short int board_id_to_write, unsigned short int boa
 	unsigned short int command_reg = 1;
 //	unsigned short int read_reg = 256;
 	unsigned int inbuf[512];
-	unsigned char *p_inbuf = (unsigned char *) &inbuf[0];
+	unsigned char *p_inbuf = (unsigned char *) inbuf;
 	initialize_io_interface(p_inbuf);
 	for (int i = 0; i < N_commands; ++i, command_id++) {
 		packet command_stack;
@@ -72,7 +72,7 @@ void write_board_id(unsigned short int board_id_to_write, unsigned short int boa
 		command_stack.CreateCommandPacket(command_id, board_id);
 		command_stack.AddWriteToPacket(command_reg, command_data[i]);
 		command_stack.AddReadToPacket(command_reg);
-		command_stack.PrintPacket();
+//		command_stack.PrintPacket();
 		//TX
 		outbuf = command_stack.AssemblePacket(size);
 //		byte_reverse(outbuf,command_stack.GetTotalSize());
@@ -80,7 +80,8 @@ void write_board_id(unsigned short int board_id_to_write, unsigned short int boa
 		delete[] outbuf;
 		//RX
 		int length = receive_packet(p_inbuf);
-		packet response(&inbuf[0], length>>2);
+		packet response(inbuf, length>>2);
+//		response.PrintPacket();
 		if (!response.CommandWasExecutedSuccessfully()) {
 			fprintf(error, "ERROR:  command was NOT executed\n");
 		}
