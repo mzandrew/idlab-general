@@ -2,6 +2,7 @@
 
 #include "generic.h"
 #include "io_interface.h"
+#include "packet_interface.h"
 #include "DebugInfoWarningError.h"
 
 #ifdef USE_USB
@@ -13,7 +14,7 @@ void initialize_io_interface(unsigned char *input_buffer) {
 #ifndef FAKE_IT
 	setup_usb();
 	//Clear the input buffer
-	usb_ClearEndpnt((IN_ADDR | LIBUSB_ENDPOINT_IN), input_buffer, 512, TM_OUT);
+	usb_ClearEndpnt((IN_ADDR | LIBUSB_ENDPOINT_IN), input_buffer, MAXIMUM_PACKET_SIZE_IN_WORDS, TM_OUT);
 #endif
 #endif
 }
@@ -42,10 +43,10 @@ int receive_data(unsigned char *input_buffer, unsigned int size_in_bytes) {
 }
 
 int receive_packet(unsigned char *input_char_buffer) {
-	unsigned int *input_buffer;
-	input_buffer = (unsigned int *) input_char_buffer;
+	packet_word *input_buffer;
+	input_buffer = (packet_word *) input_char_buffer;
 	int length = 0, j = 0, k = 0;
-	int retval = receive_data(input_char_buffer, 512*sizeof(unsigned int));
+	int retval = receive_data(input_char_buffer, MAXIMUM_PACKET_SIZE_IN_WORDS*sizeof(packet_word));
 	while (retval > 0) {
 		if (0) {
 			for(j=0; j<retval; j++) {
@@ -59,8 +60,8 @@ int receive_packet(unsigned char *input_char_buffer) {
 		length += retval;
 		input_char_buffer += retval;
 //		byte_reverse(input_buffer,retval/4);
-		//retval = receive_data(input_char_buffer + length, 512*sizeof(unsigned int));
-		retval = receive_data(input_char_buffer, 512*sizeof(unsigned int));
+		//retval = receive_data(input_char_buffer + length, MAXIMUM_PACKET_SIZE_IN_WORDS*sizeof(packet_word));
+		retval = receive_data(input_char_buffer, (MAXIMUM_PACKET_SIZE_IN_WORDS-(length>>2))*sizeof(packet_word));
 	}
 	//cout << "Read out " << retval << " bytes." << endl;
 	if (1) {
@@ -72,7 +73,7 @@ int receive_packet(unsigned char *input_char_buffer) {
 		for(j=0; j<(length>>2); j++) {
 			printf("input_buffer[%d] 0x%08x ",j,input_buffer[j]);
 			for (k = 3; k >= 0; --k) {
-				unsigned int mask = 0x000000FF;
+				packet_word mask = 0x000000FF;
 				mask = mask << (k*8);
 				mask = mask & input_buffer[j];
 				mask = mask >> (k*8);
