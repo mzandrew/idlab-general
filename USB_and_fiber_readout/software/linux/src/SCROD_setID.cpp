@@ -18,10 +18,19 @@ using namespace std;
 void write_board_id(unsigned short int board_id_to_write, unsigned short int board_revision_to_write=0x00a2);
 unsigned short int read_board_id(void);
 
-int main(){
+int main(int argc, char *argv[]) {
+	unsigned short int board_id_to_write = 34;
 	verbosity = 5;
 	setup_DebugInfoWarningError();
-	unsigned short int board_id_to_write = 34;
+	while (--argc > 0) {
+		int num = 0;
+		if (sscanf(*++argv, "%d", &num)) {
+			board_id_to_write = num;
+			fprintf(debug, "using %d for board_id\n", board_id_to_write);
+		}
+		//fprintf(debug, "argument:  \"%s\"\n", *argv);
+	}
+
 	write_board_id(board_id_to_write);
 	unsigned short int board_id_read_back = read_board_id();
 	if (board_id_to_write != board_id_read_back) {
