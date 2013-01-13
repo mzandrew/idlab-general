@@ -7,6 +7,7 @@ using namespace std;
 
 packet::packet() {
 	packet_type_is_acknowledge = false;
+	NakedPacket = false;
 }
 
 packet::packet(unsigned int *initial_array, unsigned int length) {
@@ -14,6 +15,7 @@ packet::packet(unsigned int *initial_array, unsigned int length) {
 		payload_data.push_back(initial_array[i]);
 	}
 	packet_type_is_acknowledge = false;
+	NakedPacket = true;
 }
 
 packet::~packet() {}
