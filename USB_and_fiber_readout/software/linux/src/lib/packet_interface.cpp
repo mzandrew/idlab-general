@@ -10,7 +10,7 @@ packet::packet() {
 	NakedPacket = false;
 }
 
-packet::packet(unsigned int *initial_array, unsigned int length) {
+packet::packet(packet_word *initial_array, unsigned int length) {
 	for (int i=0; i<length; i++) {
 		payload_data.push_back(initial_array[i]);
 	}
@@ -25,7 +25,7 @@ void packet::ClearPacket() {
 	payload_data.clear();
 }
 
-void packet::CreateCommandPacket(unsigned int base_command_id, unsigned int board_id) {
+void packet::CreateCommandPacket(packet_word base_command_id, packet_word board_id) {
 	command_id = base_command_id;
 	//This is a command packet, so start adding to the payload...
 	payload_data.push_back(PACKET_TYPE_COMMAND);
@@ -33,7 +33,7 @@ void packet::CreateCommandPacket(unsigned int base_command_id, unsigned int boar
 }
 
 void packet::AddPingToPacket() {
-	unsigned int command_checksum = 0;
+	packet_word command_checksum = 0;
 	payload_data.push_back(command_id);
 	command_checksum += command_id;
 	command_id++;
@@ -43,25 +43,25 @@ void packet::AddPingToPacket() {
 }
 
 void packet::AddReadToPacket(unsigned short int reg_id) {
-	unsigned int command_checksum = 0;
+	packet_word command_checksum = 0;
 	payload_data.push_back(command_id);
 	command_checksum += command_id;
 	command_id++;
 	payload_data.push_back(COMMAND_TYPE_READ);
 	command_checksum += COMMAND_TYPE_READ;
-	payload_data.push_back( (unsigned int) reg_id);
-	command_checksum += (unsigned int) reg_id;
+	payload_data.push_back( (packet_word) reg_id);
+	command_checksum += (packet_word) reg_id;
 	payload_data.push_back(command_checksum);
 }
 
 void packet::AddWriteToPacket(unsigned short int reg_id, unsigned short int reg_data) {
-	unsigned int command_checksum = 0;
+	packet_word command_checksum = 0;
 	payload_data.push_back(command_id);
 	command_checksum += command_id;
 	command_id++;
 	payload_data.push_back(COMMAND_TYPE_WRITE);
 	command_checksum += COMMAND_TYPE_WRITE;
-	unsigned int temp_word = 0;
+	packet_word temp_word = 0;
 	temp_word |= (reg_data << 16) | (reg_id);
 	payload_data.push_back(temp_word);
 	command_checksum += temp_word;
@@ -81,20 +81,20 @@ int packet::GetPayloadSize() {
 	return (payload_data.size() + 1);
 }
 
-unsigned int *packet::AssemblePacket(int &total_size_in_words) {
+packet_word *packet::AssemblePacket(int &total_size_in_words) {
 	total_size_in_words = NakedPacket ? this->GetPayloadSize() : this->GetTotalSize();
-	unsigned int *packet_data = new unsigned int[total_size_in_words];
+	packet_word *packet_data = new packet_word[total_size_in_words];
 	if (!NakedPacket) {
 		packet_data[0] = PACKET_HEADER;
 		packet_data[1] = this->GetPayloadSize();
 	}
 	int counter = NakedPacket ? 0 : 2;
-	for (vector<unsigned int>::iterator i = payload_data.begin();
+	for (vector<packet_word>::iterator i = payload_data.begin();
 	     i != payload_data.end(); ++i, counter++) {
 		packet_data[counter] = (*i);
 	}
 	if (!NakedPacket) {
-		unsigned int packet_checksum = 0;
+		packet_word packet_checksum = 0;
 		for (int i = 0; i < counter; ++i) {
 			packet_checksum += packet_data[i];
 		}
@@ -105,7 +105,7 @@ unsigned int *packet::AssemblePacket(int &total_size_in_words) {
 
 void packet::PrintPacket() {
 	int size = 0;
-	unsigned int *data = this->AssemblePacket(size);
+	packet_word *data = this->AssemblePacket(size);
 	for (int i = 0; i < size; ++i) {
 		char words[4];
 		for (int j = 0; j < 4; ++j) {
@@ -122,12 +122,12 @@ void packet::PrintPacket() {
 
 bool packet::CheckSumMatches() {
 	int size = 0;
-	unsigned int *data = this->AssemblePacket(size);
-	unsigned int packet_checksum = 0;
+	packet_word *data = this->AssemblePacket(size);
+	packet_word packet_checksum = 0;
 	for (int i = 0; i < size - 1; ++i) {
 		packet_checksum += data[i];
 	}
-	unsigned int checksum_from_packet = data[size-1];
+	packet_word checksum_from_packet = data[size-1];
 	delete [] data;
 	if (packet_checksum == checksum_from_packet) {
 //		fprintf(debug, "checksum matches\n");
@@ -138,7 +138,7 @@ bool packet::CheckSumMatches() {
 	}
 }
 
-unsigned int packet_type[] = { PACKET_TYPE_COMMAND, PACKET_TYPE_ACKNOWLEDGE, PACKET_TYPE_ERROR };
+packet_word packet_type[] = { PACKET_TYPE_COMMAND, PACKET_TYPE_ACKNOWLEDGE, PACKET_TYPE_ERROR };
 unsigned int number_of_packet_types = sizeof(packet_type) / sizeof(packet_type[0]);
 
 bool packet::ContainsAPlausiblyValidStructure() {
@@ -146,8 +146,8 @@ bool packet::ContainsAPlausiblyValidStructure() {
 	bool valid_type = false;
 	packet_type_is_acknowledge = false;
 	int size = 0;
-	unsigned int packet_checksum = 0;
-	unsigned int *data = this->AssemblePacket(size);
+	packet_word packet_checksum = 0;
+	packet_word *data = this->AssemblePacket(size);
 	if (size<3) { errors++; }
 	for (int i=0; i<size; i++) {
 		if (i!=size-1) {
@@ -157,7 +157,7 @@ bool packet::ContainsAPlausiblyValidStructure() {
 		if (i==0) {
 			if (data[0] != PACKET_HEADER) { errors++; }
 		} else if (i==1) {
-			if (data[i] > MAXIMUM_PACKET_SIZE) { errors++; }
+			if (data[i] > MAXIMUM_PACKET_SIZE_IN_WORDS) { errors++; }
 		} else if (i==2) {
 //			fprintf(debug, "packet type is 0x%08x\n", data[i]);
 			for (int j=0; j<number_of_packet_types; j++) {
@@ -195,8 +195,6 @@ bool packet::CommandWasExecutedSuccessfully() {
 
 /*
 things that should be done, perhaps:
-	change all 512's to MAX_PACKET_SIZE
-	change all unsigned int's that correspond to the basic datatype to a typedef (typedef unsigned int my_datatype; etc)
 	DebugInfoWarningError should be c++'ed so that it's info << "this is my informational message" << endl; and error << "ERROR:  you didn't sanitize your inputs, did you? " << endl; with default constructors so it doesn't segfault if you don't run the init function...
 */
 

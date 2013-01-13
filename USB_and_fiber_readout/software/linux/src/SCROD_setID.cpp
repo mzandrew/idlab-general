@@ -30,12 +30,11 @@ int main(int argc, char *argv[]) {
 		}
 		//fprintf(debug, "argument:  \"%s\"\n", *argv);
 	}
-
 	write_board_id(board_id_to_write);
-	unsigned short int board_id_read_back = read_board_id();
-	if (board_id_to_write != board_id_read_back) {
-		fprintf(error, "ERROR:  unable to verify that the board id was written properly\n");
-	}
+//	unsigned short int board_id_read_back = read_board_id();
+//	if (board_id_to_write != board_id_read_back) {
+//		fprintf(error, "ERROR:  unable to verify that the board id was written properly\n");
+//	}
 	return 0;
 }
 
@@ -47,8 +46,8 @@ unsigned short int read_board_id(void) {
 void write_board_id(unsigned short int board_id_to_write, unsigned short int board_revision_to_write) {
 	unsigned short int board_id_low_mask = 0x00FF;
 	unsigned short int board_id_high_mask = 0xFF00;
-	unsigned int board_id = 0x00000000;  //Broadcast ID
-//	unsigned int board_id = 0x00A2000E;  //Try sending to your specific board
+	packet_word board_id = 0x00000000;  //Broadcast ID
+//	packet_word board_id = 0x00A2000E;  //Try sending to your specific board
 	//I2C command stack here
 	unsigned short int command_data[14]= {0x0100,  //1. start
 	                                      0x00A0,  //2. setup send
@@ -68,15 +67,15 @@ void write_board_id(unsigned short int board_id_to_write, unsigned short int boa
 	//printf("%d\n", N_commands);
 	//fflush(stdout);
 	int size = 0;
-	unsigned int command_id = 10; // a random number
+	packet_word command_id = 10; // a random number
 	unsigned short int command_reg = 1;
 //	unsigned short int read_reg = 256;
-	unsigned int inbuf[512];
+	packet_word inbuf[MAXIMUM_PACKET_SIZE_IN_WORDS];
 	unsigned char *p_inbuf = (unsigned char *) inbuf;
 	initialize_io_interface(p_inbuf);
 	for (int i = 0; i < N_commands; ++i, command_id++) {
 		packet command_stack;
-		unsigned int *outbuf;
+		packet_word *outbuf;
 		//command_stack.ClearPacket();
 		command_stack.CreateCommandPacket(command_id, board_id);
 		command_stack.AddWriteToPacket(command_reg, command_data[i]);
