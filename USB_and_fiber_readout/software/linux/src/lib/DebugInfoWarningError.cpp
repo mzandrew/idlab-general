@@ -1,81 +1,61 @@
-// 2012-08-16 mza
+// 2013-01-13 mza (replaced c version with c++ one)
 
 #include "DebugInfoWarningError.h"
-#include <fcntl.h>
-#include <stdio.h>
 
-unsigned short int verbosity = 3;
+std::ofstream debug, debug2, info, warning, error;
+DebugInfoWarningError DebugInfoWarningError; // creates local object with default constructor called before main()
 
-FILE *debug   = 0;
-FILE *debug2  = 0;
-FILE *info    = 0;
-FILE *warning = 0;
-FILE *error   = 0;
-
-void setup_DebugInfoWarningError(void) {
-	static bool has_been_run_through;
-//	if (has_been_run_through) {
-//		return;
-//	}
-	static int stdout_fd, stderr_fd, devnull_fd;
-	if (!has_been_run_through) {
-		stderr_fd  = open("/dev/stderr", O_WRONLY);
-		stdout_fd  = open("/dev/stdout", O_WRONLY);
-		devnull_fd = open("/dev/null",   O_WRONLY);
-	}
-	
-	if (verbosity >= 1) {
-		error = fdopen(stderr_fd, "w");
-	} else {
-		error = fdopen(devnull_fd, "w");
-	}
-
-	if (verbosity >= 2) {
-		warning = fdopen(stderr_fd, "w");
-	} else {
-		warning = fdopen(devnull_fd, "w");
-	}
-
-	if (verbosity >= 3) {
-		info = fdopen(stdout_fd, "w");
-	} else {
-		info = fdopen(devnull_fd, "w");
-	}
-
-	if (verbosity >= 4) {
-		debug = fdopen(stdout_fd, "w");
-	} else {
-		debug = fdopen(devnull_fd, "w");
-	}
-
-
-	if (verbosity >= 5) {
-		debug2 = fdopen(stdout_fd, "w");
-	} else {
-		debug2 = fdopen(devnull_fd, "w");
-	}
-
-//	fprintf(debug,   "this is the debug message\n");
-//	fprintf(debug2,  "this is the debug2 message\n");
-//	fprintf(info,    "this is the info message\n");
-//	fprintf(warning, "this is the warning message\n");
-//	fprintf(error,   "this is the error message\n");
-
-	has_been_run_through = true;
+DebugInfoWarningError::DebugInfoWarningError() {
+	has_been_initialized = false;
+	verbosity = 3;
+	init();
 }
 
-unsigned short int change_verbosity(unsigned short int new_verbosity = verbosity) {
+DebugInfoWarningError::DebugInfoWarningError(unsigned short int desired_verbosity) {
+	has_been_initialized = false;
+	verbosity = desired_verbosity;
+	init();
+}
+
+DebugInfoWarningError::~DebugInfoWarningError() {
+	close_all();
+}
+
+void DebugInfoWarningError::close_all() {
+	  error.close();
+	warning.close();
+	   info.close();
+	  debug.close();
+	 debug2.close();
+	has_been_initialized = false;
+}
+
+void DebugInfoWarningError::init() {
+	if (has_been_initialized) { return; }
+	has_been_initialized = true;
+	if (verbosity >= 1) {   error.open("/dev/stderr"); } else {   error.open("/dev/null"); }
+	if (verbosity >= 2) { warning.open("/dev/stderr"); } else { warning.open("/dev/null"); }
+	if (verbosity >= 3) {    info.open("/dev/stdout"); } else {    info.open("/dev/null"); }
+	if (verbosity >= 4) {   debug.open("/dev/stdout"); } else {   debug.open("/dev/null"); }
+	if (verbosity >= 5) {  debug2.open("/dev/stdout"); } else {  debug2.open("/dev/null"); }
+	if (0) {
+		error   << "this is an error message"  << std::endl;
+		warning << "this is a warning message" << std::endl;
+		info    << "this is an info message"   << std::endl;
+		debug   << "this is a debug message"   << std::endl;
+		debug2  << "this is a debug2 message"  << std::endl;
+	}
+}
+
+unsigned short int DebugInfoWarningError::ChangeVerbosity(unsigned short int new_verbosity) {
+	close_all();
 	unsigned short int old_verbosity = verbosity;
 	verbosity = new_verbosity;
-	setup_DebugInfoWarningError();
+	init();
 	return old_verbosity;
 }
 
-//fprintf(debug, "\nchannel %d had %ld bytes to read", i, total_bytes_read_so_far);
-//debug("\nchannel %d had %ld bytes to read", i, total_bytes_read_so_far);
-//#include <cstdarg.h>
-//void debug(...) {
-//	va_list arguments;
-//	
-//}
+unsigned short int change_verbosity(unsigned short int new_verbosity) {
+	DebugInfoWarningError.ChangeVerbosity(new_verbosity);
+}
 

@@ -184,7 +184,8 @@ void packet::CheckPacket() {
 //		fprintf(error, "ERROR:  checksum does not match!\n");
 //	}
 	if (!ContainsAPlausiblyValidStructure()) {
-		fprintf(error, "ERROR:  packet does not seem to be valid!\n");
+		//fprintf(error, "ERROR:  packet does not seem to be valid!\n");
+		error << "ERROR:  packet does not seem to be valid!" << std::endl;
 	}
 }
 
@@ -192,9 +193,4 @@ bool packet::CommandWasExecutedSuccessfully() {
 	ContainsAPlausiblyValidStructure();
 	return packet_type_is_acknowledge ? true : false;
 }
-
-/*
-things that should be done, perhaps:
-	DebugInfoWarningError should be c++'ed so that it's info << "this is my informational message" << endl; and error << "ERROR:  you didn't sanitize your inputs, did you? " << endl; with default constructors so it doesn't segfault if you don't run the init function...
-*/
 

@@ -20,13 +20,14 @@ unsigned short int read_board_id(void);
 
 int main(int argc, char *argv[]) {
 	unsigned short int board_id_to_write = 34;
-	verbosity = 5;
-	setup_DebugInfoWarningError();
+	//verbosity = 5;
+	//setup_DebugInfoWarningError();
 	while (--argc > 0) {
 		int num = 0;
 		if (sscanf(*++argv, "%d", &num)) {
 			board_id_to_write = num;
-			fprintf(debug, "using %d for board_id\n", board_id_to_write);
+			//fprintf(debug, "using %d for board_id\n", board_id_to_write);
+			debug << "using " << board_id_to_write << " for board_id" << endl;
 		}
 		//fprintf(debug, "argument:  \"%s\"\n", *argv);
 	}
@@ -39,7 +40,8 @@ int main(int argc, char *argv[]) {
 }
 
 unsigned short int read_board_id(void) {
-	fprintf(warning, "WARNING:  read_board_id() does nothing\n");
+	//fprintf(warning, "WARNING:  read_board_id() does nothing\n");
+	warning << "WARNING:  read_board_id() does nothing" << endl;
 	return 0;
 }
 
@@ -91,7 +93,8 @@ void write_board_id(unsigned short int board_id_to_write, unsigned short int boa
 		packet response(inbuf, length>>2);
 //		response.PrintPacket();
 		if (!response.CommandWasExecutedSuccessfully()) {
-			fprintf(error, "ERROR:  command was NOT executed\n");
+			//fprintf(error, "ERROR:  command was NOT executed\n");
+			error << "ERROR:  command was NOT executed" << endl;
 		}
 //		sleep(1);
 //		getchar();
