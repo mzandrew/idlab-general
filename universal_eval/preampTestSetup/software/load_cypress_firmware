@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+lsusb
+sleep 1
+sudo cycfx2prog prg:fw.hex run
+sleep 10
+lsusb
+
