@@ -1,0 +1,243 @@
+###########################################################################
+#Pin mappings and timing constraints here are based on the SCROD_revA2.   #
+#Please update the pin mappings if using a different board, and add the   #
+#file with a new name in the repository.                                  #
+#If you are not compiling in USB or fiberoptic functionality, you will    #
+#have to comment out the appropriate portion below.  I hope these regions #
+#are self explanatory.                                                    #
+###########################################################################
+####################General Universal Eval IOs######################################
+NET BOARD_40MHz_CLOCKP LOC="p79";
+NET BOARD_40MHz_CLOCKN LOC="p80";
+
+# Associated constraints for the OFFSET OUT
+#NET "internal_CLOCK_40MHz_BUFG" TNM_NET = "internal_CLOCK_40MHz_BUFG";
+#TIMESPEC "TS_internal_CLOCK_40MHz_BUFG" = PERIOD "internal_CLOCK_40MHz_BUFG" 25.0 ns HIGH 50%;
+#TIMEGRP "DataOut_40" = PADS("RAMP" "START");
+# OFFSET = OUT <time> <units> AFTER <clk > TIMEGRP <grp_name>;
+#OFFSET = OUT 25 ns AFTER internal_CLOCK_40MHz_BUFG TIMEGRP DataOut_40;
+NET BOARD_150MHz_CLOCKP LOC="p183";
+NET BOARD_150MHz_CLOCKN LOC="p184";
+
+# Associated constraints for the OFFSET OUT
+#NET "internal_CLOCK_150MHz_BUFG" TNM_NET = "internal_CLOCK_150MHz_BUFG";
+#TIMESPEC "TS_internal_CLOCK_150MHz_BUFG" = PERIOD "internal_CLOCK_150MHz_BUFG" 6.666 ns HIGH 50%;
+#TIMEGRP "DataOut_150" = PADS("SSTIN" "SSPIN" "SMA_CONN");
+#OFFSET = OUT 6.666 ns AFTER internal_CLOCK_150MHz_BUFG TIMEGRP DataOut_150;
+NET "SMA_CONN" LOC = "P76";
+
+NET "MON<0>"  LOC = "p181"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<1>"  LOC = "p178"  |pullup ;
+NET "MON<2>"  LOC = "p176"  |pullup ;
+NET "MON<3>"  LOC = "p175"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<4>"  LOC = "p172"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<5>"  LOC = "p171"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<6>"  LOC = "p169"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<7>"  LOC = "p168"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<8>"  LOC = "p166"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<9>"  LOC = "p165"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<10>"  LOC = "p162"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<11>"  LOC = "p161"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<12>"  LOC = "p156"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<13>"  LOC = "p155"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<14>"  LOC = "p154"  |IOSTANDARD=LVCMOS25 ;
+NET "MON<15>"  LOC = "p152"  |IOSTANDARD=LVCMOS25 ;
+INST "MON<*>" TNM = "MON_GRP";
+
+#(16 DOWNTO 1)	MUST BE INPUT SIGNALS!
+NET "DO<1>" 			LOC= 	"p182"; 
+NET "DO<2>" 			LOC= 	"p185"; 
+NET "DO<3>" 			LOC= 	"p187"; 
+NET "DO<4>" 			LOC= 	"p189"; 
+NET "DO<5>" 			LOC= 	"p190"; 
+NET "DO<6>" 			LOC= 	"p191"; 
+NET "DO<7>" 			LOC= 	"p194"; 
+NET "DO<8>" 			LOC= 	"p196"; 
+NET "DO<9>" 			LOC= 	"p197"; 
+NET "DO<10>" 			LOC= 	"p198";
+NET "DO<11>" 			LOC= 	"p199"; 
+NET "DO<12>" 			LOC= 	"p200"; 
+NET "DO<13>" 			LOC= 	"p203"; 
+NET "DO<14>" 			LOC= 	"p204"; 
+NET "DO<15>" 			LOC= 	"p205";
+NET "DO<16>" 			LOC= 	"p43"; 
+
+# NOTE - SSTIN/SSPIN signals are reversed on TARGET4 ASIC!!!!
+NET "SSTIN" 			LOC= 	"p24"; #TARGET4 ONLY - should be 22
+NET "SSPIN" 			LOC= 	"p22"; #TARGET4 ONLY - should be 24
+NET "SSPOUT" 			LOC= 	"p21"; 
+NET "RCO" 			LOC= 	"p20";
+#(4 DOWNTO 1)
+NET "TRG<1>" 			LOC= 	"p19"; 
+NET "TRG<2>" 			LOC= 	"p18";
+NET "TRG<3>" 			LOC= 	"p77"; 
+NET "TRG<4>" 			LOC= 	"p29";
+NET "TRG_16" 			LOC= 	"p16";	#TRG_16
+NET "TRGIN" 			LOC= 	"p15";
+NET "TRGMON" 			LOC= 	"p13";
+NET "RAMP" 			LOC= 	"p12";
+#(2 DOWNTO 0)
+NET "RD_ROWSEL<0>" 			LOC= 	"p11";
+NET "RD_ROWSEL<1>" 			LOC= 	"p10";
+NET "RD_ROWSEL<2>" 			LOC= 	"p9";
+
+NET "RD_ENA" 			LOC= 	"p7";
+NET "SHOUT" 			LOC= 	"p5";
+NET "TST_START" 			LOC= 	"p4";
+NET "TST_BOIN_CLR" 			LOC= 	"p3";
+NET "TSTOUT" 			LOC= 	"p2";
+
+NET "SIN" 			LOC= 	"p26";
+NET "SCLK" 			LOC= 	"p27";
+NET "REGCLR" 			LOC= 	"p28";
+NET "PCLK" 			LOC= 	"p78";
+#(5 DOWNTO 0)
+NET "RD_COLSEL<0>" 			LOC= 	"p74";
+NET "RD_COLSEL<1>" 			LOC= 	"p31";
+NET "RD_COLSEL<2>" 			LOC= 	"p72";
+NET "RD_COLSEL<3>" 			LOC= 	"p33";
+NET "RD_COLSEL<4>" 			LOC= 	"p71";
+NET "RD_COLSEL<5>" 			LOC= 	"p34";
+
+NET "WR_ADDRCLR" 			LOC= 	"p35";
+NET "WR_STRB" 			LOC= 	"p36";
+NET "START" 			LOC= 	"p37";
+#(5 DOWNTO 1)
+NET "SAMPLESEL<5>" 			LOC= 	"p39";
+NET "SAMPLESEL<4>" 			LOC= 	"p64";
+NET "SAMPLESEL<3>" 			LOC= 	"p40";
+NET "SAMPLESEL<2>" 			LOC= 	"p63";
+NET "SAMPLESEL<1>" 			LOC= 	"p42";
+NET "SAMPLESEL_ANY"			LOC=	"P62";
+
+NET "SCK_DAC" 			LOC= 	"p44";		#MAX5258(8-bit DAC)
+NET "DIN_DAC" 			LOC= 	"p45";
+NET "CS_DAC" 			LOC= 	"p52";
+
+NET "SCL_MUX" 			LOC= 	"p46"	|pullup;
+NET "SDA_MUX" 			LOC= 	"p48"	|pullup;
+
+NET "SCL_MON" 			LOC= 	"p50";
+NET "SDA_MON" 			LOC= 	"p51";
+
+NET "WR_ADVCLK" 			LOC= 	"p68";
+NET "WR_ENA" 			LOC= 	"p67";
+NET "CLR" 			LOC= 	"p65";
+NET "SR_SEL" 			LOC= 	"p61";
+NET "SR_CLOCK" 			LOC= 	"p58";
+NET "SR_CLEAR" 			LOC= 	"p57";
+
+####################General SCROD IOs######################################
+#General SCROD clocking
+#NET BOARD_CLOCKP LOC=U25;
+#NET BOARD_CLOCKN LOC=U26;
+#Diagnostics on LEDs (3.3 V)
+#NET FIBER_0_LINK_UP  LOC=F18 | IOSTANDARD = LVCMOS33; #LEDS<0>
+#NET FIBER_1_LINK_UP  LOC=E18 | IOSTANDARD = LVCMOS33; #LEDS<1>
+#NET  LOC=G16 | IOSTANDARD = LVCMOS33; #LEDS<2>
+#NET  LOC=F17 | IOSTANDARD = LVCMOS33; #LEDS<3>
+#NET FIBER_0_LINK_ERR LOC=F20 | IOSTANDARD = LVCMOS33; #LEDS<4>
+#NET FIBER_1_LINK_ERR LOC=E20 | IOSTANDARD = LVCMOS33; #LEDS<5>
+#NET  LOC=H17 | IOSTANDARD = LVCMOS33; #LEDS<6>
+#NET  LOC=G17 | IOSTANDARD = LVCMOS33; #LEDS<7>
+#NET  LOC=C21 | IOSTANDARD = LVCMOS33; #LEDS<8>
+#NET  LOC=B21 | IOSTANDARD = LVCMOS33; #LEDS<9>
+#NET  LOC=H18 | IOSTANDARD = LVCMOS33; #LEDS<10>
+#NET  LOC=H19 | IOSTANDARD = LVCMOS33; #LEDS<11>
+#NET  LOC=B22 | IOSTANDARD = LVCMOS33; #LEDS<12>
+#NET  LOC=A22 | IOSTANDARD = LVCMOS33; #LEDS<13>
+#NET  LOC=G19 | IOSTANDARD = LVCMOS33; #LEDS<14>
+#NET PLL_LOCKED LOC=F19 | IOSTANDARD = LVCMOS33; #LEDS<15>
+####################USB IOs and timing constraints###########################
+NET USB_IFCLK   LOC = "p180" |IOSTANDARD = LVCMOS25; # on UnivEval RevA, IFCLK is connected to p180
+NET "map_daq_fifo_layer/internal_USB_CLOCK" TNM_NET = IFCLK_48M;
+TIMESPEC "TS_IFCLK_48M" = PERIOD "IFCLK_48M" 20.833 ns HIGH 50%;
+
+NET "USB_CLKOUT"  LOC = "p109" |IOSTANDARD=LVCMOS25 ; 
+NET "USB_WAKEUP"  LOC = "p122" |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<0>"  LOC = "p147"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<10>"  LOC = "p117"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<11>"  LOC = "p116"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<12>"  LOC = "p115"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<13>"  LOC = "p114"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<14>"  LOC = "p113"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<15>"  LOC = "p111"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<1>"  LOC = "p146"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<2>"  LOC = "p144"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<3>"  LOC = "p143"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<4>"  LOC = "p141"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<5>"  LOC = "p140"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<6>"  LOC = "p139"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<7>"  LOC = "p138"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<8>"  LOC = "p120"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_FDD<9>"  LOC = "p119"  |IOSTANDARD=LVCMOS25 ; 
+INST "USB_FDD<*>" TNM = "FDD_GRP";
+NET "USB_CTL0"  LOC = "p137" |IOSTANDARD=LVCMOS25 ;  #flagA
+NET "USB_CTL1"  LOC = "p135" |IOSTANDARD=LVCMOS25 ;  #flagB
+NET "USB_CTL2"  LOC = "p133" |IOSTANDARD=LVCMOS25 ;  #flagC
+NET "USB_PA0"  LOC = "p132"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_PA1"  LOC = "p131"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_PA2"  LOC = "p130"  |IOSTANDARD=LVCMOS25 ;  #SLOE
+NET "USB_PA3"  LOC = "p128"  |IOSTANDARD=LVCMOS25 ; 
+NET "USB_PA4"  LOC = "p126"  |IOSTANDARD=LVCMOS25 ;  #FIFO ADR0
+NET "USB_PA5"  LOC = "p125"  |IOSTANDARD=LVCMOS25 ;  #FIFO ADR1
+NET "USB_PA6"  LOC = "p124"  |IOSTANDARD=LVCMOS25 ;  #PKTEND
+NET "USB_PA7"  LOC = "p123"  |IOSTANDARD=LVCMOS25 ;  #flagD 
+NET "USB_RDY0"  LOC = "p108"  |IOSTANDARD=LVCMOS25 ;  #SLRD
+NET "USB_RDY1"  LOC = "p107"  |IOSTANDARD=LVCMOS25 ;  #SLWR
+####################Fiberoptic IOs and timing constraints########################
+#RX and TX for transceiver 0
+#NET FIBER_0_RXP LOC=D7;
+#NET FIBER_0_RXN LOC=C7;
+#NET FIBER_0_TXP LOC=B6;
+#NET FIBER_0_TXN LOC=A6;
+#RX and TX for transceiver 1
+#NET FIBER_1_RXP LOC=D9;
+#NET FIBER_1_RXN LOC=C9;
+#NET FIBER_1_TXP LOC=B8;
+#NET FIBER_1_TXN LOC=A8;
+# GT REFCLK for both transceivers
+#NET FIBER_REFCLKP LOC=B10; 
+#NET FIBER_REFCLKN LOC=A10; 
+#Transceiver signals (3.3 V)
+#NET FIBER_0_DISABLE_TRANSCEIVER LOC=E10 | IOSTANDARD = LVCMOS33;
+#NET FIBER_1_DISABLE_TRANSCEIVER LOC=G13 | IOSTANDARD = LVCMOS33;
+## UCF generated for xc6slx150t-fgg676-3 device
+# 156.25MHz GTP Reference clock constraint 
+#NET "map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/GTPD2_left_i" TNM_NET = GT_REFCLK; 
+#TIMESPEC TS_GTPD2_LEFT_I = PERIOD "GT_REFCLK" 156.25 MHz HIGH 50%;
+# User Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (4-Byte)
+#NET "map_daq_fifo_layer/internal_FIBER_USER_CLOCK" TNM_NET = USER_CLK;
+#TIMESPEC TS_USER_CLK_I = PERIOD "USER_CLK" 78.125 MHz HIGH 50%;
+#NET "map_daq_fifo_layer/internal_FIFO_CLOCK" TNM_NET = FIFO_CLK;
+#TIMESPEC TS_FIFO_CLK_I = PERIOD "FIFO_CLK" 78.125 MHz HIGH 50%;
+# Sync Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (4-Byte)
+#NET "map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/sync_clk_0_i" TNM_NET = SYNC_CLK;
+#TIMESPEC TS_SYNC_CLK_0 = PERIOD "SYNC_CLK" 312.5 MHz HIGH 50%;
+#Site specifications.  Only the GTPA dual site is strictly necessary.
+#The others here were from some other experiments.
+#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/aurora_module_i/gtp_wrapper_i/gtp_tile_inst/gtpa1_dual_i LOC=GTPA1_DUAL_X0Y1;
+# PLL Constraints from initial testing with two transceivers running Aurora example designs
+# and no other internal logic.
+#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_0_i/pll_adv_i LOC=PLL_ADV_X0Y3;
+#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_1_i/pll_adv_i LOC=PLL_ADV_X0Y4;
+#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_0_i/user_clk_net_i LOC=BUFGMUX_X2Y4;
+#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_1_i/user_clk_net_i LOC=BUFGMUX_X2Y2;
+#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_0_i/sync_clk_net_i LOC=BUFGMUX_X3Y13;
+#INST map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/clock_module_1_i/sync_clk_net_i LOC=BUFGMUX_X2Y3;
+#Created by Constraints Editor (xc3s400-pq208-4) - 2012/11/20
+NET "BOARD_40MHz_CLOCKN" TNM_NET = BOARD_40MHz_CLOCKN;
+#Created by Constraints Editor (xc3s400-pq208-4) - 2012/11/20
+NET "BOARD_40MHz_CLOCKP" TNM_NET = BOARD_40MHz_CLOCKP;
+TIMESPEC TS_BOARD_40MHz_CLOCKN = PERIOD "BOARD_40MHz_CLOCKN" 40 MHz HIGH 50%;
+TIMESPEC TS_BOARD_40MHz_CLOCKP = PERIOD "BOARD_40MHz_CLOCKP" 40 MHz HIGH 50%;
+NET "BOARD_150MHz_CLOCKN" TNM_NET = BOARD_150MHz_CLOCKN;
+TIMESPEC TS_BOARD_150MHz_CLOCKN = PERIOD "BOARD_150MHz_CLOCKN" 150 MHz HIGH 50%;
+NET "BOARD_150MHz_CLOCKP" TNM_NET = BOARD_150MHz_CLOCKP;
+TIMESPEC TS_BOARD_150MHz_CLOCKP = PERIOD "BOARD_150MHz_CLOCKP" 150 MHz HIGH 50%;
+NET "START" OFFSET = OUT 25 ns AFTER "BOARD_40MHz_CLOCKN";
+NET "RAMP" OFFSET = OUT 25 ns AFTER "BOARD_40MHz_CLOCKN";
+#Created by Constraints Editor (xc3s400-pq208-4) - 2012/11/20
+#Created by Constraints Editor (xc3s400-pq208-4) - 2012/11/20
+NET "SSTIN" OFFSET = OUT 13.333 ns AFTER "BOARD_150MHz_CLOCKN";
+NET "SMA_CONN" OFFSET = OUT 13.333 ns AFTER "BOARD_150MHz_CLOCKN";
