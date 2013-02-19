@@ -1,0 +1,471 @@
+###########################################################################
+#Pin mappings and timing constraints here are based on the SCROD_revA2.   #
+#Please update the pin mappings if using a different board, and add the   #
+#file with a new name in the repository.                                  #
+#If you are not compiling in USB or fiberoptic functionality, you will    #
+#have to comment out the appropriate portion below.  I hope these regions #
+#are self explanatory.                                                    #
+###########################################################################
+
+
+####################General SCROD IOs######################################
+
+#General SCROD clocking
+NET BOARD_CLOCKP LOC=U25;
+NET BOARD_CLOCKN LOC=U26;
+NET "map_clock_generation/internal_BOARD_CLOCK" TNM_NET = BOARD_CLOCK;
+TIMESPEC "TS_BOARD_CLOCK" = PERIOD "BOARD_CLOCK" 4 ns HIGH 50%;
+
+#Diagnostics on LEDs (3.3 V)
+NET LEDS<0>  LOC=F18 | IOSTANDARD = LVCMOS33; #LEDS<0>
+NET LEDS<1>  LOC=E18 | IOSTANDARD = LVCMOS33; #LEDS<1>
+NET LEDS<2>  LOC=G16 | IOSTANDARD = LVCMOS33; #LEDS<2>
+NET LEDS<3>  LOC=F17 | IOSTANDARD = LVCMOS33; #LEDS<3>
+NET LEDS<4>  LOC=F20 | IOSTANDARD = LVCMOS33; #LEDS<4>
+NET LEDS<5>  LOC=E20 | IOSTANDARD = LVCMOS33; #LEDS<5>
+NET LEDS<6>  LOC=H17 | IOSTANDARD = LVCMOS33; #LEDS<6>
+NET LEDS<7>  LOC=G17 | IOSTANDARD = LVCMOS33; #LEDS<7>
+NET LEDS<8>  LOC=C21 | IOSTANDARD = LVCMOS33; #LEDS<8>
+NET LEDS<9>  LOC=B21 | IOSTANDARD = LVCMOS33; #LEDS<9>
+NET LEDS<10> LOC=H18 | IOSTANDARD = LVCMOS33; #LEDS<10>
+NET LEDS<11> LOC=H19 | IOSTANDARD = LVCMOS33; #LEDS<11>
+NET LEDS<12> LOC=B22 | IOSTANDARD = LVCMOS33; #LEDS<12>
+NET LEDS<13> LOC=A22 | IOSTANDARD = LVCMOS33; #LEDS<13>
+NET LEDS<14> LOC=G19 | IOSTANDARD = LVCMOS33; #LEDS<14>
+NET LEDS<15> LOC=F19 | IOSTANDARD = LVCMOS33; #LEDS<15>
+
+##Jumper to choose between FTSW and local clock##
+#NET MONITOR_INPUT<0>  LOC=J2 | IOSTANDARD = LVCMOS25 | PULLUP; #currently wrong???
+
+####FTSW Pin mappings######
+##FTSW Inputs
+#NET RJ45_ACK_P		LOC = "ad14" | IOSTANDARD = LVDS_25 | diff_term=true;
+#NET RJ45_ACK_N		LOC = "af14" | IOSTANDARD = LVDS_25 | diff_term=true;
+#NET RJ45_TRG_P		LOC = "ab14" | IOSTANDARD = LVDS_25 | diff_term=true;
+#NET RJ45_TRG_N		LOC = "ac14" | IOSTANDARD = LVDS_25 | diff_term=true;
+#NET RJ45_RSV_P		LOC = "ae15" | IOSTANDARD = LVDS_25 | diff_term=true;
+#NET RJ45_RSV_N		LOC = "af15" | IOSTANDARD = LVDS_25 | diff_term=true;
+#NET RJ45_CLK_P		LOC = "ae13" | IOSTANDARD = LVDS_25 | diff_term=true;
+#NET RJ45_CLK_N		LOC = "af13" | IOSTANDARD = LVDS_25 | diff_term=true;
+
+####I2C Pin Mappings#######
+#Bus A - SCROD general purpose EEPROM and temp sensor
+#NET I2C_BUSA_SCL LOC=B23 | IOSTANDARD = LVCMOS33;
+#NET I2C_BUSA_SDA LOC=A23 | IOSTANDARD = LVCMOS33;
+#Bus B handles SCROD fiberoptic transceiver 0
+#NET I2C_BUSB_SCL LOC=C13 | IOSTANDARD = LVCMOS33;
+#NET I2C_BUSB_SDA LOC=D13 | IOSTANDARD = LVCMOS33;
+#Bus C handles SCROD fiberoptic transceiver 1
+#NET I2C_BUSC_SCL LOC=K12 | IOSTANDARD = LVCMOS33;
+#NET I2C_BUSC_SDA LOC=A14 | IOSTANDARD = LVCMOS33;
+#Pins for controlling external DACs - separated by column.
+#NET DAC_SCL_C<0>		LOC = "H13" | IOSTANDARD = LVCMOS33; #DAC1 on SCROD schematic
+#NET DAC_SDA_C<0>		LOC = "F14" | IOSTANDARD = LVCMOS33; #DAC2 on SCROD schematic
+#NET DAC_SCL_C<1>		LOC = "E14" | IOSTANDARD = LVCMOS33; #DAC3 on SCROD schematic
+#NET DAC_SDA_C<1>		LOC = "K14" | IOSTANDARD = LVCMOS33; #DAC4 on SCROD schematic
+#NET DAC_SCL_C<2>		LOC = "H14" | IOSTANDARD = LVCMOS33; #DAC5 on SCROD schematic
+#NET DAC_SDA_C<2>		LOC = "J15" | IOSTANDARD = LVCMOS33; #DAC6 on SCROD schematic
+#NET DAC_SCL_C<3>		LOC = "H15" | IOSTANDARD = LVCMOS33; #DAC7 on SCROD schematic
+#NET DAC_SDA_C<3>		LOC = "J16" | IOSTANDARD = LVCMOS33; #DAC8 on SCROD schematic
+#Timing constraints for I2C (multi-cycle)
+#NET "map_i2c_bus*/*CLOCK_ENABLE*" TNM_NET = FFS "I2C_ENABLES";
+#NET "map_CarrierRevA_I2C_DAC_Control/*CLK_ENABLE*" TNM_NET = FFS "I2C_ENABLES";
+#TIMESPEC TS_I2C_ENABLES = FROM "I2C_ENABLES" TO "I2C_ENABLES" TS_BOARD_CLOCK*40;
+#NET "map_CarrierRevA_I2C_DAC_Control/map_DAC_Control_COL_GEN*/internal_UPDATE_STATUSES*" TIG;
+#NET "map_readout_interfaces/internal_GPR*" TIG;
+
+####################USB IOs and timing constraints###########################
+NET USB_IFCLK   LOC = "b14" | IOSTANDARD = LVCMOS33; # on SCROD revA2, IFCLK is connected to b14
+NET "map_readout_interfaces/map_daq_fifo_layer/internal_USB_CLOCK" TNM_NET = IFCLK_48M;
+TIMESPEC "TS_IFCLK_48M" = PERIOD "IFCLK_48M" 20.833 ns HIGH 50%;
+NET USB_CLKOUT  LOC = "e13" | IOSTANDARD = LVCMOS33; # on SCROD revA2, CLKOUT is connected to e13
+NET USB_FDD<0>  LOC = "f5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<1>  LOC = "e6"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<2>  LOC = "e5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<3>  LOC = "h9"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<4>  LOC = "g9"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<5>  LOC = "a3"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<6>  LOC = "a2"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<7>  LOC = "f9"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<8>  LOC = "e8"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<9>  LOC = "d5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<10> LOC = "c5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<11> LOC = "h10" | IOSTANDARD = LVCMOS33;
+NET USB_FDD<12> LOC = "g10" | IOSTANDARD = LVCMOS33;
+NET USB_FDD<13> LOC = "b4"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<14> LOC = "a4"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<15> LOC = "f10" | IOSTANDARD = LVCMOS33;
+NET USB_PA0     LOC = "g7"  | IOSTANDARD = LVCMOS33;
+NET USB_PA1     LOC = "h8"  | IOSTANDARD = LVCMOS33;
+NET USB_PA2     LOC = "g8"  | IOSTANDARD = LVCMOS33;
+NET USB_PA3     LOC = "f7"  | IOSTANDARD = LVCMOS33;
+NET USB_PA4     LOC = "f6"  | IOSTANDARD = LVCMOS33;
+NET USB_PA5     LOC = "c3"  | IOSTANDARD = LVCMOS33;
+NET USB_PA6     LOC = "b3"  | IOSTANDARD = LVCMOS33;
+NET USB_PA7     LOC = "g6"  | IOSTANDARD = LVCMOS33;
+NET USB_CTL0    LOC = "f12" | IOSTANDARD = LVCMOS33;
+NET USB_CTL1    LOC = "e12" | IOSTANDARD = LVCMOS33;
+NET USB_CTL2    LOC = "j11" | IOSTANDARD = LVCMOS33;
+NET USB_RDY0    LOC = "g11" | IOSTANDARD = LVCMOS33;
+NET USB_RDY1    LOC = "h12" | IOSTANDARD = LVCMOS33;
+NET USB_WAKEUP  LOC = "f11" | IOSTANDARD = LVCMOS33;
+
+####################Fiberoptic IOs and timing constraints########################
+#RX and TX for transceiver 0
+NET FIBER_0_RXP LOC=D7;
+NET FIBER_0_RXN LOC=C7;
+NET FIBER_0_TXP LOC=B6;
+NET FIBER_0_TXN LOC=A6;
+#RX and TX for transceiver 1
+NET FIBER_1_RXP LOC=D9;
+NET FIBER_1_RXN LOC=C9;
+NET FIBER_1_TXP LOC=B8;
+NET FIBER_1_TXN LOC=A8;
+# GT REFCLK for both transceivers
+NET FIBER_REFCLKP LOC=B10; 
+NET FIBER_REFCLKN LOC=A10; 
+
+#Transceiver signals (3.3 V)
+NET FIBER_0_DISABLE_TRANSCEIVER LOC=E10 | IOSTANDARD = LVCMOS33;
+#NET FIBER_0_LINK_ERR            LOC=    | IOSTANDARD = LVCMOS33; #TX_FAULT G12, TX_DIS E10, MOD0(mod_present_l) A13, LOS_0 B5
+#NET FIBER_0_LINK_UP             LOC=    | IOSTANDARD = LVCMOS33; 
+NET FIBER_1_DISABLE_TRANSCEIVER LOC=G13 | IOSTANDARD = LVCMOS33;
+#NET FIBER_1_LINK_ERR            LOC=    | IOSTANDARD = LVCMOS33; #TX_FAULT A5, TX_DIS G13, MOD0 J12, LOS_1 J13
+#NET FIBER_1_LINK_UP             LOC=    | IOSTANDARD = LVCMOS33;
+
+## UCF generated for xc6slx150t-fgg676-3 device
+# 156.25MHz GTP Reference clock constraint 
+NET "map_readout_interfaces/map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/GTPD2_left_i" TNM_NET = GT_REFCLK; 
+TIMESPEC TS_GTPD2_LEFT_I = PERIOD "GT_REFCLK" 156.25 MHz HIGH 50%;
+
+# User Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (4-Byte)
+NET "map_readout_interfaces/map_daq_fifo_layer/internal_FIBER_USER_CLOCK" TNM_NET = USER_CLK;
+TIMESPEC TS_USER_CLK_I = PERIOD "USER_CLK" 78.125 MHz HIGH 50%;
+NET "map_readout_interfaces/map_daq_fifo_layer/internal_FIFO_CLOCK" TNM_NET = FIFO_CLK;
+TIMESPEC TS_FIFO_CLK_I = PERIOD "FIFO_CLK" 78.125 MHz HIGH 50%;
+
+# Sync Clock Constraint: Value is selected based on the line rate (3.125 Gbps) and lane width (4-Byte)
+NET "map_readout_interfaces/map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/sync_clk_0_i" TNM_NET = SYNC_CLK;
+TIMESPEC TS_SYNC_CLK_0 = PERIOD "SYNC_CLK" 312.5 MHz HIGH 50%;
+
+#Site specifications.  Only the GTPA dual site is strictly necessary, as far as I know.
+INST map_readout_interfaces/map_daq_fifo_layer/synthesize_with_aurora.map_two_lane_aurora_interface/aurora_module_i/gtp_wrapper_i/gtp_tile_inst/gtpa1_dual_i LOC=GTPA1_DUAL_X0Y1;
+
+#SciFi Specific - 9UVME + ASIC pins
+#NET EXT_TRIGGER								LOC= "K7";
+
+#SPARE PINS - routed to 80 PIN connector on SciFi motherboard rev A
+#NET SPARE_PIN<0>								LOC= "H13"	| IOSTANDARD = LVCMOS33;
+#NET SPARE_PIN<1>								LOC= "F14"	| IOSTANDARD = LVCMOS33;
+#NET SPARE_PIN<2>								LOC= "E14"	| IOSTANDARD = LVCMOS33;
+#NET SPARE_PIN<3>								LOC= "K14"	| IOSTANDARD = LVCMOS33;
+#NET SPARE_PIN<4>								LOC= "H14"	| IOSTANDARD = LVCMOS33;
+#NET SPARE_PIN<5>								LOC= "J15"	| IOSTANDARD = LVCMOS33;
+#NET SPARE_PIN<6>								LOC= "H15"	| IOSTANDARD = LVCMOS33;
+#NET SPARE_PIN<7>								LOC= "J16"	| IOSTANDARD = LVCMOS33;
+#NET SPARE_PIN<8>								LOC= "U21"	| IOSTANDARD = LVCMOS33;
+#NET SPARE_PIN<9>								LOC= "T20"	| IOSTANDARD = LVCMOS33;
+
+#GLOBAL BUS
+#NET BUS_RD_ENA								LOC= "AD4";
+#NET BUS_RD_ROWSEL_S0						LOC= "W8";
+#NET BUS_RD_ROWSEL_S1						LOC= "AC5";
+#NET BUS_RD_ROWSEL_S2						LOC= "R10";
+#NET BUS_RD_COLSEL_S0						LOC= "AF4";
+#NET BUS_RD_COLSEL_S1						LOC= "AF5";
+#NET BUS_RD_COLSEL_S2						LOC = "AE5";
+#NET BUS_RD_COLSEL_S3						LOC= "AF6";
+#NET BUS_RD_COLSEL_S4						LOC= "AD6";
+#NET BUS_RD_COLSEL_S5						LOC= "AA10";
+#NET BUS_SAMPLESEL_S1						LOC= "AA9";
+#NET BUS_SAMPLESEL_S2						LOC= "V11";
+#NET BUS_SAMPLESEL_S3						LOC= "Y11";
+#NET BUS_SAMPLESEL_S4						LOC= "AB13";
+#NET BUS_SAMPLESEL_S5						LOC= "V12";
+
+NET BUS_SCLK					LOC=	"AA12";
+INST BUS_SCLK DRIVE=16;
+NET BUS_SCLK SLEW="FAST";
+
+NET BUS_PCLK					LOC=	"AA6";
+NET BUS_REGCLR					LOC=	"P10";
+NET BUS_TST_START				LOC=	"M10";
+NET BUS_TST_BOIN_CLR			LOC=	"L10";
+#NET BUS_WR_ENA					LOC=	"K10";
+#NET BUS_TRGIN					LOC=	"AA15";
+
+#BUS A
+#NET BUSA_SCK_DAC				LOC=	"";
+#NET BUSA_DIN_DAC				LOC=	"";
+#NET BUSA_SCL_MUX				LOC=	"";
+#NET BUSA_SCL_MON				LOC=	"";
+#NET BUSA_CLR					LOC=	"";
+#NET BUSA_WR_ADDRCLR			LOC=	"";
+#NET BUSA_START					LOC=	"";
+#NET BUSA_RAMP					LOC=	"";
+#NET BUSA_SR_CLEAR				LOC=	"";
+#NET BUSA_SR_SEL				LOC=	"";
+#NET BUSA_DO1				LOC=	"";
+#NET BUSA_DO2				LOC=	"";
+#NET BUSA_DO3				LOC=	"";
+#NET BUSA_DO4				LOC=	"";
+#NET BUSA_DO5				LOC=	"";
+#NET BUSA_DO6				LOC=	"";
+#NET BUSA_DO7				LOC=	"";
+#NET BUSA_DO8				LOC=	"";
+#NET BUSA_DO9				LOC=	"";
+#NET BUSA_DO10				LOC=	"";
+#NET BUSA_DO11				LOC=	"";
+#NET BUSA_DO12				LOC=	"";
+#NET BUSA_DO13				LOC=	"";
+#NET BUSA_DO14				LOC=	"";
+#NET BUSA_DO15				LOC=	"";
+#NET BUSA_DO16				LOC=	"";
+
+#BUS B
+#NET BUSB_SCK_DAC				LOC=	"";
+#NET BUSB_DIN_DAC				LOC=	"";
+#NET BUSB_SCL_MUX				LOC=	"";
+#NET BUSB_SCL_MON				LOC=	"";
+#NET BUSB_CLR					LOC=	"";
+#NET BUSB_WR_ADDRCLR			LOC=	"";
+#NET BUSB_START					LOC=	"";
+#NET BUSB_RAMP					LOC=	"";
+#NET BUSB_SR_CLEAR				LOC=	"";
+#NET BUSB_SR_SEL				LOC=	"";
+#NET BUSB_DO1				LOC=	"";
+#NET BUSB_DO2				LOC=	"";
+#NET BUSB_DO3				LOC=	"";
+#NET BUSB_DO4				LOC=	"";
+#NET BUSB_DO5				LOC=	"";
+#NET BUSB_DO6				LOC=	"";
+#NET BUSB_DO7				LOC=	"";
+#NET BUSB_DO8				LOC=	"";
+#NET BUSB_DO9				LOC=	"";
+#NET BUSB_DO10				LOC=	"";
+#NET BUSB_DO11				LOC=	"";
+#NET BUSB_DO12				LOC=	"";
+#NET BUSB_DO13				LOC=	"";
+#NET BUSB_DO14				LOC=	"";
+#NET BUSB_DO15				LOC=	"";
+#NET BUSA_DO16				LOC=	"";
+
+#DC0 specific
+NET TDC_CS_DAC<0> 	LOC = "P1";
+NET TDC_SDA_MUX<0> 	LOC = "R1";
+NET TDC_SDA_MON<0> 	LOC = "R2";
+NET TDC_SAMPLESEL_ANY<0> 	LOC = "T1";
+NET TDC_SIN<0> 		LOC = "U1";
+NET TDC_SHOUT<0> 	LOC = "U2";
+NET TDC_TSTOUT<0>	LOC = "V1";
+NET TDC_SSPOUT<0>	LOC = "W1";
+NET TDC_SSPIN<0>		LOC = "W2";
+NET TDC_SSTIN<0>		LOC = "Y1";
+NET TDC_WR_ADVCLK<0> LOC = "AA1";
+NET TDC_WR_STRB<0>	LOC = "AA2";
+NET TDC_TRG_1<0>		LOC = "AB1";
+NET TDC_TRG_2<0>		LOC = "AC1";
+NET TDC_TRG_3<0>		LOC = "AC2";
+NET TDC_TRG_4<0>		LOC = "AD1";
+NET TDC_TRG_16<0>	LOC = "AE1";
+NET TDC_TRGMON<0>	LOC = "AE2";
+NET TDC_RCO<0>		LOC = "D3";
+NET TDC_SR_CLOCK<0> LOC = "E4";
+
+#DC1 specific
+NET TDC_CS_DAC<1> 	LOC = "G3";
+NET TDC_SDA_MUX<1> 	LOC = "H3";
+NET TDC_SDA_MON<1> 	LOC = "J3";
+NET TDC_SAMPLESEL_ANY<1> 	LOC = "J5";
+NET TDC_SIN<1> 		LOC = "K5";
+NET TDC_SHOUT<1> 	LOC = "L4";
+NET TDC_TSTOUT<1>	LOC = "M4";
+NET TDC_SSPOUT<1>	LOC = "N4";
+NET TDC_SSPIN<1>		LOC = "P3";
+NET TDC_SSTIN<1>		LOC = "R3";
+NET TDC_WR_ADVCLK<1> LOC = "R5";
+NET TDC_WR_STRB<1>	LOC = "T4";
+NET TDC_TRG_1<1>		LOC = "U4";
+NET TDC_TRG_2<1>		LOC = "V3";
+NET TDC_TRG_3<1>		LOC = "V5";
+NET TDC_TRG_4<1>		LOC = "W5";
+NET TDC_TRG_16<1>	LOC = "Y5";
+NET TDC_TRGMON<1>	LOC = "AA4";
+NET TDC_RCO<1>		LOC = "AB4";
+NET TDC_SR_CLOCK<1> LOC = "AC3";
+
+#DC2 specific
+NET TDC_CS_DAC<2> 	LOC = "F1";
+NET TDC_SDA_MUX<2> 	LOC = "E1";
+NET TDC_SDA_MON<2> 	LOC = "C1";
+NET TDC_SAMPLESEL_ANY<2> 	LOC = "C2";
+NET TDC_SIN<2> 		LOC = "D1";
+NET TDC_SHOUT<2> 	LOC = "B2";
+NET TDC_TSTOUT<2>	LOC = "E2";
+NET TDC_SSPOUT<2>	LOC = "B1";
+NET TDC_SSPIN<2>		LOC = "G1";
+NET TDC_SSTIN<2>		LOC = "G2";
+NET TDC_WR_ADVCLK<2> LOC = "H1";
+NET TDC_WR_STRB<2>	LOC = "J1";
+NET TDC_TRG_1<2>		LOC = "J2";
+NET TDC_TRG_2<2>		LOC = "K1";
+NET TDC_TRG_3<2>		LOC = "L1";
+NET TDC_TRG_4<2>		LOC = "L2";
+NET TDC_TRG_16<2>	LOC = "M1";
+NET TDC_TRGMON<2>	LOC = "N1";
+NET TDC_RCO<2>		LOC = "N2";
+NET TDC_SR_CLOCK<2> LOC = "E3";
+
+#DC3 specific
+NET TDC_CS_DAC<3> 	LOC = "F3";
+NET TDC_SDA_MUX<3> 	LOC = "G4";
+NET TDC_SDA_MON<3> 	LOC = "H5";
+NET TDC_SAMPLESEL_ANY<3> 	LOC = "J4";
+NET TDC_SIN<3> 		LOC = "K3";
+NET TDC_SHOUT<3> 	LOC = "L3";
+NET TDC_TSTOUT<3>	LOC = "M3";
+NET TDC_SSPOUT<3>	LOC = "N3";
+NET TDC_SSPIN<3>		LOC = "N5";
+NET TDC_SSTIN<3>		LOC = "P5";
+NET TDC_WR_ADVCLK<3> LOC = "R4";
+NET TDC_WR_STRB<3>	LOC = "T3";
+NET TDC_TRG_1<3>		LOC = "U3";
+NET TDC_TRG_2<3>		LOC = "U5";
+NET TDC_TRG_3<3>		LOC = "V4";
+NET TDC_TRG_4<3>		LOC = "W3";
+NET TDC_TRG_16<3>	LOC = "Y3";
+NET TDC_TRGMON<3>	LOC = "AA3";
+NET TDC_RCO<3>		LOC = "AB3";
+NET TDC_SR_CLOCK<3> LOC = "AB5";
+
+#DC4 specific
+NET TDC_CS_DAC<4> 	LOC = "AD3";
+NET TDC_SDA_MUX<4> 	LOC = "AC4";
+NET TDC_SDA_MON<4> 	LOC = "AA7";
+NET TDC_SAMPLESEL_ANY<4> 	LOC = "W7";
+NET TDC_SIN<4> 		LOC = "AD5";
+NET TDC_SHOUT<4> 	LOC = "AC6";
+NET TDC_TSTOUT<4>	LOC = "AB7";
+NET TDC_SSPOUT<4>	LOC = "AA8";
+NET TDC_SSPIN<4>		LOC = "Y9";
+NET TDC_SSTIN<4>		LOC = "W9";
+NET TDC_WR_ADVCLK<4> LOC = "W10";
+NET TDC_WR_STRB<4>	LOC = "AB11";
+NET TDC_TRG_1<4>		LOC = "AB9";
+NET TDC_TRG_2<4>		LOC = "V10";
+NET TDC_TRG_3<4>		LOC = "AA11";
+NET TDC_TRG_4<4>		LOC = "AA13";
+NET TDC_TRG_16<4>	LOC = "W12";
+NET TDC_TRGMON<4>	LOC = "Y13";
+NET TDC_RCO<4>		LOC = "Y12";
+NET TDC_SR_CLOCK<4> LOC = "V13";
+
+#DC5 specific
+NET TDC_CS_DAC<5> 	LOC = "AC24";
+NET TDC_SDA_MUX<5> 	LOC = "AD24";
+NET TDC_SDA_MON<5> 	LOC = "AB24";
+NET TDC_SAMPLESEL_ANY<5> 	LOC = "AC23";
+NET TDC_SIN<5> 		LOC = "U13";
+NET TDC_SHOUT<5> 	LOC = "W14";
+NET TDC_TSTOUT<5>	LOC = "P17";
+NET TDC_SSPOUT<5>	LOC = "AB15";
+NET TDC_SSPIN<5>		LOC = "V15";
+NET TDC_SSTIN<5>		LOC = "AA16";
+NET TDC_WR_ADVCLK<5> LOC = "AB17";
+NET TDC_WR_STRB<5>	LOC = "Y16";
+NET TDC_TRG_1<5>		LOC = "AB19";
+NET TDC_TRG_2<5>		LOC = "V16";
+NET TDC_TRG_3<5>		LOC = "AA17";
+NET TDC_TRG_4<5>		LOC = "AB21";
+NET TDC_TRG_16<5>	LOC = "W18";
+NET TDC_TRGMON<5>	LOC = "W19";
+NET TDC_RCO<5>		LOC = "V18";
+NET TDC_SR_CLOCK<5> LOC = "AC22";
+
+#DC6 specific
+NET TDC_CS_DAC<6> 	LOC = "A25";
+NET TDC_SDA_MUX<6> 	LOC = "B26";
+NET TDC_SDA_MON<6> 	LOC = "B25";
+NET TDC_SAMPLESEL_ANY<6> 	LOC = "C26";
+NET TDC_SIN<6> 		LOC = "C25";
+NET TDC_SHOUT<6> 	LOC = "D26";
+NET TDC_TSTOUT<6>	LOC = "E26";
+NET TDC_SSPOUT<6>	LOC = "E25";
+NET TDC_SSPIN<6>		LOC = "F26";
+NET TDC_SSTIN<6>		LOC = "G26";
+NET TDC_WR_ADVCLK<6> LOC = "G25";
+NET TDC_WR_STRB<6>	LOC = "H26";
+NET TDC_TRG_1<6>		LOC = "J26";
+NET TDC_TRG_2<6>		LOC = "J25";
+NET TDC_TRG_3<6>		LOC = "K26";
+NET TDC_TRG_4<6>		LOC = "L26";
+NET TDC_TRG_16<6>	LOC = "L25";
+NET TDC_TRGMON<6>	LOC = "M26";
+NET TDC_RCO<6>		LOC = "N26";
+NET TDC_SR_CLOCK<6> LOC = "N25";
+
+#DC7 specific
+NET TDC_CS_DAC<7> 	LOC = "D23";
+NET TDC_SDA_MUX<7> 	LOC = "E23";
+NET TDC_SDA_MON<7> 	LOC = "F23";
+NET TDC_SAMPLESEL_ANY<7> 	LOC = "G24";
+NET TDC_SIN<7> 		LOC = "H24";
+NET TDC_SHOUT<7> 	LOC = "J24";
+NET TDC_TSTOUT<7>	LOC = "J22";
+NET TDC_SSPOUT<7>	LOC = "K22";
+NET TDC_SSPIN<7>		LOC = "L6";
+NET TDC_SSTIN<7>		LOC = "M24";
+NET TDC_WR_ADVCLK<7> LOC = "N24";
+NET TDC_WR_STRB<7>	LOC = "N22";
+NET TDC_TRG_1<7>		LOC = "P22";
+NET TDC_TRG_2<7>		LOC = "R23";
+NET TDC_TRG_3<7>		LOC = "T23";
+NET TDC_TRG_4<7>		LOC = "N17";
+NET TDC_TRG_16<7>	LOC = "U22";
+NET TDC_TRGMON<7>	LOC = "V23";
+NET TDC_RCO<7>		LOC = "Y24";
+NET TDC_SR_CLOCK<7> LOC = "AA23";
+
+#DC8 specific
+NET TDC_CS_DAC<8> 	LOC = "P26";
+NET TDC_SDA_MUX<8> 	LOC = "R26";
+NET TDC_SDA_MON<8> 	LOC = "R25";
+NET TDC_SAMPLESEL_ANY<8> 	LOC = "T26";
+NET TDC_SIN<8> 		LOC = "U23";
+NET TDC_SHOUT<8> 	LOC = "U24";
+NET TDC_TSTOUT<8>	LOC = "V26";
+NET TDC_SSPOUT<8>	LOC = "W26";
+NET TDC_SSPIN<8>		LOC = "W25";
+NET TDC_SSTIN<8>		LOC = "Y26";
+NET TDC_WR_ADVCLK<8> LOC = "AA25";
+NET TDC_WR_STRB<8>	LOC = "AA26";
+NET TDC_TRG_1<8>		LOC = "AB26";
+NET TDC_TRG_2<8>		LOC = "AC25";
+NET TDC_TRG_3<8>		LOC = "AC26";
+NET TDC_TRG_4<8>		LOC = "AD26";
+NET TDC_TRG_16<8>	LOC = "AE26";
+NET TDC_TRGMON<8>	LOC = "AE25";
+NET TDC_RCO<8>		LOC = "AF23";
+NET TDC_SR_CLOCK<8> LOC = "C24";
+
+#DC9 specific
+NET TDC_CS_DAC<9> 	LOC = "D24";
+NET TDC_SDA_MUX<9> 	LOC = "E24";
+NET TDC_SDA_MON<9> 	LOC = "F24";
+NET TDC_SAMPLESEL_ANY<9> 	LOC = "F22";
+NET TDC_SIN<9> 		LOC = "G23";
+NET TDC_SHOUT<9> 	LOC = "H22";
+NET TDC_TSTOUT<9>	LOC = "J23";
+NET TDC_SSPOUT<9>	LOC = "K24";
+NET TDC_SSPIN<9>		LOC = "L24";
+NET TDC_SSTIN<9>		LOC = "L23";
+NET TDC_WR_ADVCLK<9> LOC = "M23";
+NET TDC_WR_STRB<9>	LOC = "N23";
+NET TDC_TRG_1<9>		LOC = "P24";
+NET TDC_TRG_2<9>		LOC = "R24";
+NET TDC_TRG_3<9>		LOC = "T24";
+NET TDC_TRG_4<9>		LOC = "T22";
+NET TDC_TRG_16<9>	LOC = "J7";
+NET TDC_TRGMON<9>	LOC = "V24";
+NET TDC_RCO<9>		LOC = "W24";
+NET TDC_SR_CLOCK<9> LOC = "AA24";
