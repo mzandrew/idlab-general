@@ -1,0 +1,23 @@
+Installing USB interface (Linux only)
+
+1) Install libusb:
+Ubuntu: sudo apt-get install libusb-1.0-0-dev
+Alternatively: 
+-download stable version of libusb-1.0.x from http://www.libusb.org/ (currently libusb-1.0.9)
+-follow installation instructions
+
+2) Install ROOT:
+-see http://root.cern.ch/ (tested with 5.34/03)
+
+3) Compile code:
+-go to usbInterface directory: cd usbInterface/
+-compile: make
+
+Using USB interface
+
+1) Attach USB cable before powering on frontend boards
+2) Program FPGA (tested on SPARTAN3 with bit file univ_eval_revB_top.bit included in directory)
+3) Check that the Cypress USB interface controller is detected:
+-use lsusb to get a list of USB devices, should return: Bus ### Device ###: ID 04b4:1004 Cypress Semiconductor Corp.
+-if Cypress device is not found try power cycling the board
+-if Cypress firmware is not "04b4:1004", check that fw.hex file is present then reprogram firmware: ./load_cypress_firmware

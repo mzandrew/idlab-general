@@ -1,0 +1,166 @@
+###########################################################################
+#Pin mappings and timing constraints here are based on the SCROD_revB.   #
+#Please update the pin mappings if using a different board, and add the   #
+#file with a new name in the repository.                                  #
+#If you are not compiling in USB or fiberoptic functionality, you will    #
+#have to comment out the appropriate portion below.  I hope these regions #
+#are self explanatory.                                                    #
+###########################################################################
+####################General Universal Eval IOs######################################
+NET BOARD_40MHz_CLOCK 		LOC="p79";
+NET BOARD_40MHz_CLOCK		PERIOD = 25.0 ns;
+	
+#NET BOARD_150MHz_CLOCK		LOC = "P181";
+#NET BOARD_150MHz_CLOCK		PERIOD = 6.66 ns;
+
+#NET whatever_your_clock_net_name_is PERIOD = 25.0 ns;
+
+#
+#
+#NET SDA_MON			LOC = "p182";
+#NET SCL_MON			LOC = "p183";	
+#
+#NET CS_DAC			LOC = "p27";
+#NET DIN_DAC			LOC = "p26";
+#NET SCK_DAC			LOC = "p24";
+#NET AMUX_S<3>			LOC = "p184";
+#NET AMUX_S<2>			LOC = "p185";
+#NET AMUX_S<1>			LOC = "p187";
+#NET AMUX_S<0>			LOC = "p189";
+#
+#SSPIN - CONN 1 pin 16 = GP0_P190_30P
+#NET SSPIN			LOC = "p190";
+#NET SSTIN			LOC = "p18";
+
+#TRG0 - CONN 1 pin 64 = GP7_P16_22N 
+NET TRG<0>			LOC = "p16";
+#TRG1 - CONN 1 pin 18 = GP0_P191_30N
+NET TRG<1>			LOC = "p191";
+#TRG2 - CONN 2 pin 75 = GP5_P78
+NET TRG<2>			LOC = "p78";
+#TRG3 - CONN 2 pin 8 = GP6_P33_39N
+NET TRG<3>			LOC = "p33";
+#TRG16 - CONN 1 pin 62 = GP7_P15_22P 
+NET TRG_16			LOC = "p15";
+#RCO_SSPOUT - CONN 1 pin 20 = GP0_P194_27P
+#NET RCO_SSPOUT			LOC = "p194";
+#NET TRGMON			LOC = "p13";
+#RAMP - CONN 1 pin 23 = GP0_P196_27N
+#NET RAMP			LOC = "p196";
+
+#RD_RS_S<0> - CONN1 - pin 58 = GP7_P12_21P
+#NET RD_RS_S<0>			LOC = "p12";
+#RD_RS_S<1> - CONN1 - pin 25 = GP0_P197
+#NET RD_RS_S<1>			LOC = "p197";
+#RD_RS_S<2> - CONN1 - pin 56 = GP7_P11_20N
+#NET RD_RS_S<2>			LOC = "p11";
+
+#
+#NET RD_CS_S<0>			LOC = "p77";
+#NET RD_CS_S<1>			LOC = "p34";
+#NET RD_CS_S<2>			LOC = "p76";
+#NET RD_CS_S<3>			LOC = "p35";
+#NET RD_CS_S<4>			LOC = "p74";
+#NET RD_CS_S<5>			LOC = "p36";
+#
+
+#RD_ENA - CONN 1 pin 27 = GP0_P198_25P
+#NET RD_ENA			LOC = "p198";
+#REGCLR - CONN 1 pin 54 = GP7_P10_20P
+NET REGCLR			LOC = "p10";
+#NET TST_BOICLR			LOC = "p199";
+#NET TST_START			LOC = "p9";
+#NET TSTOUT			LOC = "p7";
+#
+#NET DO<0>			LOC = "p200";
+#NET DO<1>			LOC = "p5";
+#NET DO<2>			LOC = "p203";
+#NET DO<3>			LOC = "p4";
+#NET DO<4>			LOC = "p204";
+#NET DO<5>			LOC = "p3";
+#NET DO<6>			LOC = "p205";
+#NET DO<7>			LOC = "p2";
+#NET DO<8>			LOC = "p58";
+#NET DO<9>			LOC = "p50";
+#NET DO<10>			LOC = "p61";
+#NET DO<11>			LOC = "p48";
+#NET DO<12>			LOC = "p62";
+#NET DO<13>			LOC = "p46";
+#NET DO<14>			LOC = "p45";
+#NET DO<15>			LOC = "p63";
+
+#SIN - CONN 2 pin 2 = GP6_P28_40P
+NET SIN			LOC = "p28";
+#SCLK - CONN 2 pin 4 = GP6_P29_40N
+NET SCLK			LOC = "p29";
+#PCLK - CONN 2 pin 77 = GP4_GCLK1_P80
+NET PCLK			LOC = "p80";
+#SHOUT - CONN 2 pin 6 = GP6_P31_39P
+NET SHOUT			LOC = "p31";
+#
+#
+#
+#
+#NET WR_ADVCLK			LOC = "p72";
+#NET WR_ADDRCLR			LOC = "p37";
+#NET WR_STRB			LOC = "p71";
+#NET WR_ENA			LOC = "p39";
+#NET START			LOC = "p68";
+#NET CLR			LOC = "p40";
+#
+#NET SAMPLESEL<4>			LOC = "p67";
+#NET SAMPLESEL<3>			LOC = "p42";
+#NET SAMPLESEL<2>			LOC = "p65";
+#NET SAMPLESEL<1>			LOC = "p43";
+#NET SAMPLESEL<0>			LOC = "p64";
+#NET SAMPLESEL_ANY			LOC = "p44";
+#
+#NET SR_CLEAR			LOC = "p51";
+#NET SR_CLOCK			LOC = "p57";
+#NET SR_SEL			LOC = "p52";
+#
+#NET SP1			LOC = "p22";
+#NET SP2			LOC = "p21";
+#NET SP3			LOC = "p20";
+#NET SP4			LOC = "p19";
+#
+#NET "SMA_CONN" LOC = "P81";
+#
+
+#INST "MON<*>" TNM = "MON_GRP";
+
+####################USB IOs and timing constraints###########################
+NET USB_IFCLK   LOC = "b14" | IOSTANDARD = LVCMOS33; # on SCROD revA2, IFCLK is connected to b14
+NET "map_readout_interfaces/map_daq_fifo_layer/internal_USB_CLOCK" TNM_NET = IFCLK_48M;
+TIMESPEC "TS_IFCLK_48M" = PERIOD "IFCLK_48M" 20.833 ns HIGH 50%;
+NET USB_CLKOUT  LOC = "e13" | IOSTANDARD = LVCMOS33; # on SCROD revA2, CLKOUT is connected to e13
+NET USB_FDD<0>  LOC = "f5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<1>  LOC = "e6"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<2>  LOC = "e5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<3>  LOC = "h9"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<4>  LOC = "g9"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<5>  LOC = "a3"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<6>  LOC = "a2"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<7>  LOC = "f9"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<8>  LOC = "e8"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<9>  LOC = "d5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<10> LOC = "c5"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<11> LOC = "h10" | IOSTANDARD = LVCMOS33;
+NET USB_FDD<12> LOC = "g10" | IOSTANDARD = LVCMOS33;
+NET USB_FDD<13> LOC = "b4"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<14> LOC = "a4"  | IOSTANDARD = LVCMOS33;
+NET USB_FDD<15> LOC = "f10" | IOSTANDARD = LVCMOS33;
+NET USB_PA0     LOC = "g7"  | IOSTANDARD = LVCMOS33;
+NET USB_PA1     LOC = "h8"  | IOSTANDARD = LVCMOS33;
+NET USB_PA2     LOC = "g8"  | IOSTANDARD = LVCMOS33;
+NET USB_PA3     LOC = "f7"  | IOSTANDARD = LVCMOS33;
+NET USB_PA4     LOC = "f6"  | IOSTANDARD = LVCMOS33;
+NET USB_PA5     LOC = "c3"  | IOSTANDARD = LVCMOS33;
+NET USB_PA6     LOC = "b3"  | IOSTANDARD = LVCMOS33;
+NET USB_PA7     LOC = "g6"  | IOSTANDARD = LVCMOS33;
+NET USB_CTL0    LOC = "f12" | IOSTANDARD = LVCMOS33;
+NET USB_CTL1    LOC = "e12" | IOSTANDARD = LVCMOS33;
+NET USB_CTL2    LOC = "j11" | IOSTANDARD = LVCMOS33;
+NET USB_RDY0    LOC = "g11" | IOSTANDARD = LVCMOS33;
+NET USB_RDY1    LOC = "h12" | IOSTANDARD = LVCMOS33;
+NET USB_WAKEUP  LOC = "f11" | IOSTANDARD = LVCMOS33;
