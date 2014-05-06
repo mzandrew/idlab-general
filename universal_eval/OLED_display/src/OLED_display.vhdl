@@ -7,7 +7,8 @@
 -- connected to a universal_eval revB with a xilinx xc3s400-4pq208 FPGA
 -- started 2013-12-26 by mza
 -- originally based on code from http://code.google.com/p/idlab-daq/source/browse/iTOP-DSP_FIN-COPPER-FINESSE/branches/finesse_copper_local_bus_test/FPGA/src/top.vhdl; concept for ucf-less vhdl from Nakao-san
--- last edited 2014-01-02 by mza
+-- core of the code came together on 2014-01-02 (Isaac Asimov's birthday)
+-- last edited 2014-01-03 by mza
 ----------------------------------------------------------------------------------
 
 library ieee;
@@ -50,8 +51,8 @@ entity my_module_name is
 	attribute loc of OLED_reset_active_low       : signal is "p155";
 	attribute loc of OLED_interface_type_select  : signal is "p154,p152";
 	attribute loc of sync                        : signal is "p150";
-	--attribute tnm_net of clock_40                : signal is "clock_40";
-	--attribute timespec of clock_40               : signal is "period clock_40 25 ns high 50%";
+	--attribute tnm_net of clock_40                : signal is "clock_40"; -- this is not available in a vhdl file
+	--attribute timespec of clock_40               : signal is "period clock_40 25 ns high 50%"; -- this is not available in a vhdl file
 --	attribute iostandard of data_bus                 : signal is "lvcmos";
 --	attribute clock_dedicated_route of copper2_localbus_chip_select_active_low : signal is "false";
 --	attribute iostandard of ibufgds : component is "LVDS_25";
@@ -71,12 +72,13 @@ architecture my_module_name_architecture of my_module_name is
 	signal internal_interface_type_select  : std_logic_vector(1 downto 0) := "11";
 	signal clock_enable_1kHz  : std_logic := '0';
 	signal clock_enable_7MHz  : std_logic := '0';
-	signal clock_enable_50MHz : std_logic := '0';
+--	signal clock_enable_50MHz : std_logic := '0';
 	constant size_of_reset_counter : integer := 16;
+	constant a_prime_number : integer := 16381;
 	signal reset_counter : unsigned(size_of_reset_counter-1 downto 0) := (others => '0');
 	signal initialization_counter : unsigned(11 downto 0) := (others => '0');
 	signal initialization_phase : std_logic := '0';
-	signal normal_counter : unsigned(11 downto 0) := (others => '0');
+	signal normal_counter : unsigned(31 downto 0) := (others => '0');
 	signal individual_transaction_counter : unsigned(2 downto 0) := (others => '0');
 	signal x : unsigned(8 downto 0) := (others => '0');
 	signal y : unsigned(6 downto 0) := (others => '0');
@@ -86,19 +88,15 @@ architecture my_module_name_architecture of my_module_name is
 	signal row_end   : unsigned(7 downto 0) := (others => '0');
 	signal column_start : unsigned(6 downto 0) := (others => '0');
 	signal column_end   : unsigned(6 downto 0) := (others => '0');
-	signal blargh : std_logic := '0';
-	--procedure chip_select_active is
-	--begin
-	--	internal_chip_select_active_low <= '0';
-	--end chip_select_active;
 	signal transaction_required    : std_logic := '0';
 	signal transaction_in_progress : std_logic := '0';
 
 begin
-	--
 --	internal_clock_150 <= clock_150;
 	internal_clock_40 <= clock_40;
 	sync <= internal_sync;
+	x <=    row - row_start     & '0';
+	y <= column - column_start;
 	OLED_enable                 <=     internal_enable;
 	OLED_read_write_not         <=     internal_read_write_not;
 	OLED_chip_select_active_low <= not internal_chip_select; -- enforce using positive logic internally
@@ -106,14 +104,12 @@ begin
 	OLED_reset_active_low       <= not internal_reset;       -- enforce using positive logic internally
 	OLED_interface_type_select  <=     internal_interface_type_select;
 	OLED_data_bus               <=     internal_data_bus;
-	--
+
 	clock_1kHz : entity work.clock_enable_generator
 		generic map (
-			--DIVIDE_RATIO => 150000 -- 1 kHz
 			DIVIDE_RATIO => 40000 -- 1 kHz
 		)
 		port map (
-			--CLOCK_IN         => internal_clock_150,
 			CLOCK_IN         => internal_clock_40,
 			CLOCK_ENABLE_OUT => clock_enable_1kHz
 		);
@@ -124,21 +120,10 @@ begin
 			DIVIDE_RATIO => 6 -- 6.667 MHz, corresponding to 140 ns max read cycle timing
 		)
 		port map (
-			--CLOCK_IN         => internal_clock_150,
 			CLOCK_IN         => internal_clock_40,
 			CLOCK_ENABLE_OUT => clock_enable_7MHz
 		);
---	OLED_control : entity work.OLED_controller
-		--generic map (
-		--	mode => 6800
-		--)
---		port map (
---			CLOCK            => internal_clock_150,
---			CLOCK_ENABLE     => clock_enable_3MHz,
---			OLED_ENABLE      => ,
---			OLED_CHIP_SELECT => ,
---		);
-	--
+
 	process (internal_clock_40)
 	begin
 		if rising_edge(internal_clock_40) then
@@ -158,20 +143,11 @@ begin
 					internal_interface_type_select  <= "11"; -- 6800 mode
 					initialization_phase <= '1';
 					initialization_counter <= x"000";
-					normal_counter <= x"000";
-					blargh <= '0';
-					--x_start <= to_unsigned( 28, 8);
-					--x_end   <= to_unsigned( 91, 8);
-					--y_start <= to_unsigned(  0, 7);
-					--y_end   <= to_unsigned( 63, 7);
+					normal_counter <= x"00000000";
 					row_start <= to_unsigned(  0, 8);
 					row_end   <= to_unsigned(127, 8);
 					column_start  <= to_unsigned( 28, 7);
 					column_end    <= to_unsigned( 91, 7);
-					--y_start  <= to_unsigned( 28, 7);
-					--y_end    <= to_unsigned( 91, 7);
-					--x2_start <= to_unsigned(  0, 8);
-					--x2_end   <= to_unsigned(127, 8);
 					transaction_required <= '0';
 					transaction_in_progress <= '0';
 				else
@@ -195,7 +171,6 @@ begin
 						end if;
 						individual_transaction_counter <= individual_transaction_counter + 1;
 					else
-						-- setup for next transaction:
 						transaction_required <= '0';
 						transaction_in_progress <= '0';
 						individual_transaction_counter <= "000";
@@ -209,13 +184,11 @@ begin
 						if (initialization_counter < 1) then
 							internal_read_write_not   <= '0';
 							internal_data_command_not <= '0';
+							internal_data_bus <= x"ae"; -- display off
+						elsif (initialization_counter < 2) then
 							--internal_data_bus <= x"a5"; -- all pixels on
 							internal_data_bus <= x"a6"; -- normal mode
-						elsif (initialization_counter < 2) then
-							internal_data_bus <= x"af"; -- display on
 						elsif (initialization_counter < 3) then
-							--internal_data_bus <= x"00"; -- enable grayscale mode with custom lut
-							internal_data_bus <= x"b9"; -- use linear grayscale lut
 						elsif (initialization_counter < 4) then
 							internal_data_bus <= x"75"; -- set row start and end address (by the following two transactions)
 						elsif (initialization_counter < 5) then
@@ -233,10 +206,49 @@ begin
 							internal_data_bus <= '0' & std_logic_vector(column_end); -- column end address
 						elsif (initialization_counter < 10) then
 							internal_data_command_not       <= '0';
+							internal_data_bus <= x"b8"; -- setup grayscale gamma levels (next 15 data transactions)
+						elsif (initialization_counter < 11) then
+							internal_data_command_not       <= '1';
+							internal_data_bus <= x"00"; -- gamma level for GS1 (range 00-b4)
+						elsif (initialization_counter < 12) then
+							internal_data_bus <= x"20"; -- gamma level for GS2 (range 00-b4)
+						elsif (initialization_counter < 13) then
+							internal_data_bus <= x"40"; -- gamma level for GS3 (range 00-b4)
+						elsif (initialization_counter < 14) then
+							internal_data_bus <= x"60"; -- gamma level for GS4 (range 00-b4)
+						elsif (initialization_counter < 15) then
+							internal_data_bus <= x"80"; -- gamma level for GS5 (range 00-b4)
+						elsif (initialization_counter < 16) then
+							internal_data_bus <= x"90"; -- gamma level for GS6 (range 00-b4)
+						elsif (initialization_counter < 17) then
+							internal_data_bus <= x"94"; -- gamma level for GS7 (range 00-b4)
+						elsif (initialization_counter < 18) then
+							internal_data_bus <= x"98"; -- gamma level for GS8 (range 00-b4)
+						elsif (initialization_counter < 19) then
+							internal_data_bus <= x"9c"; -- gamma level for GS9 (range 00-b4)
+						elsif (initialization_counter < 20) then
+							internal_data_bus <= x"a0"; -- gamma level for GS10 (range 00-b4)
+						elsif (initialization_counter < 21) then
+							internal_data_bus <= x"a4"; -- gamma level for GS11 (range 00-b4)
+						elsif (initialization_counter < 22) then
+							internal_data_bus <= x"a8"; -- gamma level for GS12 (range 00-b4)
+						elsif (initialization_counter < 23) then
+							internal_data_bus <= x"ac"; -- gamma level for GS13 (range 00-b4)
+						elsif (initialization_counter < 24) then
+							internal_data_bus <= x"b0"; -- gamma level for GS14 (range 00-b4)
+						elsif (initialization_counter < 25) then
+							internal_data_bus <= x"b4"; -- gamma level for GS15 (range 00-b4)
+						elsif (initialization_counter < 26) then
+							internal_data_command_not       <= '0';
+							internal_data_bus <= x"00"; -- enable grayscale mode with custom lut
+							--internal_data_bus <= x"b9"; -- use linear grayscale lut
+						elsif (initialization_counter < 27) then
+							internal_data_bus <= x"af"; -- display on
+						elsif (initialization_counter < 28) then
 							internal_data_bus <= x"5c"; -- write to display ram
 						else
 							internal_data_command_not       <= '1';
-							normal_counter <= x"000";
+							normal_counter <= x"00000000";
 							transaction_in_progress <= '0';
 							individual_transaction_counter <= "000";
 							initialization_phase <= '0';
@@ -245,21 +257,9 @@ begin
 					end if;
 				end if;
 
-				if (blargh = '1' and internal_reset = '0' and initialization_phase = '1') then
-				end if;
---						individual_transaction_counter <= "000";
-
 				if (initialization_phase = '0') then
-					-- original line:
-					-- x <= 2 * (   row - row_start   );
-				-- xilinx ISE 13.2 says:
-				-- WARNING:Xst:1610 - "C:/mza/FPGA/OLED_display/src/OLED_display.vhdl" line 254: Width mismatch. <x> has a width of 9 bits but assigned expression is 16-bit wide.
-				-- which seems like a bad warning message, as [an 8 bit] - [an 8 bit] is at most [a 9 bit], and then multiplying by two gives at most [a 10 bit]...
-					-- these two should be outside the clocked part:
-					x <=    row - row_start     & '0';
-					y <= column - column_start;
 					if (transaction_in_progress = '0' and transaction_required = '0') then
-						internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(normal_counter(3 downto 0));
+						internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(normal_counter(14 downto 11));
 						if (row < row_end) then
 							row <= row + 1;
 						else
@@ -270,7 +270,11 @@ begin
 								column <= column_start;
 							end if;
 						end if;
-						normal_counter <= normal_counter + 1;
+						if (normal_counter < a_prime_number) then
+							normal_counter <= normal_counter + 1;
+						else
+							normal_counter <= (others => '0');
+						end if;
 						transaction_required <= '1';
 					end if;
 				end if;
@@ -280,11 +284,7 @@ begin
 	end process;
 end my_module_name_architecture;
 
---						if (x = 20 or x = 22) then -- takes 153.8 us to write a whole horizontal line in the dumb mode (6.667 MHz clock cycles)
---						if (x = 20) then
-							--internal_data_bus <= '1' & std_logic_vector(y(4 downto 2)) & '1' & std_logic_vector(y(4 downto 2));
-							--internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(y(5 downto 2));
---						end if;
+--						if (x = 20 or x = 22) then -- takes 153.8 us to write a whole horizontal line in the original version of dumb mode (6.667 MHz clock cycles)
 
 --use work.OLED_control.all;
 --package OLED_control is
