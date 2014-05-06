@@ -1,8 +1,8 @@
 net clock_150 tnm_net = clock_150;
 timespec ts_clock_150 = period clock_150 6.667 ns high 50%;
 
-net clock_40 tnm_net = clock_40;
-timespec ts_clock_40 = period clock_40 25 ns high 50%;
+#net clock_40 tnm_net = clock_40;
+#timespec ts_clock_40 = period clock_40 25 ns high 50%;
 
 #net "my_module_name/clock_enable_7MHz" tnm_net = ffs 7MHz_enable;
 #timespec ts_7MHz_enable = from 7MHz_enable to 7MHz_enable ts_clock_150*21;
