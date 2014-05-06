@@ -22,7 +22,7 @@ use ieee.numeric_std.all;
 
 entity my_module_name is
 	Port (
-		clock_150               : in    std_logic;
+--		clock_150               : in    std_logic;
 		clock_40                : in    std_logic;
 		sync                    :   out std_logic;
 		OLED_data_bus                : inout std_logic_vector (7 downto 0);
@@ -38,7 +38,9 @@ entity my_module_name is
 	attribute iostandard            : string;
 	attribute clock_dedicated_route : string;
 	attribute box_type              : string;
-	attribute loc of clock_150                   : signal is "p181";
+	--attribute tnm_net               : string;
+	--attribute timespec              : string;
+--	attribute loc of clock_150                   : signal is "p181";
 	attribute loc of clock_40                    : signal is "p79";
 	attribute loc of OLED_data_bus               : signal is "p178,p176,p175,p172,p171,p169,p168,p166";
 	attribute loc of OLED_enable                 : signal is "p165";
@@ -48,6 +50,8 @@ entity my_module_name is
 	attribute loc of OLED_reset_active_low       : signal is "p155";
 	attribute loc of OLED_interface_type_select  : signal is "p154,p152";
 	attribute loc of sync                        : signal is "p150";
+	--attribute tnm_net of clock_40                : signal is "clock_40";
+	--attribute timespec of clock_40               : signal is "period clock_40 25 ns high 50%";
 --	attribute iostandard of data_bus                 : signal is "lvcmos";
 --	attribute clock_dedicated_route of copper2_localbus_chip_select_active_low : signal is "false";
 --	attribute iostandard of ibufgds : component is "LVDS_25";
@@ -56,7 +60,7 @@ end my_module_name;
 
 architecture my_module_name_architecture of my_module_name is
 	signal internal_sync      : std_logic := '0';
-	signal internal_clock_150 : std_logic := '0';
+--	signal internal_clock_150 : std_logic := '0';
 	signal internal_clock_40  : std_logic := '0';
 	signal internal_data_bus               : std_logic_vector(7 downto 0) := x"00";
 	signal internal_enable                 : std_logic := '0';
@@ -74,7 +78,7 @@ architecture my_module_name_architecture of my_module_name is
 	signal initialization_phase : std_logic := '0';
 	signal normal_counter : unsigned(11 downto 0) := (others => '0');
 	signal individual_transaction_counter : unsigned(2 downto 0) := (others => '0');
-	signal x : unsigned(7 downto 0) := (others => '0');
+	signal x : unsigned(8 downto 0) := (others => '0');
 	signal y : unsigned(6 downto 0) := (others => '0');
 	signal row    : unsigned(7 downto 0) := (others => '0');
 	signal column : unsigned(6 downto 0) := (others => '0');
@@ -92,7 +96,7 @@ architecture my_module_name_architecture of my_module_name is
 
 begin
 	--
-	internal_clock_150 <= clock_150;
+--	internal_clock_150 <= clock_150;
 	internal_clock_40 <= clock_40;
 	sync <= internal_sync;
 	OLED_enable                 <=     internal_enable;
@@ -123,16 +127,6 @@ begin
 			--CLOCK_IN         => internal_clock_150,
 			CLOCK_IN         => internal_clock_40,
 			CLOCK_ENABLE_OUT => clock_enable_7MHz
-		);
-	clock_50MHz : entity work.clock_enable_generator
-		generic map (
-			--DIVIDE_RATIO => 45 -- 3.333 MHz
-			--DIVIDE_RATIO => 21 -- 7.143 MHz, corresponding to 140 ns max read cycle timing
-			DIVIDE_RATIO => 3 -- 50 MHz, corresponding to 20 ns
-		)
-		port map (
-			CLOCK_IN         => internal_clock_150,
-			CLOCK_ENABLE_OUT => clock_enable_50MHz
 		);
 --	OLED_control : entity work.OLED_controller
 		--generic map (
@@ -256,9 +250,14 @@ begin
 --						individual_transaction_counter <= "000";
 
 				if (initialization_phase = '0') then
+					-- original line:
+					-- x <= 2 * (   row - row_start   );
+				-- xilinx ISE 13.2 says:
+				-- WARNING:Xst:1610 - "C:/mza/FPGA/OLED_display/src/OLED_display.vhdl" line 254: Width mismatch. <x> has a width of 9 bits but assigned expression is 16-bit wide.
+				-- which seems like a bad warning message, as [an 8 bit] - [an 8 bit] is at most [a 9 bit], and then multiplying by two gives at most [a 10 bit]...
 					-- these two should be outside the clocked part:
-					x <= 2 * (   row - row_start   );
-					y <=      column - column_start;
+					x <=    row - row_start     & '0';
+					y <= column - column_start;
 					if (transaction_in_progress = '0' and transaction_required = '0') then
 						internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(normal_counter(3 downto 0));
 						if (row < row_end) then
