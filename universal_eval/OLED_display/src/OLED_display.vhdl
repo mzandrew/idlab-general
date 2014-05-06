@@ -6,8 +6,8 @@
 -- for driving a newhaven NHD-3.12-25664UCB2 OLED display
 -- connected to a universal_eval revB with a xilinx xc3s400-4pq208 FPGA
 -- started 2013-12-26 by mza
--- originally from http://code.google.com/p/idlab-daq/source/browse/iTOP-DSP_FIN-COPPER-FINESSE/branches/finesse_copper_local_bus_test/FPGA/src/top.vhdl
--- last edited 2013-12-31 by mza
+-- originally based on code from http://code.google.com/p/idlab-daq/source/browse/iTOP-DSP_FIN-COPPER-FINESSE/branches/finesse_copper_local_bus_test/FPGA/src/top.vhdl; concept for ucf-less vhdl from Nakao-san
+-- last edited 2014-01-02 by mza
 ----------------------------------------------------------------------------------
 
 library ieee;
@@ -87,6 +87,9 @@ architecture my_module_name_architecture of my_module_name is
 	--begin
 	--	internal_chip_select_active_low <= '0';
 	--end chip_select_active;
+	signal transaction_required    : std_logic := '0';
+	signal transaction_in_progress : std_logic := '0';
+
 begin
 	--
 	internal_clock_150 <= clock_150;
@@ -172,6 +175,8 @@ begin
 					--y_end    <= to_unsigned( 91, 7);
 					--x2_start <= to_unsigned(  0, 8);
 					--x2_end   <= to_unsigned(127, 8);
+					transaction_required <= '0';
+					transaction_in_progress <= '0';
 				else
 					internal_reset <= '0';
 				end if;
@@ -307,11 +312,11 @@ begin
 --						individual_transaction_counter <= "000";
 
 				if (initialization_phase = '0') then
+					-- these two should be outside the clocked part:
 					x <= 2 * (   row - row_start   );
 					y <=      column - column_start;
-					if (individual_transaction_counter < 4) then
-						individual_transaction_counter <= individual_transaction_counter + 1;
-					else
+					if (transaction_in_progress = '0') then
+						internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(normal_counter(3 downto 0));
 						if (row < row_end) then
 							row <= row + 1;
 						else
@@ -323,20 +328,30 @@ begin
 							end if;
 						end if;
 						normal_counter <= normal_counter + 1;
+						transaction_required <= '1';
+					end if;
+				end if;
+
+				if (transaction_required = '1') then
+					transaction_required <= '0';
+					if (individual_transaction_counter < 4) then
+						transaction_in_progress <= '1';
+						if (individual_transaction_counter < 1) then
+							internal_sync <= not internal_sync;
+							internal_enable <= '1';
+						elsif (individual_transaction_counter < 2) then
+							internal_sync <= not internal_sync;
+							internal_chip_select <= '1';
+						elsif (individual_transaction_counter < 3) then
+							internal_chip_select <= '0';
+							internal_enable <= '0';
+						end if;
+						individual_transaction_counter <= individual_transaction_counter + 1;
+					else
+						-- setup for next transaction:
+						transaction_in_progress <= '0';
 						individual_transaction_counter <= "000";
 					end if;
-					if (individual_transaction_counter < 1) then
-						internal_sync <= not internal_sync;
-						internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(normal_counter(3 downto 0));
-						internal_enable <= '1';
-					elsif (individual_transaction_counter < 2) then
-						internal_sync <= not internal_sync;
-						internal_chip_select <= '1';
-					elsif (individual_transaction_counter < 3) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					end if;
-					--
 				end if;
 
 			end if;
