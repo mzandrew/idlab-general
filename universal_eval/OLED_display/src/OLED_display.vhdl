@@ -162,10 +162,14 @@ begin
 					--x_end   <= to_unsigned( 91, 8);
 					--y_start <= to_unsigned(  0, 7);
 					--y_end   <= to_unsigned( 63, 7);
-					y_start  <= to_unsigned( 28, 7);
-					y_end    <= to_unsigned( 91, 7);
-					x2_start <= to_unsigned(  0, 8);
-					x2_end   <= to_unsigned(127, 8);
+					y_start  <= to_unsigned(  0, 7);
+					y_end    <= to_unsigned(127, 7);
+					x2_start <= to_unsigned( 28, 8);
+					x2_end   <= to_unsigned( 91, 8);
+					--y_start  <= to_unsigned( 28, 7);
+					--y_end    <= to_unsigned( 91, 7);
+					--x2_start <= to_unsigned(  0, 8);
+					--x2_end   <= to_unsigned(127, 8);
 				else
 					internal_reset <= '0';
 				end if;
@@ -342,9 +346,10 @@ begin
 					elsif (individual_transaction_counter < 2) then
 						internal_sync <= not internal_sync;
 						--internal_data_bus <= std_logic_vector(normal_counter(3 downto 0))
-						if (y = y_start + 20) then
+						if (y = y_start + 20) then -- takes 153.8 us to write a whole horizontal line in the dumb mode (6.667 MHz clock cycles)
 --							if (x2 = x2_start + 20) then
-								internal_data_bus <= x"ff";
+								--internal_data_bus <= x"ff";
+								internal_data_bus <= std_logic_vector(x2);
 --							else
 								--internal_data_bus <= (others => '0');
 --								internal_data_bus <= x"cc";
