@@ -6,6 +6,7 @@
 -- for driving a newhaven NHD-3.12-25664UCB2 OLED display
 -- connected to a universal_eval revB with a xilinx xc3s400-4pq208 FPGA
 -- started 2013-12-26 by mza
+-- originally from http://code.google.com/p/idlab-daq/source/browse/iTOP-DSP_FIN-COPPER-FINESSE/branches/finesse_copper_local_bus_test/FPGA/src/top.vhdl
 -- last edited 2013-12-31 by mza
 ----------------------------------------------------------------------------------
 
@@ -22,7 +23,7 @@ use ieee.numeric_std.all;
 entity my_module_name is
 	Port (
 		clock_150               : in    std_logic;
---		clock_40                : in    std_logic;
+		clock_40                : in    std_logic;
 		sync                    :   out std_logic;
 		OLED_data_bus                : inout std_logic_vector (7 downto 0);
 		OLED_enable                  :   out std_logic;
@@ -38,7 +39,7 @@ entity my_module_name is
 	attribute clock_dedicated_route : string;
 	attribute box_type              : string;
 	attribute loc of clock_150                   : signal is "p181";
---	attribute loc of clock_40                    : signal is "p79";
+	attribute loc of clock_40                    : signal is "p79";
 	attribute loc of OLED_data_bus               : signal is "p178,p176,p175,p172,p171,p169,p168,p166";
 	attribute loc of OLED_enable                 : signal is "p165";
 	attribute loc of OLED_read_write_not         : signal is "p162";
@@ -56,7 +57,7 @@ end my_module_name;
 architecture my_module_name_architecture of my_module_name is
 	signal internal_sync      : std_logic := '0';
 	signal internal_clock_150 : std_logic := '0';
---	signal internal_clock_40  : std_logic := '0';
+	signal internal_clock_40  : std_logic := '0';
 	signal internal_data_bus               : std_logic_vector(7 downto 0) := x"00";
 	signal internal_enable                 : std_logic := '0';
 	signal internal_read_write_not         : std_logic := '1';
@@ -74,7 +75,7 @@ architecture my_module_name_architecture of my_module_name is
 	signal normal_counter : unsigned(11 downto 0) := (others => '0');
 	signal individual_transaction_counter : unsigned(2 downto 0) := (others => '0');
 	signal x2 : unsigned(7 downto 0) := (others => '0');
-	signal y : unsigned(6 downto 0) := (others => '0');
+	signal y  : unsigned(6 downto 0) := (others => '0');
 	signal x2_start : unsigned(7 downto 0) := (others => '0');
 	signal x2_end   : unsigned(7 downto 0) := (others => '0');
 	signal y_start  : unsigned(6 downto 0) := (others => '0');
@@ -87,7 +88,7 @@ architecture my_module_name_architecture of my_module_name is
 begin
 	--
 	internal_clock_150 <= clock_150;
---	internal_clock_40 <= clock_40;
+	internal_clock_40 <= clock_40;
 	sync <= internal_sync;
 	OLED_enable                 <=     internal_enable;
 	OLED_read_write_not         <=     internal_read_write_not;
@@ -99,19 +100,23 @@ begin
 	--
 	clock_1kHz : entity work.clock_enable_generator
 		generic map (
-			DIVIDE_RATIO => 150000 -- 1 kHz
+			--DIVIDE_RATIO => 150000 -- 1 kHz
+			DIVIDE_RATIO => 40000 -- 1 kHz
 		)
 		port map (
-			CLOCK_IN         => internal_clock_150,
+			--CLOCK_IN         => internal_clock_150,
+			CLOCK_IN         => internal_clock_40,
 			CLOCK_ENABLE_OUT => clock_enable_1kHz
 		);
 	clock_7MHz : entity work.clock_enable_generator
 		generic map (
 			--DIVIDE_RATIO => 45 -- 3.333 MHz
-			DIVIDE_RATIO => 21 -- 7.143 MHz, corresponding to 140 ns max read cycle timing
+			--DIVIDE_RATIO => 21 -- 7.143 MHz, corresponding to 140 ns max read cycle timing
+			DIVIDE_RATIO => 6 -- 6.667 MHz, corresponding to 140 ns max read cycle timing
 		)
 		port map (
-			CLOCK_IN         => internal_clock_150,
+			--CLOCK_IN         => internal_clock_150,
+			CLOCK_IN         => internal_clock_40,
 			CLOCK_ENABLE_OUT => clock_enable_7MHz
 		);
 	clock_50MHz : entity work.clock_enable_generator
@@ -135,9 +140,9 @@ begin
 --			OLED_CHIP_SELECT => ,
 --		);
 	--
-	process (internal_clock_150)
+	process (internal_clock_40)
 	begin
-		if rising_edge(internal_clock_150) then
+		if rising_edge(internal_clock_40) then
 			if (clock_enable_1kHz = '1') then
 
 				if (reset_counter < 100) then
@@ -338,12 +343,12 @@ begin
 						internal_sync <= not internal_sync;
 						--internal_data_bus <= std_logic_vector(normal_counter(3 downto 0))
 						if (y = y_start + 20) then
-							if (x2 = x2_start + 20) then
+--							if (x2 = x2_start + 20) then
 								internal_data_bus <= x"ff";
-							else
+--							else
 								--internal_data_bus <= (others => '0');
-								internal_data_bus <= x"cc";
-							end if;
+--								internal_data_bus <= x"cc";
+--							end if;
 						else
 							internal_data_bus <= (others => '0');
 						end if;
