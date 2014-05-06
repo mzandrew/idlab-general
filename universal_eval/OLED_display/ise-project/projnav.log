@@ -29,15 +29,11 @@ Analyzing hierarchy for entity <clock_enable_generator> in library <work> (archi
 Analyzing hierarchy for entity <clock_enable_generator> in library <work> (architecture <Behavioral>) with generics.
 	DIVIDE_RATIO = 6
 
-Analyzing hierarchy for entity <clock_enable_generator> in library <work> (architecture <Behavioral>) with generics.
-	DIVIDE_RATIO = 3
-
 
 =========================================================================
 *                            HDL Analysis                               *
 =========================================================================
 Analyzing Entity <my_module_name> in library <work> (Architecture <my_module_name_architecture>).
-    Set user-defined property "LOC =  p181" for signal <clock_150> in unit <my_module_name>.
     Set user-defined property "LOC =  p79" for signal <clock_40> in unit <my_module_name>.
     Set user-defined property "LOC =  p150" for signal <sync> in unit <my_module_name>.
     Set user-defined property "LOC =  p178 p176 p175 p172 p171 p169 p168 p166" for signal <OLED_data_bus> in unit <my_module_name>.
@@ -47,7 +43,6 @@ Analyzing Entity <my_module_name> in library <work> (Architecture <my_module_nam
     Set user-defined property "LOC =  p156" for signal <OLED_data_command_not> in unit <my_module_name>.
     Set user-defined property "LOC =  p155" for signal <OLED_reset_active_low> in unit <my_module_name>.
     Set user-defined property "LOC =  p154 p152" for signal <OLED_interface_type_select> in unit <my_module_name>.
-WARNING:Xst:1610 - "C:/mza/FPGA/idlab-general/universal_eval/OLED_display/src/OLED_display.vhdl" line 260: Width mismatch. <x> has a width of 8 bits but assigned expression is 16-bit wide.
 INFO:Xst:2679 - Register <internal_interface_type_select> in unit <my_module_name> has a constant value of 11 during circuit operation. The register is replaced by logic.
 INFO:Xst:2679 - Register <blargh> in unit <my_module_name> has a constant value of 0 during circuit operation. The register is replaced by logic.
 INFO:Xst:2679 - Register <row_start> in unit <my_module_name> has a constant value of 00000000 during circuit operation. The register is replaced by logic.
@@ -60,10 +55,6 @@ Entity <clock_enable_generator.1> analyzed. Unit <clock_enable_generator.1> gene
 Analyzing generic Entity <clock_enable_generator.2> in library <work> (Architecture <Behavioral>).
 	DIVIDE_RATIO = 6
 Entity <clock_enable_generator.2> analyzed. Unit <clock_enable_generator.2> generated.
-
-Analyzing generic Entity <clock_enable_generator.3> in library <work> (Architecture <Behavioral>).
-	DIVIDE_RATIO = 3
-Entity <clock_enable_generator.3> analyzed. Unit <clock_enable_generator.3> generated.
 
 
 =========================================================================
@@ -92,77 +83,67 @@ Synthesizing Unit <clock_enable_generator_2>.
 Unit <clock_enable_generator_2> synthesized.
 
 
-Synthesizing Unit <clock_enable_generator_3>.
-    Related source file is "C:/mza/FPGA/idlab-general/universal_eval/OLED_display/contrib/clocking/clock_enable_generator.vhd".
-    Found 2-bit up counter for signal <internal_COUNTER>.
-    Found 1-bit register for signal <internal_COUNTER_RESET>.
-    Summary:
-	inferred   1 Counter(s).
-	inferred   1 D-type flip-flop(s).
-Unit <clock_enable_generator_3> synthesized.
-
-
 Synthesizing Unit <my_module_name>.
     Related source file is "C:/mza/FPGA/idlab-general/universal_eval/OLED_display/src/OLED_display.vhdl".
 WARNING:Xst:646 - Signal <y<6>> is assigned but never used. This unconnected signal will be trimmed during the optimization process.
 WARNING:Xst:646 - Signal <y<1:0>> is assigned but never used. This unconnected signal will be trimmed during the optimization process.
 WARNING:Xst:646 - Signal <x> is assigned but never used. This unconnected signal will be trimmed during the optimization process.
-WARNING:Xst:646 - Signal <clock_enable_50MHz> is assigned but never used. This unconnected signal will be trimmed during the optimization process.
+WARNING:Xst:1780 - Signal <clock_enable_50MHz> is never used or assigned. This unconnected signal will be trimmed during the optimization process.
 WARNING:Xst:646 - Signal <blargh> is assigned but never used. This unconnected signal will be trimmed during the optimization process.
     Found 7-bit up counter for signal <column>.
-    Found 7-bit comparator less for signal <column$cmp_lt0000> created at line 268.
+    Found 7-bit comparator less for signal <column$cmp_lt0000> created at line 267.
     Found 7-bit register for signal <column_end>.
     Found 7-bit register for signal <column_start>.
     Found 3-bit register for signal <individual_transaction_counter>.
-    Found 3-bit adder for signal <individual_transaction_counter$addsub0000> created at line 202.
-    Found 3-bit comparator less for signal <individual_transaction_counter$cmp_lt0000> created at line 191.
+    Found 3-bit adder for signal <individual_transaction_counter$addsub0000> created at line 196.
+    Found 3-bit comparator less for signal <individual_transaction_counter$cmp_lt0000> created at line 185.
     Found 12-bit register for signal <initialization_counter>.
-    Found 12-bit adder for signal <initialization_counter$addsub0000> created at line 213.
+    Found 12-bit adder for signal <initialization_counter$addsub0000> created at line 207.
     Found 1-bit register for signal <initialization_phase>.
     Found 1-bit register for signal <internal_chip_select>.
-    Found 3-bit comparator greatequal for signal <internal_chip_select$cmp_ge0000> created at line 197.
-    Found 3-bit comparator greatequal for signal <internal_chip_select$cmp_ge0001> created at line 191.
-    Found 3-bit comparator less for signal <internal_chip_select$cmp_lt0000> created at line 193.
-    Found 3-bit comparator less for signal <internal_chip_select$cmp_lt0001> created at line 195.
+    Found 3-bit comparator greatequal for signal <internal_chip_select$cmp_ge0000> created at line 191.
+    Found 3-bit comparator greatequal for signal <internal_chip_select$cmp_ge0001> created at line 185.
+    Found 3-bit comparator less for signal <internal_chip_select$cmp_lt0000> created at line 187.
+    Found 3-bit comparator less for signal <internal_chip_select$cmp_lt0001> created at line 189.
     Found 8-bit register for signal <internal_data_bus>.
-    Found 12-bit comparator greatequal for signal <internal_data_bus$cmp_ge0000> created at line 239.
+    Found 12-bit comparator greatequal for signal <internal_data_bus$cmp_ge0000> created at line 233.
     Found 1-bit register for signal <internal_data_command_not>.
     Found 1-bit register for signal <internal_enable>.
-    Found 3-bit comparator greatequal for signal <internal_enable$cmp_ge0000> created at line 193.
+    Found 3-bit comparator greatequal for signal <internal_enable$cmp_ge0000> created at line 187.
     Found 1-bit register for signal <internal_read_write_not>.
     Found 1-bit register for signal <internal_reset>.
-    Found 16-bit comparator less for signal <internal_reset$cmp_lt0000> created at line 153.
+    Found 16-bit comparator less for signal <internal_reset$cmp_lt0000> created at line 147.
     Found 1-bit register for signal <internal_sync>.
     Found 12-bit register for signal <normal_counter>.
-    Found 12-bit adder for signal <normal_counter$addsub0000> created at line 274.
-    Found 16-bit comparator greatequal for signal <normal_counter$cmp_ge0000> created at line 153.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0001> created at line 237.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0002> created at line 234.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0003> created at line 231.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0004> created at line 229.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0005> created at line 226.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0006> created at line 224.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0007> created at line 221.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0008> created at line 219.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0009> created at line 215.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0000> created at line 215.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0001> created at line 219.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0002> created at line 221.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0003> created at line 224.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0004> created at line 226.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0005> created at line 229.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0006> created at line 231.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0007> created at line 234.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0008> created at line 237.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0009> created at line 239.
+    Found 12-bit adder for signal <normal_counter$addsub0000> created at line 273.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0000> created at line 231.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0001> created at line 228.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0002> created at line 225.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0003> created at line 223.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0004> created at line 220.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0005> created at line 218.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0006> created at line 215.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0007> created at line 213.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0008> created at line 209.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0000> created at line 209.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0001> created at line 213.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0002> created at line 215.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0003> created at line 218.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0004> created at line 220.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0005> created at line 223.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0006> created at line 225.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0007> created at line 228.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0008> created at line 231.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0009> created at line 233.
     Found 16-bit up counter for signal <reset_counter>.
+    Found 16-bit comparator greatequal for signal <reset_counter$cmp_ge0000> created at line 147.
     Found 8-bit up counter for signal <row>.
-    Found 8-bit comparator less for signal <row$cmp_lt0000> created at line 264.
+    Found 8-bit comparator less for signal <row$cmp_lt0000> created at line 263.
     Found 8-bit register for signal <row_end>.
     Found 1-bit register for signal <transaction_in_progress>.
     Found 1-bit register for signal <transaction_required>.
     Found 7-bit register for signal <y>.
-    Found 7-bit subtractor for signal <y$sub0000> created at line 261.
+    Found 7-bit subtractor for signal <y$sub0000> created at line 260.
     Summary:
 	inferred   3 Counter(s).
 	inferred  73 D-type flip-flop(s).
@@ -179,14 +160,13 @@ Macro Statistics
  12-bit adder                                          : 2
  3-bit adder                                           : 1
  7-bit subtractor                                      : 1
-# Counters                                             : 6
+# Counters                                             : 5
  16-bit up counter                                     : 2
- 2-bit up counter                                      : 1
  3-bit up counter                                      : 1
  7-bit up counter                                      : 1
  8-bit up counter                                      : 1
-# Registers                                            : 20
- 1-bit register                                        : 12
+# Registers                                            : 19
+ 1-bit register                                        : 11
  12-bit register                                       : 2
  3-bit register                                        : 1
  7-bit register                                        : 3
@@ -207,8 +187,6 @@ Macro Statistics
 *                       Advanced HDL Synthesis                          *
 =========================================================================
 
-WARNING:Xst:1290 - Hierarchical block <clock_50MHz> is unconnected in block <my_module_name>.
-   It will be removed from the design.
 WARNING:Xst:1426 - The value init of the FF/Latch internal_read_write_not hinder the constant cleaning in the block my_module_name.
    You should achieve better results by setting this init to 0.
 WARNING:Xst:1426 - The value init of the FF/Latch row_end_0 hinder the constant cleaning in the block my_module_name.
@@ -263,14 +241,13 @@ Macro Statistics
  12-bit adder                                          : 2
  3-bit adder                                           : 1
  7-bit subtractor                                      : 1
-# Counters                                             : 6
+# Counters                                             : 5
  16-bit up counter                                     : 2
- 2-bit up counter                                      : 1
  3-bit up counter                                      : 1
  7-bit up counter                                      : 1
  8-bit up counter                                      : 1
-# Registers                                            : 73
- Flip-Flops                                            : 73
+# Registers                                            : 72
+ Flip-Flops                                            : 72
 # Comparators                                          : 30
  12-bit comparator greatequal                          : 10
  12-bit comparator less                                : 10
@@ -326,7 +303,6 @@ WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <column_end_2> has a
 WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <column_end_5> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
 WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <row_end_7> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
 INFO:Xst:2261 - The FF/Latch <column_start_2> in Unit <my_module_name> is equivalent to the following 14 FFs/Latches, which will be removed : <column_start_3> <column_start_4> <column_end_0> <column_end_1> <column_end_3> <column_end_4> <column_end_6> <row_end_0> <row_end_1> <row_end_2> <row_end_3> <row_end_4> <row_end_5> <row_end_6> 
-WARNING:Xst:2677 - Node <clock_50MHz/internal_COUNTER_RESET> of sequential type is unconnected in block <my_module_name>.
 WARNING:Xst:2677 - Node <normal_counter_4> of sequential type is unconnected in block <my_module_name>.
 WARNING:Xst:2677 - Node <normal_counter_5> of sequential type is unconnected in block <my_module_name>.
 WARNING:Xst:2677 - Node <normal_counter_6> of sequential type is unconnected in block <my_module_name>.
@@ -412,33 +388,6 @@ Annotating constraints to design from ucf file
 "C:/mza/FPGA/idlab-general/universal_eval/OLED_display/src/OLED_display.ucf" ...
 Resolving constraint associations...
 Checking Constraint Associations...
-WARNING:ConstraintSystem:137 - Constraint <net clock_150 tnm_net = clock_150;>
-   [C:/mza/FPGA/idlab-general/universal_eval/OLED_display/src/OLED_display.ucf(1
-   )]: No appropriate instances for the TNM constraint are driven by
-   "clock_150".
-
-WARNING:ConstraintSystem:56 - Constraint <timespec ts_clock_150 = period
-   clock_150 6.667 ns high 50%;>
-   [C:/mza/FPGA/idlab-general/universal_eval/OLED_display/src/OLED_display.ucf(2
-   )]: Unable to find an active 'TNM' or 'TimeGrp' constraint named 'clock_150'.
-
-WARNING:ConstraintSystem:191 - The TNM 'clock_150', does not directly or
-   indirectly drive any flip-flops, latches and/or RAMS and cannot be actively
-   used by the referencing Period constraint 'ts_clock_150'. If clock manager
-   blocks are directly or indirectly driven, a new TNM constraint will not be
-   derived even though the referencing constraint is a PERIOD constraint unless
-   an output of the clock manager drives flip-flops, latches or RAMs. This TNM
-   is used in the following user PERIOD specification:
-   <timespec ts_clock_150 = period clock_150 6.667 ns high 50%;>
-   [C:/mza/FPGA/idlab-general/universal_eval/OLED_display/src/OLED_display.ucf(2
-   )]
-
-WARNING:ConstraintSystem:197 - The following specification is invalid because
-   the referenced TNM constraint was removed:
-   <timespec ts_clock_150 = period clock_150 6.667 ns high 50%;>
-   [C:/mza/FPGA/idlab-general/universal_eval/OLED_display/src/OLED_display.ucf(2
-   )]
-
 Done...
 
 Checking expanded design ...
@@ -452,7 +401,7 @@ Partition Implementation Status
 
 NGDBUILD Design Results Summary:
   Number of errors:     0
-  Number of warnings:   4
+  Number of warnings:   0
 
 Writing NGD file "my_module_name.ngd" ...
 Total REAL time to NGDBUILD completion:  3 sec
@@ -495,12 +444,12 @@ Logic Distribution:
   The Slice Logic Distribution report is not meaningful if the design is
   over-mapped for a non-slice resource or if Placement fails.
 
-  Number of bonded IOBs:                 18 out of     141   12%
+  Number of bonded IOBs:                 17 out of     141   12%
   Number of BUFGMUXs:                     1 out of       8   12%
 
-Average Fanout of Non-Clock Nets:                3.25
+Average Fanout of Non-Clock Nets:                3.26
 
-Peak Memory Usage:  254 MB
+Peak Memory Usage:  255 MB
 Total REAL time to MAP completion:  1 secs 
 Total CPU time to MAP completion:   1 secs 
 
@@ -547,8 +496,8 @@ Device speed data version:  "PRODUCTION 1.39 2013-10-13".
 Device Utilization Summary:
 
    Number of BUFGMUXs                        1 out of 8      12%
-   Number of External IOBs                  18 out of 141    12%
-      Number of LOCed IOBs                  18 out of 18    100%
+   Number of External IOBs                  17 out of 141    12%
+      Number of LOCed IOBs                  17 out of 17    100%
 
    Number of Slices                        144 out of 3584    4%
       Number of SLICEMs                      0 out of 1792    0%
@@ -563,41 +512,40 @@ Router effort level (-rl):    High
 Starting initial Timing Analysis.  REAL time: 1 secs 
 Finished initial Timing Analysis.  REAL time: 1 secs 
 
-WARNING:Par:288 - The signal clock_150_IBUF has no load.  PAR will not attempt to route this signal.
 
 Starting Placer
 Total REAL time at the beginning of Placer: 1 secs 
 Total CPU  time at the beginning of Placer: 1 secs 
 
 Phase 1.1  Initial Placement Analysis
-Phase 1.1  Initial Placement Analysis (Checksum:f0913358) REAL time: 1 secs 
+Phase 1.1  Initial Placement Analysis (Checksum:58e84787) REAL time: 1 secs 
 
 Phase 2.7  Design Feasibility Check
-Phase 2.7  Design Feasibility Check (Checksum:f0913358) REAL time: 1 secs 
+Phase 2.7  Design Feasibility Check (Checksum:58e84787) REAL time: 1 secs 
 
 Phase 3.31  Local Placement Optimization
-Phase 3.31  Local Placement Optimization (Checksum:f0913358) REAL time: 1 secs 
+Phase 3.31  Local Placement Optimization (Checksum:58e84787) REAL time: 1 secs 
 
 Phase 4.2  Initial Clock and IO Placement
 
-Phase 4.2  Initial Clock and IO Placement (Checksum:12784018) REAL time: 1 secs 
+Phase 4.2  Initial Clock and IO Placement (Checksum:77c869ff) REAL time: 1 secs 
 
 Phase 5.36  Local Placement Optimization
-Phase 5.36  Local Placement Optimization (Checksum:12784018) REAL time: 1 secs 
+Phase 5.36  Local Placement Optimization (Checksum:77c869ff) REAL time: 1 secs 
 
 Phase 6.8  Global Placement
-.........
-...
-Phase 6.8  Global Placement (Checksum:5f2de76) REAL time: 2 secs 
+............
+..
+Phase 6.8  Global Placement (Checksum:3487d271) REAL time: 2 secs 
 
 Phase 7.5  Local Placement Optimization
-Phase 7.5  Local Placement Optimization (Checksum:5f2de76) REAL time: 2 secs 
+Phase 7.5  Local Placement Optimization (Checksum:3487d271) REAL time: 2 secs 
 
 Phase 8.18  Placement Optimization
-Phase 8.18  Placement Optimization (Checksum:3d964334) REAL time: 2 secs 
+Phase 8.18  Placement Optimization (Checksum:565c8c16) REAL time: 2 secs 
 
 Phase 9.5  Local Placement Optimization
-Phase 9.5  Local Placement Optimization (Checksum:3d964334) REAL time: 2 secs 
+Phase 9.5  Local Placement Optimization (Checksum:565c8c16) REAL time: 2 secs 
 
 Total REAL time to Placer completion: 2 secs 
 Total CPU  time to Placer completion: 2 secs 
@@ -612,9 +560,9 @@ Phase  1  : 910 unrouted;      REAL time: 2 secs
 
 Phase  2  : 825 unrouted;      REAL time: 2 secs 
 
-Phase  3  : 295 unrouted;      REAL time: 2 secs 
+Phase  3  : 335 unrouted;      REAL time: 2 secs 
 
-Phase  4  : 295 unrouted; (Setup:0, Hold:0, Component Switching Limit:0)     REAL time: 2 secs 
+Phase  4  : 335 unrouted; (Setup:0, Hold:0, Component Switching Limit:0)     REAL time: 3 secs 
 
 Phase  5  : 0 unrouted; (Setup:0, Hold:0, Component Switching Limit:0)     REAL time: 3 secs 
 
@@ -665,8 +613,8 @@ Asterisk (*) preceding a constraint indicates it was not met.
   Constraint                                |    Check    | Worst Case |  Best Case | Timing |   Timing   
                                             |             |    Slack   | Achievable | Errors |    Score   
 ----------------------------------------------------------------------------------------------------------
-  ts_clock_40 = PERIOD TIMEGRP "clock_40" 2 | SETUP       |    14.282ns|    10.718ns|       0|           0
-  5 ns HIGH 50%                             | HOLD        |     0.848ns|            |       0|           0
+  ts_clock_40 = PERIOD TIMEGRP "clock_40" 2 | SETUP       |    13.872ns|    11.128ns|       0|           0
+  5 ns HIGH 50%                             | HOLD        |     0.832ns|            |       0|           0
 ----------------------------------------------------------------------------------------------------------
 
 
@@ -677,19 +625,17 @@ Generating Pad Report.
 
 All signals are completely routed.
 
-WARNING:Par:283 - There are 1 loadless signals in this design. This design will cause Bitgen to issue DRC warnings.
-
 Total REAL time to PAR completion: 3 secs 
 Total CPU time to PAR completion: 3 secs 
 
-Peak Memory Usage:  269 MB
+Peak Memory Usage:  270 MB
 
 Placement: Completed - No errors found.
 Routing: Completed - No errors found.
 Timing: Completed - No errors found.
 
 Number of error messages: 0
-Number of warning messages: 3
+Number of warning messages: 0
 Number of info messages: 0
 
 Writing design to file my_module_name.ncd
@@ -708,7 +654,7 @@ C:\Xilinx\14.7\ISE_DS\ISE\.
    "my_module_name" is an NCD, version 3.2, device xc3s400, package pq208, speed
 -4
 
-Analysis completed Tue May 06 13:30:53 2014
+Analysis completed Tue May 06 13:32:52 2014
 --------------------------------------------------------------------------------
 
 Generating Report ...
