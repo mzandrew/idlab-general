@@ -74,12 +74,14 @@ architecture my_module_name_architecture of my_module_name is
 	signal initialization_phase : std_logic := '0';
 	signal normal_counter : unsigned(11 downto 0) := (others => '0');
 	signal individual_transaction_counter : unsigned(2 downto 0) := (others => '0');
-	signal x2 : unsigned(7 downto 0) := (others => '0');
-	signal y  : unsigned(6 downto 0) := (others => '0');
-	signal x2_start : unsigned(7 downto 0) := (others => '0');
-	signal x2_end   : unsigned(7 downto 0) := (others => '0');
-	signal y_start  : unsigned(6 downto 0) := (others => '0');
-	signal y_end    : unsigned(6 downto 0) := (others => '0');
+	signal x : unsigned(7 downto 0) := (others => '0');
+	signal y : unsigned(6 downto 0) := (others => '0');
+	signal row    : unsigned(7 downto 0) := (others => '0');
+	signal column : unsigned(6 downto 0) := (others => '0');
+	signal row_start : unsigned(7 downto 0) := (others => '0');
+	signal row_end   : unsigned(7 downto 0) := (others => '0');
+	signal column_start : unsigned(6 downto 0) := (others => '0');
+	signal column_end   : unsigned(6 downto 0) := (others => '0');
 	signal blargh : std_logic := '0';
 	--procedure chip_select_active is
 	--begin
@@ -162,10 +164,10 @@ begin
 					--x_end   <= to_unsigned( 91, 8);
 					--y_start <= to_unsigned(  0, 7);
 					--y_end   <= to_unsigned( 63, 7);
-					y_start  <= to_unsigned(  0, 7);
-					y_end    <= to_unsigned(127, 7);
-					x2_start <= to_unsigned( 28, 8);
-					x2_end   <= to_unsigned( 91, 8);
+					row_start <= to_unsigned(  0, 8);
+					row_end   <= to_unsigned(127, 8);
+					column_start  <= to_unsigned( 28, 7);
+					column_end    <= to_unsigned( 91, 7);
 					--y_start  <= to_unsigned( 28, 7);
 					--y_end    <= to_unsigned( 91, 7);
 					--x2_start <= to_unsigned(  0, 8);
@@ -227,7 +229,7 @@ begin
 					--
 					elsif (initialization_counter < 23) then
 						internal_data_command_not       <= '1';
-						internal_data_bus <= '0' & std_logic_vector(y_start); -- row start address
+						internal_data_bus <= std_logic_vector(row_start); -- row start address
 					elsif (initialization_counter < 24) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 25) then
@@ -237,7 +239,7 @@ begin
 						internal_enable <= '0';
 					--
 					elsif (initialization_counter < 27) then
-						internal_data_bus <= '0' & std_logic_vector(y_end); -- row end address
+						internal_data_bus <= std_logic_vector(row_end); -- row end address
 					elsif (initialization_counter < 28) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 29) then
@@ -259,7 +261,7 @@ begin
 					--
 					elsif (initialization_counter < 35) then
 						internal_data_command_not       <= '1';
-						internal_data_bus <= std_logic_vector(x2_start); -- column start address
+						internal_data_bus <= '0' & std_logic_vector(column_start); -- column start address
 					elsif (initialization_counter < 36) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 37) then
@@ -269,7 +271,7 @@ begin
 						internal_enable <= '0';
 					--
 					elsif (initialization_counter < 39) then
-						internal_data_bus <= std_logic_vector(x2_end); -- column end address
+						internal_data_bus <= '0' & std_logic_vector(column_end); -- column end address
 					elsif (initialization_counter < 40) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 41) then
@@ -293,8 +295,8 @@ begin
 						internal_data_command_not       <= '1';
 						normal_counter <= x"000";
 						individual_transaction_counter <= "000";
-						x2 <= x2_start;
-						y <= y_start;
+						row <= row_start;
+						column <= column_start;
 					else
 						initialization_phase <= '0';
 					end if;
@@ -325,17 +327,19 @@ begin
 --						individual_transaction_counter <= "000";
 
 				if (initialization_phase = '0') then
+					x <= 2 * (   row - row_start   );
+					y <=      column - column_start;
 					if (individual_transaction_counter < 7) then
 						individual_transaction_counter <= individual_transaction_counter + 1;
 					else
-						if (x2 < x2_end) then
-							x2 <= x2 + 1;
+						if (row < row_end) then
+							row <= row + 1;
 						else
-							x2 <= x2_start;
-							if (y < y_end) then
-								y <= y + 1;
+							row <= row_start;
+							if (column < column_end) then
+								column <= column + 1;
 							else
-								y <= y_start;
+								column <= column_start;
 							end if;
 						end if;
 						normal_counter <= normal_counter + 1;
@@ -346,17 +350,16 @@ begin
 					elsif (individual_transaction_counter < 2) then
 						internal_sync <= not internal_sync;
 						--internal_data_bus <= std_logic_vector(normal_counter(3 downto 0))
-						if (y = y_start + 20) then -- takes 153.8 us to write a whole horizontal line in the dumb mode (6.667 MHz clock cycles)
+--						if (x = 20 or x = 22) then -- takes 153.8 us to write a whole horizontal line in the dumb mode (6.667 MHz clock cycles)
 --							if (x2 = x2_start + 20) then
-								--internal_data_bus <= x"ff";
-								internal_data_bus <= std_logic_vector(x2);
+								--internal_data_bus <= '1' & std_logic_vector(y(4 downto 2)) & '1' & std_logic_vector(y(4 downto 2));
+								internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(y(5 downto 2));
 --							else
 								--internal_data_bus <= (others => '0');
---								internal_data_bus <= x"cc";
 --							end if;
-						else
-							internal_data_bus <= (others => '0');
-						end if;
+--						else
+--							internal_data_bus <= (others => '0');
+--						end if;
 					elsif (individual_transaction_counter < 3) then
 						internal_enable <= '1';
 					elsif (individual_transaction_counter < 4) then
