@@ -182,69 +182,74 @@ begin
 						initialization_counter <= initialization_counter + 1;
 						transaction_required <= '1';
 						if (initialization_counter < 1) then
-							internal_read_write_not   <= '0';
-							internal_data_command_not <= '0';
+							internal_read_write_not         <= '0';
+							internal_data_command_not       <= '0';
 							internal_data_bus <= x"ae"; -- display off
 						elsif (initialization_counter < 2) then
 							--internal_data_bus <= x"a5"; -- all pixels on
 							internal_data_bus <= x"a6"; -- normal mode
 						elsif (initialization_counter < 3) then
+							internal_data_bus <= x"c7"; -- master brightness control (by next data transaction)
 						elsif (initialization_counter < 4) then
-							internal_data_bus <= x"75"; -- set row start and end address (by the following two transactions)
+							internal_data_command_not       <= '1';
+							internal_data_bus <= x"09"; -- master brightness (range 0-f)
 						elsif (initialization_counter < 5) then
+							internal_data_command_not       <= '0';
+							internal_data_bus <= x"75"; -- set row start and end address (by the following two transactions)
+						elsif (initialization_counter < 6) then
 							internal_data_command_not       <= '1';
 							internal_data_bus <= std_logic_vector(row_start); -- row start address
-						elsif (initialization_counter < 6) then
-							internal_data_bus <= std_logic_vector(row_end); -- row end address
 						elsif (initialization_counter < 7) then
+							internal_data_bus <= std_logic_vector(row_end); -- row end address
+						elsif (initialization_counter < 8) then
 							internal_data_command_not       <= '0';
 							internal_data_bus <= x"15"; -- set column start and end address (by the following two transactions)
-						elsif (initialization_counter < 8) then
+						elsif (initialization_counter < 9) then
 							internal_data_command_not       <= '1';
 							internal_data_bus <= '0' & std_logic_vector(column_start); -- column start address
-						elsif (initialization_counter < 9) then
-							internal_data_bus <= '0' & std_logic_vector(column_end); -- column end address
 						elsif (initialization_counter < 10) then
+							internal_data_bus <= '0' & std_logic_vector(column_end); -- column end address
+						elsif (initialization_counter < 11) then
 							internal_data_command_not       <= '0';
 							internal_data_bus <= x"b8"; -- setup grayscale gamma levels (next 15 data transactions)
-						elsif (initialization_counter < 11) then
+						elsif (initialization_counter < 12) then
 							internal_data_command_not       <= '1';
 							internal_data_bus <= x"00"; -- gamma level for GS1 (range 00-b4)
-						elsif (initialization_counter < 12) then
-							internal_data_bus <= x"20"; -- gamma level for GS2 (range 00-b4)
 						elsif (initialization_counter < 13) then
-							internal_data_bus <= x"40"; -- gamma level for GS3 (range 00-b4)
+							internal_data_bus <= x"20"; -- gamma level for GS2 (range 00-b4)
 						elsif (initialization_counter < 14) then
-							internal_data_bus <= x"60"; -- gamma level for GS4 (range 00-b4)
+							internal_data_bus <= x"40"; -- gamma level for GS3 (range 00-b4)
 						elsif (initialization_counter < 15) then
-							internal_data_bus <= x"80"; -- gamma level for GS5 (range 00-b4)
+							internal_data_bus <= x"60"; -- gamma level for GS4 (range 00-b4)
 						elsif (initialization_counter < 16) then
-							internal_data_bus <= x"90"; -- gamma level for GS6 (range 00-b4)
+							internal_data_bus <= x"80"; -- gamma level for GS5 (range 00-b4)
 						elsif (initialization_counter < 17) then
-							internal_data_bus <= x"94"; -- gamma level for GS7 (range 00-b4)
+							internal_data_bus <= x"90"; -- gamma level for GS6 (range 00-b4)
 						elsif (initialization_counter < 18) then
-							internal_data_bus <= x"98"; -- gamma level for GS8 (range 00-b4)
+							internal_data_bus <= x"94"; -- gamma level for GS7 (range 00-b4)
 						elsif (initialization_counter < 19) then
-							internal_data_bus <= x"9c"; -- gamma level for GS9 (range 00-b4)
+							internal_data_bus <= x"98"; -- gamma level for GS8 (range 00-b4)
 						elsif (initialization_counter < 20) then
-							internal_data_bus <= x"a0"; -- gamma level for GS10 (range 00-b4)
+							internal_data_bus <= x"9c"; -- gamma level for GS9 (range 00-b4)
 						elsif (initialization_counter < 21) then
-							internal_data_bus <= x"a4"; -- gamma level for GS11 (range 00-b4)
+							internal_data_bus <= x"a0"; -- gamma level for GS10 (range 00-b4)
 						elsif (initialization_counter < 22) then
-							internal_data_bus <= x"a8"; -- gamma level for GS12 (range 00-b4)
+							internal_data_bus <= x"a4"; -- gamma level for GS11 (range 00-b4)
 						elsif (initialization_counter < 23) then
-							internal_data_bus <= x"ac"; -- gamma level for GS13 (range 00-b4)
+							internal_data_bus <= x"a8"; -- gamma level for GS12 (range 00-b4)
 						elsif (initialization_counter < 24) then
-							internal_data_bus <= x"b0"; -- gamma level for GS14 (range 00-b4)
+							internal_data_bus <= x"ac"; -- gamma level for GS13 (range 00-b4)
 						elsif (initialization_counter < 25) then
-							internal_data_bus <= x"b4"; -- gamma level for GS15 (range 00-b4)
+							internal_data_bus <= x"b0"; -- gamma level for GS14 (range 00-b4)
 						elsif (initialization_counter < 26) then
+							internal_data_bus <= x"b4"; -- gamma level for GS15 (range 00-b4)
+						elsif (initialization_counter < 27) then
 							internal_data_command_not       <= '0';
 							internal_data_bus <= x"00"; -- enable grayscale mode with custom lut
 							--internal_data_bus <= x"b9"; -- use linear grayscale lut
-						elsif (initialization_counter < 27) then
-							internal_data_bus <= x"af"; -- display on
 						elsif (initialization_counter < 28) then
+							internal_data_bus <= x"af"; -- display on
+						elsif (initialization_counter < 29) then
 							internal_data_bus <= x"5c"; -- write to display ram
 						else
 							internal_data_command_not       <= '1';
@@ -285,6 +290,7 @@ begin
 end my_module_name_architecture;
 
 --						if (x = 20 or x = 22) then -- takes 153.8 us to write a whole horizontal line in the original version of dumb mode (6.667 MHz clock cycles)
+--						if (x = 20 or x = 22) then -- takes 230.4 us to write a whole horizontal line in the newer transaction-based version of dumb mode (6.667 MHz clock cycles)
 
 --use work.OLED_control.all;
 --package OLED_control is
