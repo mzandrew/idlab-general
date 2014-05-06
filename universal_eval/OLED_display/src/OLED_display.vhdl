@@ -8,7 +8,7 @@
 -- started 2013-12-26 by mza
 -- originally based on code from http://code.google.com/p/idlab-daq/source/browse/iTOP-DSP_FIN-COPPER-FINESSE/branches/finesse_copper_local_bus_test/FPGA/src/top.vhdl; concept for ucf-less vhdl from Nakao-san
 -- core of the code came together on 2014-01-02 (Isaac Asimov's birthday)
--- last edited 2014-01-03 by mza
+-- last edited 2014-01-06 by mza
 ----------------------------------------------------------------------------------
 
 library ieee;
@@ -65,13 +65,13 @@ architecture my_module_name_architecture of my_module_name is
 	signal internal_clock_40  : std_logic := '0';
 	signal internal_data_bus               : std_logic_vector(7 downto 0) := x"00";
 	signal internal_enable                 : std_logic := '0';
-	signal internal_read_write_not         : std_logic := '1';
+	signal internal_read_write_not         : std_logic := '0';
 	signal internal_chip_select            : std_logic := '0';
 	signal internal_data_command_not       : std_logic := '1';
 	signal internal_reset                  : std_logic := '1';
 	signal internal_interface_type_select  : std_logic_vector(1 downto 0) := "11";
 	signal clock_enable_1kHz  : std_logic := '0';
-	signal clock_enable_7MHz  : std_logic := '0';
+--	signal clock_enable_7MHz  : std_logic := '0';
 --	signal clock_enable_50MHz : std_logic := '0';
 	constant size_of_reset_counter : integer := 16;
 	constant a_prime_number : integer := 16381;
@@ -79,15 +79,15 @@ architecture my_module_name_architecture of my_module_name is
 	signal initialization_counter : unsigned(11 downto 0) := (others => '0');
 	signal initialization_phase : std_logic := '0';
 	signal normal_counter : unsigned(31 downto 0) := (others => '0');
-	signal individual_transaction_counter : unsigned(2 downto 0) := (others => '0');
+	signal individual_transaction_counter : unsigned(3 downto 0) := (others => '0');
 	signal x : unsigned(8 downto 0) := (others => '0');
 	signal y : unsigned(6 downto 0) := (others => '0');
 	signal row    : unsigned(7 downto 0) := (others => '0');
 	signal column : unsigned(6 downto 0) := (others => '0');
 	signal row_start : unsigned(7 downto 0) := (others => '0');
-	signal row_end   : unsigned(7 downto 0) := (others => '0');
-	signal column_start : unsigned(6 downto 0) := (others => '0');
-	signal column_end   : unsigned(6 downto 0) := (others => '0');
+	signal row_end   : unsigned(7 downto 0) := to_unsigned(127, 8);
+	signal column_start : unsigned(6 downto 0) := to_unsigned( 28, 7);
+	signal column_end   : unsigned(6 downto 0) := to_unsigned( 91, 7);
 	signal transaction_required    : std_logic := '0';
 	signal transaction_in_progress : std_logic := '0';
 
@@ -113,16 +113,16 @@ begin
 			CLOCK_IN         => internal_clock_40,
 			CLOCK_ENABLE_OUT => clock_enable_1kHz
 		);
-	clock_7MHz : entity work.clock_enable_generator
-		generic map (
-			--DIVIDE_RATIO => 45 -- 3.333 MHz
-			--DIVIDE_RATIO => 21 -- 7.143 MHz, corresponding to 140 ns max read cycle timing
-			DIVIDE_RATIO => 6 -- 6.667 MHz, corresponding to 140 ns max read cycle timing
-		)
-		port map (
-			CLOCK_IN         => internal_clock_40,
-			CLOCK_ENABLE_OUT => clock_enable_7MHz
-		);
+--	clock_7MHz : entity work.clock_enable_generator
+--		generic map (
+--			--DIVIDE_RATIO => 45 -- 3.333 MHz
+--			--DIVIDE_RATIO => 21 -- 7.143 MHz, corresponding to 140 ns max read cycle timing
+--			DIVIDE_RATIO => 6 -- 6.667 MHz, corresponding to 140 ns max read cycle timing
+--		)
+--		port map (
+--			CLOCK_IN         => internal_clock_40,
+--			CLOCK_ENABLE_OUT => clock_enable_7MHz
+--		);
 
 	process (internal_clock_40)
 	begin
@@ -130,9 +130,9 @@ begin
 			if (clock_enable_1kHz = '1') then
 
 				if (reset_counter < 100) then
-					if (reset_counter = x"0000") then
-						internal_sync <= not internal_sync;
-					end if;
+--					if (reset_counter = x"0000") then
+--						internal_sync <= not internal_sync;
+--					end if;
 					reset_counter <= reset_counter + 1;
 					internal_reset                  <= '1';
 					internal_data_bus               <= x"00";
@@ -155,17 +155,17 @@ begin
 				end if;
 
 			end if;
-			if (clock_enable_7MHz = '1') then
+			--if (clock_enable_40MHz = '1') then
 
 				if (transaction_required = '1') then
-					if (individual_transaction_counter < 4) then
+					if (individual_transaction_counter < 10) then -- 300 ns cycle time (takes a cycle to get here, and the end part of this block takes another
 						transaction_in_progress <= '1';
-						if (individual_transaction_counter < 1) then
+						if (individual_transaction_counter < 1) then -- for 25 ns:
 							internal_sync <= not internal_sync;
 							internal_enable <= '1';
-						elsif (individual_transaction_counter < 2) then
+						elsif (individual_transaction_counter < 2) then -- for 75 ns:
 							internal_chip_select <= '1';
-						elsif (individual_transaction_counter < 3) then
+						elsif (individual_transaction_counter < 5) then -- for 175 ns:
 							internal_chip_select <= '0';
 							internal_enable <= '0';
 						end if;
@@ -173,9 +173,12 @@ begin
 					else
 						transaction_required <= '0';
 						transaction_in_progress <= '0';
-						individual_transaction_counter <= "000";
+						individual_transaction_counter <= (others => '0');
 					end if;
 				end if;
+
+			--end if;
+--			if (clock_enable_7MHz = '1') then
 
 				if (internal_reset = '0' and initialization_phase = '1') then
 					if (transaction_in_progress = '0' and transaction_required = '0') then
@@ -255,7 +258,7 @@ begin
 							internal_data_command_not       <= '1';
 							normal_counter <= x"00000000";
 							transaction_in_progress <= '0';
-							individual_transaction_counter <= "000";
+							individual_transaction_counter <= (others => '0');
 							initialization_phase <= '0';
 							transaction_required <= '0';
 						end if;
@@ -264,7 +267,9 @@ begin
 
 				if (initialization_phase = '0') then
 					if (transaction_in_progress = '0' and transaction_required = '0') then
-						internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(normal_counter(14 downto 11));
+						--internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(normal_counter(14 downto 11));
+						--internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(x(3 downto 0));
+						internal_data_bus <= (x(8) and x(7)) & std_logic_vector(y(6 downto 0) xor x(6 downto 0));
 						if (row < row_end) then
 							row <= row + 1;
 						else
@@ -284,7 +289,7 @@ begin
 					end if;
 				end if;
 
-			end if;
+--			end if;
 		end if;
 	end process;
 end my_module_name_architecture;
@@ -296,7 +301,6 @@ end my_module_name_architecture;
 --package OLED_control is
 --	procedure chip_select_active();
 --end OLED_control;
-
 --package body OLED_control is
 --end OLED_control;
 
