@@ -337,8 +337,8 @@ begin
 					elsif (individual_transaction_counter < 2) then
 						internal_sync <= not internal_sync;
 						--internal_data_bus <= std_logic_vector(normal_counter(3 downto 0))
-						if (x2 = x2_start + 20) then
-							if (y = y_start + 20) then
+						if (y = y_start + 20) then
+							if (x2 = x2_start + 20) then
 								internal_data_bus <= x"ff";
 							else
 								--internal_data_bus <= (others => '0');
