@@ -6,7 +6,6 @@
 -- for driving a newhaven NHD-3.12-25664UCB2 OLED display
 -- connected to a universal_eval revB with a xilin xc3s400-4pq208 FPGA
 -- started 2013-12-26 by mza
--- last edited 2013-12-27 by mza
 ----------------------------------------------------------------------------------
 
 library IEEE;
@@ -77,11 +76,11 @@ architecture my_module_name_architecture of my_module_name is
 	signal normal_counter : unsigned(11 downto 0) := (others => '0');
 	signal individual_transaction_counter : unsigned(2 downto 0) := (others => '0');
 	signal x : unsigned(7 downto 0) := (others => '0');
-	signal y : unsigned(6 downto 0) := (others => '0');
+	signal y : unsigned(5 downto 0) := (others => '0');
 	signal x_start : unsigned(7 downto 0) := (others => '0');
 	signal x_end   : unsigned(7 downto 0) := (others => '0');
-	signal y_start : unsigned(6 downto 0) := (others => '0');
-	signal y_end   : unsigned(6 downto 0) := (others => '0');
+	signal y_start : unsigned(5 downto 0) := (others => '0');
+	signal y_end   : unsigned(5 downto 0) := (others => '0');
 	--procedure chip_select_active is
 	--begin
 	--	internal_chip_select_active_low <= '0';
@@ -133,14 +132,10 @@ begin
 					initialization_phase <= '1';
 					initialization_counter <= x"000";
 					normal_counter <= x"000";
-					--x_start <= to_unsigned( 28, 8);
-					--x_end   <= to_unsigned( 91, 8);
-					--y_start <= to_unsigned(  0, 7);
-					--y_end   <= to_unsigned( 63, 7);
-					x_start <= to_unsigned( 28, 8);
-					x_end   <= to_unsigned( 91, 8);
-					y_start <= to_unsigned(  0, 7);
-					y_end   <= to_unsigned(127, 7);
+					x_start <= to_unsigned(  0, 8);
+					x_end   <= to_unsigned(119, 8);
+					y_start <= to_unsigned(  0, 6);
+					y_end   <= to_unsigned(127, 6);
 				else
 					internal_reset_active_low <= '1';
 				end if;
@@ -190,7 +185,7 @@ begin
 						internal_enable <= '0';
 					--
 					elsif (initialization_counter < 19) then
-						internal_data_bus <= x"75"; -- set row start and end address (by the following two transactions)
+						internal_data_bus <= x"5c"; -- write to display ram
 					elsif (initialization_counter < 20) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 21) then
@@ -200,70 +195,6 @@ begin
 						internal_enable <= '0';
 					--
 					elsif (initialization_counter < 23) then
-						internal_data_command_not       <= '1';
-						internal_data_bus <= '0' & std_logic_vector(y_start); -- row start address
-					elsif (initialization_counter < 24) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 25) then
-						internal_chip_select_active_low <= '0';
-					elsif (initialization_counter < 26) then
-						internal_chip_select_active_low <= '1';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 27) then
-						internal_data_bus <= '0' & std_logic_vector(y_end); -- row end address
-					elsif (initialization_counter < 28) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 29) then
-						internal_chip_select_active_low <= '0';
-					elsif (initialization_counter < 30) then
-						internal_chip_select_active_low <= '1';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 31) then
-						internal_data_bus <= x"15"; -- set column start and end address (by the following two transactions)
-						internal_data_command_not       <= '0';
-					elsif (initialization_counter < 32) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 33) then
-						internal_chip_select_active_low <= '0';
-					elsif (initialization_counter < 34) then
-						internal_chip_select_active_low <= '1';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 35) then
-						internal_data_command_not       <= '1';
-						internal_data_bus <= std_logic_vector(x_start); -- column start address
-					elsif (initialization_counter < 36) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 37) then
-						internal_chip_select_active_low <= '0';
-					elsif (initialization_counter < 38) then
-						internal_chip_select_active_low <= '1';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 39) then
-						internal_data_bus <= std_logic_vector(x_end); -- column end address
-					elsif (initialization_counter < 40) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 41) then
-						internal_chip_select_active_low <= '0';
-					elsif (initialization_counter < 42) then
-						internal_chip_select_active_low <= '1';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 43) then
-						internal_data_command_not       <= '0';
-						internal_data_bus <= x"5c"; -- write to display ram
-					elsif (initialization_counter < 44) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 45) then
-						internal_chip_select_active_low <= '0';
-					elsif (initialization_counter < 46) then
-						internal_chip_select_active_low <= '1';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 47) then
 						--internal_data_bus <= x"00";
 						--internal_enable      <= '0';
 						--internal_read_write_not         <= '1';
@@ -274,47 +205,49 @@ begin
 						individual_transaction_counter <= "000";
 						x <= x_start;
 						y <= y_start;
-					elsif (initialization_counter < 48) then
+--						internal_data_bus <= x"12";
+					elsif (initialization_counter < 24) then
 						initialization_phase <= '0';
+--						internal_data_bus <= x"55";
 					end if;
 				end if;
+--			end if;
+--			if (clock_enable_3MHz = '1') then
 				if (initialization_phase = '0') then
 					if (individual_transaction_counter < 6) then
 						individual_transaction_counter <= individual_transaction_counter + 1;
+--						internal_data_bus <= x"99";
 					else
-						if (x <= x_end) then
-							x <= x + 1;
+						normal_counter <= normal_counter + 2;
+						if (x < x_end) then
+							x <= x + 2;
 						else
 							x <= x_start;
-							if (y <= y_end) then
+							if (y < y_end) then
 								y <= y + 1;
 							else
 								y <= y_start;
 							end if;
 						end if;
-						normal_counter <= normal_counter + 1;
 						individual_transaction_counter <= "000";
+--						internal_data_bus <= x"ab";
 					end if;
 					if (individual_transaction_counter < 1) then
 						internal_sync <= not internal_sync;
+--						internal_data_bus <= x"ee";
 					elsif (individual_transaction_counter < 2) then
 						internal_sync <= not internal_sync;
 						--internal_data_bus <= std_logic_vector(normal_counter(3 downto 0))
-						if (y = 44) then
-							if (x = 44) then
-								internal_data_bus <= x"ff";
-							else
-								internal_data_bus <= (others => '0');
-								--internal_data_bus <= x"0c";
-							end if;
-							--internal_data_bus <= std_logic_vector(x(3 downto 0))
-							--                   & std_logic_vector(y(3 downto 0));
+						if (x = 34) then
+							internal_data_bus <= std_logic_vector(x(3 downto 0))
+							                   & std_logic_vector(y(3 downto 0));
 						else
 							internal_data_bus <= (others => '0');
 --							internal_data_bus <= "0000"
 --							                   & std_logic_vector(normal_counter(9 downto 8)) & "00";
 						end if;
 						                   --& std_logic_vector(normal_counter(2 downto 0)) & '0';
+						--internal_data_bus <= x"47";
 					elsif (individual_transaction_counter < 3) then
 						internal_enable <= '1';
 					elsif (individual_transaction_counter < 4) then
