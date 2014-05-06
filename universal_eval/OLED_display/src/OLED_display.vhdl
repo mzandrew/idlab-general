@@ -4,8 +4,9 @@
 -- Instrumentation Development Lab
 --
 -- for driving a newhaven NHD-3.12-25664UCB2 OLED display
--- connected to a universal_eval revB with a xilin xc3s400-4pq208 FPGA
+-- connected to a universal_eval revB with a xilinx c3s400-4pq208 FPGA
 -- started 2013-12-26 by mza
+-- last edited 2013-12-30 by mza
 ----------------------------------------------------------------------------------
 
 library IEEE;
@@ -25,29 +26,29 @@ entity my_module_name is
 		clock_150               : in    STD_LOGIC;
 		clock_40                : in    STD_LOGIC;
 		sync                    :   out STD_LOGIC;
-		data_bus                : inout STD_LOGIC_VECTOR (7 downto 0);
-		enable       :   out STD_LOGIC;
-		read_write_not          :   out STD_LOGIC;
-		chip_select_active_low  :   out STD_LOGIC;
-		data_command_not        :   out STD_LOGIC;
-		reset_active_low        :   out STD_LOGIC;
-		interface_type_select   :   out STD_LOGIC_VECTOR (1 downto 0)
+		OLED_data_bus                : inout STD_LOGIC_VECTOR (7 downto 0);
+		OLED_enable                  :   out STD_LOGIC;
+		OLED_read_write_not          :   out STD_LOGIC;
+		OLED_chip_select_active_low  :   out STD_LOGIC;
+		OLED_data_command_not        :   out STD_LOGIC;
+		OLED_reset_active_low        :   out STD_LOGIC;
+		OLED_interface_type_select   :   out STD_LOGIC_VECTOR (1 downto 0)
 	);
 	attribute loc                   : string;
 --	attribute pullup                : string;
 	attribute iostandard            : string;
 	attribute clock_dedicated_route : string;
 	attribute box_type              : string;
-	attribute loc of clock_150              : signal is "p181";
-	attribute loc of clock_40               : signal is "p79";
-	attribute loc of data_bus               : signal is "p178,p176,p175,p172,p171,p169,p168,p166";
-	attribute loc of enable      : signal is "p165";
-	attribute loc of read_write_not         : signal is "p162";
-	attribute loc of chip_select_active_low : signal is "p161";
-	attribute loc of data_command_not       : signal is "p156";
-	attribute loc of reset_active_low       : signal is "p155";
-	attribute loc of interface_type_select  : signal is "p154,p152";
-	attribute loc of sync                   : signal is "p150";
+	attribute loc of clock_150                   : signal is "p181";
+	attribute loc of clock_40                    : signal is "p79";
+	attribute loc of OLED_data_bus               : signal is "p178,p176,p175,p172,p171,p169,p168,p166";
+	attribute loc of OLED_enable                 : signal is "p165";
+	attribute loc of OLED_read_write_not         : signal is "p162";
+	attribute loc of OLED_chip_select_active_low : signal is "p161";
+	attribute loc of OLED_data_command_not       : signal is "p156";
+	attribute loc of OLED_reset_active_low       : signal is "p155";
+	attribute loc of OLED_interface_type_select  : signal is "p154,p152";
+	attribute loc of sync                        : signal is "p150";
 --	attribute iostandard of data_bus                 : signal is "lvcmos";
 --	attribute clock_dedicated_route of copper2_localbus_chip_select_active_low : signal is "false";
 --	attribute iostandard of ibufgds : component is "LVDS_25";
@@ -61,11 +62,11 @@ architecture my_module_name_architecture of my_module_name is
 	signal internal_clock_20  : std_logic := '0';
 	signal internal_clock_3   : std_logic := '0';
 	signal internal_data_bus               : std_logic_vector(7 downto 0) := x"00";
-	signal internal_enable      : std_logic := '1';
+	signal internal_enable                 : std_logic := '0';
 	signal internal_read_write_not         : std_logic := '1';
-	signal internal_chip_select_active_low : std_logic := '1';
+	signal internal_chip_select            : std_logic := '0';
 	signal internal_data_command_not       : std_logic := '1';
-	signal internal_reset_active_low       : std_logic := '0';
+	signal internal_reset                  : std_logic := '1';
 	signal internal_interface_type_select  : std_logic_vector(1 downto 0) := "11";
 	signal clock_enable_1kHz : std_logic := '0';
 	signal clock_enable_3MHz : std_logic := '0';
@@ -75,12 +76,13 @@ architecture my_module_name_architecture of my_module_name is
 	signal initialization_phase : STD_LOGIC := '0';
 	signal normal_counter : unsigned(11 downto 0) := (others => '0');
 	signal individual_transaction_counter : unsigned(2 downto 0) := (others => '0');
-	signal x : unsigned(7 downto 0) := (others => '0');
-	signal y : unsigned(5 downto 0) := (others => '0');
-	signal x_start : unsigned(7 downto 0) := (others => '0');
-	signal x_end   : unsigned(7 downto 0) := (others => '0');
-	signal y_start : unsigned(5 downto 0) := (others => '0');
-	signal y_end   : unsigned(5 downto 0) := (others => '0');
+	signal x2 : unsigned(7 downto 0) := (others => '0');
+	signal y : unsigned(6 downto 0) := (others => '0');
+	signal x2_start : unsigned(7 downto 0) := (others => '0');
+	signal x2_end   : unsigned(7 downto 0) := (others => '0');
+	signal y_start  : unsigned(6 downto 0) := (others => '0');
+	signal y_end    : unsigned(6 downto 0) := (others => '0');
+	signal blargh : std_logic := '0';
 	--procedure chip_select_active is
 	--begin
 	--	internal_chip_select_active_low <= '0';
@@ -90,58 +92,80 @@ begin
 	internal_clock_150 <= clock_150;
 	internal_clock_40 <= clock_40;
 	sync <= internal_sync;
-	enable <= internal_enable;
-	read_write_not <= internal_read_write_not;
-	chip_select_active_low <= internal_chip_select_active_low;
-	data_command_not <= internal_data_command_not;
-	reset_active_low <= internal_reset_active_low;
-	interface_type_select <= internal_interface_type_select;
-	data_bus <= internal_data_bus;
+	OLED_enable                 <=     internal_enable;
+	OLED_read_write_not         <=     internal_read_write_not;
+	OLED_chip_select_active_low <= not internal_chip_select; -- enforce using positive logic internally
+	OLED_data_command_not       <=     internal_data_command_not;
+	OLED_reset_active_low       <= not internal_reset;       -- enforce using positive logic internally
+	OLED_interface_type_select  <=     internal_interface_type_select;
+	OLED_data_bus               <=     internal_data_bus;
 	--
-	mapper_1kHz : entity work.clock_enable_generator
+	clock_1kHz : entity work.clock_enable_generator
 		generic map (
-			DIVIDE_RATIO => 150000
+			DIVIDE_RATIO => 150000 -- 1 kHz
 		)
 		port map (
 			CLOCK_IN         => internal_clock_150,
 			CLOCK_ENABLE_OUT => clock_enable_1kHz
 		);
-	mapper_3MHz : entity work.clock_enable_generator
+	clock_3MHz : entity work.clock_enable_generator
 		generic map (
-			DIVIDE_RATIO => 45
+			--DIVIDE_RATIO => 45 -- 3.333 MHz
+			DIVIDE_RATIO => 21 -- 7.143 MHz, corresponding to 140 ns max read cycle timing
 		)
 		port map (
 			CLOCK_IN         => internal_clock_150,
 			CLOCK_ENABLE_OUT => clock_enable_3MHz
 		);
+--	OLED_control : entity work.OLED_controller
+		--generic map (
+		--	mode => 6800
+		--)
+--		port map (
+--			CLOCK            => internal_clock_150,
+--			CLOCK_ENABLE     => clock_enable_3MHz,
+--			OLED_ENABLE      => ,
+--			OLED_CHIP_SELECT => ,
+--		);
 	--
 	process (internal_clock_150)
 	begin
 		if rising_edge(internal_clock_150) then
 			if (clock_enable_1kHz = '1') then
+
 				if (reset_counter < 100) then
-					internal_reset_active_low <= '0';
 					reset_counter <= reset_counter + 1;
+					internal_reset                  <= '1';
 					internal_data_bus               <= x"00";
-					internal_enable      <= '1';
+					internal_enable                 <= '0';
 					internal_read_write_not         <= '1';
-					internal_chip_select_active_low <= '0';
+					internal_chip_select            <= '0';
 					internal_data_command_not       <= '1';
-					internal_reset_active_low       <= '0';
 					internal_interface_type_select  <= "11"; -- 6800 mode
 					initialization_phase <= '1';
 					initialization_counter <= x"000";
 					normal_counter <= x"000";
-					x_start <= to_unsigned(  0, 8);
-					x_end   <= to_unsigned(119, 8);
-					y_start <= to_unsigned(  0, 6);
-					y_end   <= to_unsigned(127, 6);
+					blargh <= '0';
+					--x_start <= to_unsigned( 28, 8);
+					--x_end   <= to_unsigned( 91, 8);
+					--y_start <= to_unsigned(  0, 7);
+					--y_end   <= to_unsigned( 63, 7);
+					y_start  <= to_unsigned( 28, 8);
+					y_end    <= to_unsigned( 91, 8);
+					x2_start <= to_unsigned(  0, 7);
+					x2_end   <= to_unsigned(127, 7);
+					--y_start  <= to_unsigned(  0, 8);
+					--y_end    <= to_unsigned(127, 8);
+					--x2_start <= to_unsigned( 28, 7);
+					--x2_end   <= to_unsigned( 91, 7);
 				else
-					internal_reset_active_low <= '1';
+					internal_reset <= '0';
 				end if;
+
 			end if;
 			if (clock_enable_3MHz = '1') then
-				if (internal_reset_active_low = '1' and initialization_phase = '1') then
+
+				if (internal_reset = '0' and initialization_phase = '1') then
 				--	if (initialization_counter < 1000) then
 						initialization_counter <= initialization_counter + 1;
 				--	else
@@ -158,9 +182,9 @@ begin
 					elsif (initialization_counter < 6) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 7) then
-						internal_chip_select_active_low <= '0';
+						internal_chip_select <= '1';
 					elsif (initialization_counter < 9) then
-						internal_chip_select_active_low <= '1';
+						internal_chip_select <= '0';
 						internal_enable <= '0';
 					--
 					elsif (initialization_counter < 10) then
@@ -168,9 +192,9 @@ begin
 					elsif (initialization_counter < 11) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 12) then
-						internal_chip_select_active_low <= '0';
+						internal_chip_select <= '1';
 					elsif (initialization_counter < 14) then
-						internal_chip_select_active_low <= '1';
+						internal_chip_select <= '0';
 						internal_enable <= '0';
 					--
 					elsif (initialization_counter < 15) then
@@ -179,85 +203,173 @@ begin
 					elsif (initialization_counter < 16) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 17) then
-						internal_chip_select_active_low <= '0';
+						internal_chip_select <= '1';
 					elsif (initialization_counter < 18) then
-						internal_chip_select_active_low <= '1';
+						internal_chip_select <= '0';
 						internal_enable <= '0';
 					--
 					elsif (initialization_counter < 19) then
-						internal_data_bus <= x"5c"; -- write to display ram
+						internal_data_bus <= x"75"; -- set row start and end address (by the following two transactions)
 					elsif (initialization_counter < 20) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 21) then
-						internal_chip_select_active_low <= '0';
+						internal_chip_select <= '1';
 					elsif (initialization_counter < 22) then
-						internal_chip_select_active_low <= '1';
+						internal_chip_select <= '0';
 						internal_enable <= '0';
 					--
 					elsif (initialization_counter < 23) then
+						internal_data_command_not       <= '1';
+						internal_data_bus <= '0' & std_logic_vector(y_start); -- row start address
+					elsif (initialization_counter < 24) then
+						internal_enable <= '1';
+					elsif (initialization_counter < 25) then
+						internal_chip_select <= '1';
+					elsif (initialization_counter < 26) then
+						internal_chip_select <= '0';
+						internal_enable <= '0';
+					--
+					elsif (initialization_counter < 27) then
+						internal_data_bus <= '0' & std_logic_vector(y_end); -- row end address
+					elsif (initialization_counter < 28) then
+						internal_enable <= '1';
+					elsif (initialization_counter < 29) then
+						internal_chip_select <= '1';
+					elsif (initialization_counter < 30) then
+						internal_chip_select <= '0';
+						internal_enable <= '0';
+					--
+					elsif (initialization_counter < 31) then
+						internal_data_bus <= x"15"; -- set column start and end address (by the following two transactions)
+						internal_data_command_not       <= '0';
+					elsif (initialization_counter < 32) then
+						internal_enable <= '1';
+					elsif (initialization_counter < 33) then
+						internal_chip_select <= '1';
+					elsif (initialization_counter < 34) then
+						internal_chip_select <= '0';
+						internal_enable <= '0';
+					--
+					elsif (initialization_counter < 35) then
+						internal_data_command_not       <= '1';
+						internal_data_bus <= std_logic_vector(x2_start); -- column start address
+					elsif (initialization_counter < 36) then
+						internal_enable <= '1';
+					elsif (initialization_counter < 37) then
+						internal_chip_select <= '1';
+					elsif (initialization_counter < 38) then
+						internal_chip_select <= '0';
+						internal_enable <= '0';
+					--
+					elsif (initialization_counter < 39) then
+						internal_data_bus <= std_logic_vector(x2_end); -- column end address
+					elsif (initialization_counter < 40) then
+						internal_enable <= '1';
+					elsif (initialization_counter < 41) then
+						internal_chip_select <= '1';
+					elsif (initialization_counter < 42) then
+						internal_chip_select <= '0';
+						internal_enable <= '0';
+					--
+					elsif (initialization_counter < 43) then
+						internal_data_command_not       <= '0';
+						internal_data_bus <= x"5c"; -- write to display ram
+					elsif (initialization_counter < 44) then
+						internal_enable <= '1';
+					elsif (initialization_counter < 45) then
+						internal_chip_select <= '1';
+					elsif (initialization_counter < 46) then
+						internal_chip_select <= '0';
+						internal_enable <= '0';
+					--
+					elsif (initialization_counter < 47) then
 						--internal_data_bus <= x"00";
 						--internal_enable      <= '0';
 						--internal_read_write_not         <= '1';
-						--internal_chip_select_active_low <= '1';
 						--internal_data_command_not       <= '1';
 						internal_data_command_not       <= '1';
 						normal_counter <= x"000";
 						individual_transaction_counter <= "000";
-						x <= x_start;
+						x2 <= x2_start;
 						y <= y_start;
---						internal_data_bus <= x"12";
-					elsif (initialization_counter < 24) then
+					elsif (initialization_counter < 48) then
 						initialization_phase <= '0';
---						internal_data_bus <= x"55";
 					end if;
 				end if;
---			end if;
---			if (clock_enable_3MHz = '1') then
+
+				if (blargh = '1' and internal_reset = '0' and initialization_phase = '1') then
+--					if (individual_transaction_counter < 6) then
+--						individual_transaction_counter <= individual_transaction_counter + 1;
+--					else
+--						normal_counter <= normal_counter + 1;
+--						individual_transaction_counter <= "000";
+--					end if;
+--					if (individual_transaction_counter < 1) then
+						internal_sync <= not internal_sync;
+--					elsif (individual_transaction_counter < 2) then
+--						internal_sync <= not internal_sync;
+--						--internal_data_bus <= std_logic_vector(normal_counter(3 downto 0))
+--					elsif (individual_transaction_counter < 3) then
+--						internal_enable <= '1';
+--					elsif (individual_transaction_counter < 4) then
+--						internal_chip_select <= '1';
+--					elsif (individual_transaction_counter < 5) then
+--						internal_chip_select <= '0';
+--						internal_enable <= '0';
+--					end if;
+--					--
+				end if;
+--						individual_transaction_counter <= "000";
+
 				if (initialization_phase = '0') then
-					if (individual_transaction_counter < 6) then
+					if (individual_transaction_counter < 7) then
 						individual_transaction_counter <= individual_transaction_counter + 1;
---						internal_data_bus <= x"99";
 					else
-						normal_counter <= normal_counter + 2;
-						if (x < x_end) then
-							x <= x + 2;
+						if (x2 <= x2_end) then
+							x2 <= x2 + 1;
 						else
-							x <= x_start;
-							if (y < y_end) then
+							x2 <= x2_start;
+							if (y <= y_end) then
 								y <= y + 1;
 							else
 								y <= y_start;
 							end if;
 						end if;
+						normal_counter <= normal_counter + 1;
 						individual_transaction_counter <= "000";
---						internal_data_bus <= x"ab";
 					end if;
 					if (individual_transaction_counter < 1) then
 						internal_sync <= not internal_sync;
---						internal_data_bus <= x"ee";
 					elsif (individual_transaction_counter < 2) then
 						internal_sync <= not internal_sync;
 						--internal_data_bus <= std_logic_vector(normal_counter(3 downto 0))
-						if (x = 34) then
-							internal_data_bus <= std_logic_vector(x(3 downto 0))
-							                   & std_logic_vector(y(3 downto 0));
+						if (y = 44) then
+							if (x2 = 44) then
+								internal_data_bus <= x"ff";
+							else
+								internal_data_bus <= (others => '0');
+								--internal_data_bus <= x"0c";
+							end if;
+							--internal_data_bus <= std_logic_vector(x(3 downto 0))
+							--                   & std_logic_vector(y(3 downto 0));
 						else
 							internal_data_bus <= (others => '0');
 --							internal_data_bus <= "0000"
 --							                   & std_logic_vector(normal_counter(9 downto 8)) & "00";
 						end if;
 						                   --& std_logic_vector(normal_counter(2 downto 0)) & '0';
-						--internal_data_bus <= x"47";
 					elsif (individual_transaction_counter < 3) then
 						internal_enable <= '1';
 					elsif (individual_transaction_counter < 4) then
-						internal_chip_select_active_low <= '0';
+						internal_chip_select <= '1';
 					elsif (individual_transaction_counter < 5) then
-						internal_chip_select_active_low <= '1';
+						internal_chip_select <= '0';
+					elsif (individual_transaction_counter < 6) then
 						internal_enable <= '0';
 					end if;
 					--
 				end if;
+
 			end if;
 		end if;
 	end process;
