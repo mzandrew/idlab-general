@@ -151,13 +151,16 @@ begin
 			if (clock_enable_1kHz = '1') then
 
 				if (reset_counter < 100) then
+					if (reset_counter = x"0000") then
+						internal_sync <= not internal_sync;
+					end if;
 					reset_counter <= reset_counter + 1;
 					internal_reset                  <= '1';
 					internal_data_bus               <= x"00";
 					internal_enable                 <= '0';
-					internal_read_write_not         <= '1';
+					internal_read_write_not         <= '0';
 					internal_chip_select            <= '0';
-					internal_data_command_not       <= '1';
+					internal_data_command_not       <= '0';
 					internal_interface_type_select  <= "11"; -- 6800 mode
 					initialization_phase <= '1';
 					initialization_counter <= x"000";
@@ -184,126 +187,67 @@ begin
 			end if;
 			if (clock_enable_7MHz = '1') then
 
-				if (internal_reset = '0' and initialization_phase = '1') then
-						initialization_counter <= initialization_counter + 1;
-					if (initialization_counter < 4) then
-						internal_read_write_not   <= '0';
-						internal_data_command_not <= '0';
-					--
-					elsif (initialization_counter < 5) then
-						--internal_data_bus <= x"a5"; -- all pixels on
-						internal_data_bus <= x"a6"; -- normal mode
-					elsif (initialization_counter < 6) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 7) then
-						internal_chip_select <= '1';
-					elsif (initialization_counter < 9) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 10) then
-						internal_data_bus <= x"af"; -- display on
-					elsif (initialization_counter < 11) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 12) then
-						internal_chip_select <= '1';
-					elsif (initialization_counter < 14) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 15) then
-						--internal_data_bus <= x"00"; -- enable grayscale mode with custom lut
-						internal_data_bus <= x"b9"; -- use linear grayscale lut
-					elsif (initialization_counter < 16) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 17) then
-						internal_chip_select <= '1';
-					elsif (initialization_counter < 18) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 19) then
-						internal_data_bus <= x"75"; -- set row start and end address (by the following two transactions)
-					elsif (initialization_counter < 20) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 21) then
-						internal_chip_select <= '1';
-					elsif (initialization_counter < 22) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 23) then
-						internal_data_command_not       <= '1';
-						internal_data_bus <= std_logic_vector(row_start); -- row start address
-						row <= row_start;
-					elsif (initialization_counter < 24) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 25) then
-						internal_chip_select <= '1';
-					elsif (initialization_counter < 26) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 27) then
-						internal_data_bus <= std_logic_vector(row_end); -- row end address
-					elsif (initialization_counter < 28) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 29) then
-						internal_chip_select <= '1';
-					elsif (initialization_counter < 30) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 31) then
-						internal_data_bus <= x"15"; -- set column start and end address (by the following two transactions)
-						internal_data_command_not       <= '0';
-					elsif (initialization_counter < 32) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 33) then
-						internal_chip_select <= '1';
-					elsif (initialization_counter < 34) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 35) then
-						internal_data_command_not       <= '1';
-						internal_data_bus <= '0' & std_logic_vector(column_start); -- column start address
-						column <= column_start;
-					elsif (initialization_counter < 36) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 37) then
-						internal_chip_select <= '1';
-					elsif (initialization_counter < 38) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 39) then
-						internal_data_bus <= '0' & std_logic_vector(column_end); -- column end address
-					elsif (initialization_counter < 40) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 41) then
-						internal_chip_select <= '1';
-					elsif (initialization_counter < 42) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 43) then
-						internal_data_command_not       <= '0';
-						internal_data_bus <= x"5c"; -- write to display ram
-					elsif (initialization_counter < 44) then
-						internal_enable <= '1';
-					elsif (initialization_counter < 45) then
-						internal_chip_select <= '1';
-					elsif (initialization_counter < 46) then
-						internal_chip_select <= '0';
-						internal_enable <= '0';
-					--
-					elsif (initialization_counter < 47) then
-						internal_data_command_not       <= '1';
-						normal_counter <= x"000";
-						individual_transaction_counter <= "000";
+				if (transaction_required = '1') then
+					if (individual_transaction_counter < 4) then
+						transaction_in_progress <= '1';
+						if (individual_transaction_counter < 1) then
+							internal_sync <= not internal_sync;
+							internal_enable <= '1';
+						elsif (individual_transaction_counter < 2) then
+							internal_chip_select <= '1';
+						elsif (individual_transaction_counter < 3) then
+							internal_chip_select <= '0';
+							internal_enable <= '0';
+						end if;
+						individual_transaction_counter <= individual_transaction_counter + 1;
 					else
-						initialization_phase <= '0';
+						-- setup for next transaction:
+						transaction_required <= '0';
+						transaction_in_progress <= '0';
+						individual_transaction_counter <= "000";
+					end if;
+				end if;
+
+				if (internal_reset = '0' and initialization_phase = '1') then
+					if (transaction_in_progress = '0' and transaction_required = '0') then
+						initialization_counter <= initialization_counter + 1;
+						transaction_required <= '1';
+						if (initialization_counter < 1) then
+							internal_read_write_not   <= '0';
+							internal_data_command_not <= '0';
+							--internal_data_bus <= x"a5"; -- all pixels on
+							internal_data_bus <= x"a6"; -- normal mode
+						elsif (initialization_counter < 2) then
+							internal_data_bus <= x"af"; -- display on
+						elsif (initialization_counter < 3) then
+							--internal_data_bus <= x"00"; -- enable grayscale mode with custom lut
+							internal_data_bus <= x"b9"; -- use linear grayscale lut
+						elsif (initialization_counter < 4) then
+							internal_data_bus <= x"75"; -- set row start and end address (by the following two transactions)
+						elsif (initialization_counter < 5) then
+							internal_data_command_not       <= '1';
+							internal_data_bus <= std_logic_vector(row_start); -- row start address
+						elsif (initialization_counter < 6) then
+							internal_data_bus <= std_logic_vector(row_end); -- row end address
+						elsif (initialization_counter < 7) then
+							internal_data_command_not       <= '0';
+							internal_data_bus <= x"15"; -- set column start and end address (by the following two transactions)
+						elsif (initialization_counter < 8) then
+							internal_data_command_not       <= '1';
+							internal_data_bus <= '0' & std_logic_vector(column_start); -- column start address
+						elsif (initialization_counter < 9) then
+							internal_data_bus <= '0' & std_logic_vector(column_end); -- column end address
+						elsif (initialization_counter < 10) then
+							internal_data_command_not       <= '0';
+							internal_data_bus <= x"5c"; -- write to display ram
+						else
+							internal_data_command_not       <= '1';
+							normal_counter <= x"000";
+							transaction_in_progress <= '0';
+							individual_transaction_counter <= "000";
+							initialization_phase <= '0';
+							transaction_required <= '0';
+						end if;
 					end if;
 				end if;
 
@@ -315,7 +259,7 @@ begin
 					-- these two should be outside the clocked part:
 					x <= 2 * (   row - row_start   );
 					y <=      column - column_start;
-					if (transaction_in_progress = '0') then
+					if (transaction_in_progress = '0' and transaction_required = '0') then
 						internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(normal_counter(3 downto 0));
 						if (row < row_end) then
 							row <= row + 1;
@@ -329,28 +273,6 @@ begin
 						end if;
 						normal_counter <= normal_counter + 1;
 						transaction_required <= '1';
-					end if;
-				end if;
-
-				if (transaction_required = '1') then
-					transaction_required <= '0';
-					if (individual_transaction_counter < 4) then
-						transaction_in_progress <= '1';
-						if (individual_transaction_counter < 1) then
-							internal_sync <= not internal_sync;
-							internal_enable <= '1';
-						elsif (individual_transaction_counter < 2) then
-							internal_sync <= not internal_sync;
-							internal_chip_select <= '1';
-						elsif (individual_transaction_counter < 3) then
-							internal_chip_select <= '0';
-							internal_enable <= '0';
-						end if;
-						individual_transaction_counter <= individual_transaction_counter + 1;
-					else
-						-- setup for next transaction:
-						transaction_in_progress <= '0';
-						individual_transaction_counter <= "000";
 					end if;
 				end if;
 
