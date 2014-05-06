@@ -230,6 +230,7 @@ begin
 					elsif (initialization_counter < 23) then
 						internal_data_command_not       <= '1';
 						internal_data_bus <= std_logic_vector(row_start); -- row start address
+						row <= row_start;
 					elsif (initialization_counter < 24) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 25) then
@@ -262,6 +263,7 @@ begin
 					elsif (initialization_counter < 35) then
 						internal_data_command_not       <= '1';
 						internal_data_bus <= '0' & std_logic_vector(column_start); -- column start address
+						column <= column_start;
 					elsif (initialization_counter < 36) then
 						internal_enable <= '1';
 					elsif (initialization_counter < 37) then
@@ -295,41 +297,19 @@ begin
 						internal_data_command_not       <= '1';
 						normal_counter <= x"000";
 						individual_transaction_counter <= "000";
-						row <= row_start;
-						column <= column_start;
 					else
 						initialization_phase <= '0';
 					end if;
 				end if;
 
 				if (blargh = '1' and internal_reset = '0' and initialization_phase = '1') then
---					if (individual_transaction_counter < 6) then
---						individual_transaction_counter <= individual_transaction_counter + 1;
---					else
---						normal_counter <= normal_counter + 1;
---						individual_transaction_counter <= "000";
---					end if;
---					if (individual_transaction_counter < 1) then
-						internal_sync <= not internal_sync;
---					elsif (individual_transaction_counter < 2) then
---						internal_sync <= not internal_sync;
---						--internal_data_bus <= std_logic_vector(normal_counter(3 downto 0))
---					elsif (individual_transaction_counter < 3) then
---						internal_enable <= '1';
---					elsif (individual_transaction_counter < 4) then
---						internal_chip_select <= '1';
---					elsif (individual_transaction_counter < 5) then
---						internal_chip_select <= '0';
---						internal_enable <= '0';
---					end if;
---					--
 				end if;
 --						individual_transaction_counter <= "000";
 
 				if (initialization_phase = '0') then
 					x <= 2 * (   row - row_start   );
 					y <=      column - column_start;
-					if (individual_transaction_counter < 7) then
+					if (individual_transaction_counter < 4) then
 						individual_transaction_counter <= individual_transaction_counter + 1;
 					else
 						if (row < row_end) then
@@ -347,26 +327,13 @@ begin
 					end if;
 					if (individual_transaction_counter < 1) then
 						internal_sync <= not internal_sync;
+						internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(normal_counter(3 downto 0));
+						internal_enable <= '1';
 					elsif (individual_transaction_counter < 2) then
 						internal_sync <= not internal_sync;
-						--internal_data_bus <= std_logic_vector(normal_counter(3 downto 0))
---						if (x = 20 or x = 22) then -- takes 153.8 us to write a whole horizontal line in the dumb mode (6.667 MHz clock cycles)
---							if (x2 = x2_start + 20) then
-								--internal_data_bus <= '1' & std_logic_vector(y(4 downto 2)) & '1' & std_logic_vector(y(4 downto 2));
-								internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(y(5 downto 2));
---							else
-								--internal_data_bus <= (others => '0');
---							end if;
---						else
---							internal_data_bus <= (others => '0');
---						end if;
-					elsif (individual_transaction_counter < 3) then
-						internal_enable <= '1';
-					elsif (individual_transaction_counter < 4) then
 						internal_chip_select <= '1';
-					elsif (individual_transaction_counter < 5) then
+					elsif (individual_transaction_counter < 3) then
 						internal_chip_select <= '0';
-					elsif (individual_transaction_counter < 6) then
 						internal_enable <= '0';
 					end if;
 					--
@@ -376,6 +343,12 @@ begin
 		end if;
 	end process;
 end my_module_name_architecture;
+
+--						if (x = 20 or x = 22) then -- takes 153.8 us to write a whole horizontal line in the dumb mode (6.667 MHz clock cycles)
+--						if (x = 20) then
+							--internal_data_bus <= '1' & std_logic_vector(y(4 downto 2)) & '1' & std_logic_vector(y(4 downto 2));
+							--internal_data_bus <= std_logic_vector(y(5 downto 2)) & std_logic_vector(y(5 downto 2));
+--						end if;
 
 --use work.OLED_control.all;
 --package OLED_control is
