@@ -47,7 +47,7 @@ Analyzing Entity <my_module_name> in library <work> (Architecture <my_module_nam
     Set user-defined property "LOC =  p156" for signal <OLED_data_command_not> in unit <my_module_name>.
     Set user-defined property "LOC =  p155" for signal <OLED_reset_active_low> in unit <my_module_name>.
     Set user-defined property "LOC =  p154 p152" for signal <OLED_interface_type_select> in unit <my_module_name>.
-WARNING:Xst:1610 - "C:/mza/FPGA/idlab-general/universal_eval/OLED_display/src/OLED_display.vhdl" line 330: Width mismatch. <x> has a width of 8 bits but assigned expression is 16-bit wide.
+WARNING:Xst:1610 - "C:/mza/FPGA/idlab-general/universal_eval/OLED_display/src/OLED_display.vhdl" line 310: Width mismatch. <x> has a width of 8 bits but assigned expression is 16-bit wide.
 INFO:Xst:2679 - Register <internal_interface_type_select> in unit <my_module_name> has a constant value of 11 during circuit operation. The register is replaced by logic.
 INFO:Xst:2679 - Register <blargh> in unit <my_module_name> has a constant value of 0 during circuit operation. The register is replaced by logic.
 INFO:Xst:2679 - Register <row_start> in unit <my_module_name> has a constant value of 00000000 during circuit operation. The register is replaced by logic.
@@ -108,63 +108,58 @@ WARNING:Xst:646 - Signal <y<6>> is assigned but never used. This unconnected sig
 WARNING:Xst:646 - Signal <y<1:0>> is assigned but never used. This unconnected signal will be trimmed during the optimization process.
 WARNING:Xst:646 - Signal <x> is assigned but never used. This unconnected signal will be trimmed during the optimization process.
 WARNING:Xst:646 - Signal <clock_enable_50MHz> is assigned but never used. This unconnected signal will be trimmed during the optimization process.
+WARNING:Xst:646 - Signal <blargh> is assigned but never used. This unconnected signal will be trimmed during the optimization process.
     Found 7-bit register for signal <column>.
-    Found 7-bit adder for signal <column$addsub0000> created at line 340.
-    Found 7-bit comparator less for signal <column$cmp_lt0000> created at line 339.
+    Found 7-bit adder for signal <column$addsub0000> created at line 320.
+    Found 7-bit comparator less for signal <column$cmp_lt0000> created at line 319.
     Found 7-bit register for signal <column_end>.
     Found 7-bit register for signal <column_start>.
     Found 3-bit register for signal <individual_transaction_counter>.
-    Found 3-bit adder for signal <individual_transaction_counter$addsub0000> created at line 333.
+    Found 3-bit adder for signal <individual_transaction_counter$addsub0000> created at line 313.
     Found 12-bit register for signal <initialization_counter>.
     Found 12-bit adder for signal <initialization_counter$addsub0000> created at line 183.
     Found 1-bit register for signal <initialization_phase>.
-    Found 12-bit comparator less for signal <initialization_phase$cmp_lt0000> created at line 292.
+    Found 12-bit comparator less for signal <initialization_phase$cmp_lt0000> created at line 294.
     Found 1-bit register for signal <internal_chip_select>.
-    Found 3-bit comparator greatequal for signal <internal_chip_select$cmp_ge0000> created at line 366.
-    Found 3-bit comparator greatequal for signal <internal_chip_select$cmp_ge0001> created at line 349.
-    Found 3-bit comparator greatequal for signal <internal_chip_select$cmp_ge0002> created at line 348.
-    Found 12-bit comparator greatequal for signal <internal_chip_select$cmp_ge0003> created at line 289.
-    Found 3-bit comparator less for signal <internal_chip_select$cmp_lt0000> created at line 348.
-    Found 3-bit comparator less for signal <internal_chip_select$cmp_lt0001> created at line 349.
-    Found 3-bit comparator less for signal <internal_chip_select$cmp_lt0002> created at line 356.
-    Found 3-bit comparator less for signal <internal_chip_select$cmp_lt0003> created at line 364.
+    Found 3-bit comparator greatequal for signal <internal_chip_select$cmp_ge0000> created at line 334.
+    Found 12-bit comparator greatequal for signal <internal_chip_select$cmp_ge0001> created at line 291.
+    Found 3-bit comparator less for signal <internal_chip_select$cmp_lt0000> created at line 328.
+    Found 3-bit comparator less for signal <internal_chip_select$cmp_lt0001> created at line 331.
     Found 8-bit register for signal <internal_data_bus>.
     Found 1-bit register for signal <internal_data_command_not>.
     Found 1-bit register for signal <internal_enable>.
-    Found 3-bit comparator greatequal for signal <internal_enable$cmp_ge0000> created at line 368.
-    Found 3-bit comparator greatequal for signal <internal_enable$cmp_ge0001> created at line 364.
-    Found 3-bit comparator greatequal for signal <internal_enable$cmp_ge0002> created at line 356.
-    Found 3-bit comparator less for signal <internal_enable$cmp_lt0000> created at line 366.
+    Found 3-bit comparator greatequal for signal <internal_enable$cmp_ge0000> created at line 328.
     Found 1-bit register for signal <internal_read_write_not>.
     Found 1-bit register for signal <internal_reset>.
     Found 16-bit comparator less for signal <internal_reset$cmp_lt0000> created at line 150.
     Found 1-bit register for signal <internal_sync>.
+    Found 3-bit comparator greatequal for signal <internal_sync$cmp_ge0000> created at line 331.
     Found 12-bit register for signal <normal_counter>.
-    Found 12-bit adder for signal <normal_counter$addsub0000> created at line 345.
+    Found 12-bit adder for signal <normal_counter$addsub0000> created at line 325.
     Found 16-bit comparator greatequal for signal <normal_counter$cmp_ge0000> created at line 150.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0001> created at line 292.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0002> created at line 287.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0003> created at line 285.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0004> created at line 281.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0005> created at line 278.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0006> created at line 276.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0007> created at line 274.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0008> created at line 271.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0009> created at line 268.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0010> created at line 266.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0011> created at line 264.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0012> created at line 260.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0013> created at line 257.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0014> created at line 255.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0015> created at line 253.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0016> created at line 249.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0017> created at line 246.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0018> created at line 244.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0019> created at line 242.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0020> created at line 239.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0021> created at line 236.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0022> created at line 234.
-    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0023> created at line 232.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0001> created at line 294.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0002> created at line 289.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0003> created at line 287.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0004> created at line 283.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0005> created at line 280.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0006> created at line 278.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0007> created at line 276.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0008> created at line 273.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0009> created at line 270.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0010> created at line 268.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0011> created at line 266.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0012> created at line 261.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0013> created at line 258.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0014> created at line 256.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0015> created at line 254.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0016> created at line 250.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0017> created at line 247.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0018> created at line 245.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0019> created at line 243.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0020> created at line 240.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0021> created at line 237.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0022> created at line 235.
+    Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0023> created at line 233.
     Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0024> created at line 228.
     Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0025> created at line 225.
     Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0026> created at line 223.
@@ -183,7 +178,7 @@ WARNING:Xst:646 - Signal <clock_enable_50MHz> is assigned but never used. This u
     Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0039> created at line 190.
     Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0040> created at line 186.
     Found 12-bit comparator greatequal for signal <normal_counter$cmp_ge0041> created at line 184.
-    Found 3-bit comparator less for signal <normal_counter$cmp_lt0000> created at line 332.
+    Found 3-bit comparator less for signal <normal_counter$cmp_lt0000> created at line 312.
     Found 12-bit comparator less for signal <normal_counter$cmp_lt0001> created at line 184.
     Found 12-bit comparator less for signal <normal_counter$cmp_lt0002> created at line 186.
     Found 12-bit comparator less for signal <normal_counter$cmp_lt0003> created at line 190.
@@ -202,41 +197,41 @@ WARNING:Xst:646 - Signal <clock_enable_50MHz> is assigned but never used. This u
     Found 12-bit comparator less for signal <normal_counter$cmp_lt0016> created at line 223.
     Found 12-bit comparator less for signal <normal_counter$cmp_lt0017> created at line 225.
     Found 12-bit comparator less for signal <normal_counter$cmp_lt0018> created at line 228.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0019> created at line 232.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0020> created at line 234.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0021> created at line 236.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0022> created at line 239.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0023> created at line 242.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0024> created at line 244.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0025> created at line 246.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0026> created at line 249.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0027> created at line 253.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0028> created at line 255.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0029> created at line 257.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0030> created at line 260.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0031> created at line 264.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0032> created at line 266.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0033> created at line 268.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0034> created at line 271.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0035> created at line 274.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0036> created at line 276.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0037> created at line 278.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0038> created at line 281.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0039> created at line 285.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0040> created at line 287.
-    Found 12-bit comparator less for signal <normal_counter$cmp_lt0041> created at line 289.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0019> created at line 233.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0020> created at line 235.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0021> created at line 237.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0022> created at line 240.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0023> created at line 243.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0024> created at line 245.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0025> created at line 247.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0026> created at line 250.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0027> created at line 254.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0028> created at line 256.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0029> created at line 258.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0030> created at line 261.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0031> created at line 266.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0032> created at line 268.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0033> created at line 270.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0034> created at line 273.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0035> created at line 276.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0036> created at line 278.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0037> created at line 280.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0038> created at line 283.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0039> created at line 287.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0040> created at line 289.
+    Found 12-bit comparator less for signal <normal_counter$cmp_lt0041> created at line 291.
     Found 16-bit up counter for signal <reset_counter>.
     Found 8-bit register for signal <row>.
-    Found 8-bit adder for signal <row$addsub0000> created at line 336.
-    Found 8-bit comparator less for signal <row$cmp_lt0000> created at line 335.
+    Found 8-bit adder for signal <row$addsub0000> created at line 316.
+    Found 8-bit comparator less for signal <row$cmp_lt0000> created at line 315.
     Found 8-bit register for signal <row_end>.
     Found 7-bit register for signal <y>.
-    Found 7-bit subtractor for signal <y$sub0000> created at line 331.
+    Found 7-bit subtractor for signal <y$sub0000> created at line 311.
     Summary:
 	inferred   1 Counter(s).
 	inferred  86 D-type flip-flop(s).
 	inferred   6 Adder/Subtractor(s).
-	inferred 100 Comparator(s).
+	inferred  94 Comparator(s).
 Unit <my_module_name> synthesized.
 
 
@@ -244,8 +239,8 @@ Unit <my_module_name> synthesized.
 HDL Synthesis Report
 
 Macro Statistics
-# Adders/Subtractors                                   : 5
- 12-bit adder                                          : 1
+# Adders/Subtractors                                   : 6
+ 12-bit adder                                          : 2
  3-bit adder                                           : 1
  7-bit adder                                           : 1
  7-bit subtractor                                      : 1
@@ -254,19 +249,19 @@ Macro Statistics
  16-bit up counter                                     : 2
  2-bit up counter                                      : 1
  3-bit up counter                                      : 1
-# Registers                                            : 19
+# Registers                                            : 20
  1-bit register                                        : 10
- 12-bit register                                       : 1
+ 12-bit register                                       : 2
  3-bit register                                        : 1
  7-bit register                                        : 4
  8-bit register                                        : 3
-# Comparators                                          : 100
+# Comparators                                          : 94
  12-bit comparator greatequal                          : 42
  12-bit comparator less                                : 42
  16-bit comparator greatequal                          : 1
  16-bit comparator less                                : 1
- 3-bit comparator greatequal                           : 6
- 3-bit comparator less                                 : 6
+ 3-bit comparator greatequal                           : 3
+ 3-bit comparator less                                 : 3
  7-bit comparator less                                 : 1
  8-bit comparator less                                 : 1
 
@@ -308,12 +303,12 @@ WARNING:Xst:1426 - The value init of the FF/Latch column_end_4 hinder the consta
    You should achieve better results by setting this init to 1.
 WARNING:Xst:1426 - The value init of the FF/Latch column_end_6 hinder the constant cleaning in the block my_module_name.
    You should achieve better results by setting this init to 1.
-WARNING:Xst:1293 - FF/Latch <column_start_0> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
+WARNING:Xst:1293 - FF/Latch <column_end_2> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
+WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <column_end_5> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
+WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <column_start_0> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
 WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <column_start_1> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
 WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <column_start_5> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
 WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <column_start_6> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
-WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <column_end_2> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
-WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <column_end_5> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
 WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <row_end_7> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
 WARNING:Xst:2677 - Node <y_0> of sequential type is unconnected in block <my_module_name>.
 WARNING:Xst:2677 - Node <y_1> of sequential type is unconnected in block <my_module_name>.
@@ -326,8 +321,8 @@ WARNING:Xst:2677 - Node <y_6> of sequential type is unconnected in block <my_mod
 Advanced HDL Synthesis Report
 
 Macro Statistics
-# Adders/Subtractors                                   : 5
- 12-bit adder                                          : 1
+# Adders/Subtractors                                   : 6
+ 12-bit adder                                          : 2
  3-bit adder                                           : 1
  7-bit adder                                           : 1
  7-bit subtractor                                      : 1
@@ -336,15 +331,15 @@ Macro Statistics
  16-bit up counter                                     : 2
  2-bit up counter                                      : 1
  3-bit up counter                                      : 1
-# Registers                                            : 74
- Flip-Flops                                            : 74
-# Comparators                                          : 100
+# Registers                                            : 86
+ Flip-Flops                                            : 86
+# Comparators                                          : 94
  12-bit comparator greatequal                          : 42
  12-bit comparator less                                : 42
  16-bit comparator greatequal                          : 1
  16-bit comparator less                                : 1
- 3-bit comparator greatequal                           : 6
- 3-bit comparator less                                 : 6
+ 3-bit comparator greatequal                           : 3
+ 3-bit comparator less                                 : 3
  7-bit comparator less                                 : 1
  8-bit comparator less                                 : 1
 
@@ -392,22 +387,29 @@ WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <column_end_5> has a
 WARNING:Xst:1896 - Due to other FF/Latch trimming, FF/Latch <row_end_7> has a constant value of 0 in block <my_module_name>. This FF/Latch will be trimmed during the optimization process.
 INFO:Xst:2261 - The FF/Latch <column_start_2> in Unit <my_module_name> is equivalent to the following 14 FFs/Latches, which will be removed : <column_start_3> <column_start_4> <column_end_0> <column_end_1> <column_end_3> <column_end_4> <column_end_6> <row_end_0> <row_end_1> <row_end_2> <row_end_3> <row_end_4> <row_end_5> <row_end_6> 
 WARNING:Xst:2677 - Node <clock_50MHz/internal_COUNTER_RESET> of sequential type is unconnected in block <my_module_name>.
+WARNING:Xst:2677 - Node <normal_counter_4> of sequential type is unconnected in block <my_module_name>.
+WARNING:Xst:2677 - Node <normal_counter_5> of sequential type is unconnected in block <my_module_name>.
+WARNING:Xst:2677 - Node <normal_counter_6> of sequential type is unconnected in block <my_module_name>.
+WARNING:Xst:2677 - Node <normal_counter_7> of sequential type is unconnected in block <my_module_name>.
+WARNING:Xst:2677 - Node <normal_counter_8> of sequential type is unconnected in block <my_module_name>.
+WARNING:Xst:2677 - Node <normal_counter_9> of sequential type is unconnected in block <my_module_name>.
+WARNING:Xst:2677 - Node <normal_counter_10> of sequential type is unconnected in block <my_module_name>.
+WARNING:Xst:2677 - Node <normal_counter_11> of sequential type is unconnected in block <my_module_name>.
 
 Optimizing unit <my_module_name> ...
 
 Mapping all equations...
 Building and optimizing final netlist ...
-Found area constraint ratio of 100 (+ 5) on block my_module_name, actual ratio is 9.
+Found area constraint ratio of 100 (+ 5) on block my_module_name, actual ratio is 10.
 FlipFlop initialization_counter_0 has been replicated 1 time(s)
 FlipFlop initialization_counter_1 has been replicated 1 time(s)
-FlipFlop initialization_counter_10 has been replicated 1 time(s)
+FlipFlop initialization_counter_10 has been replicated 2 time(s)
 FlipFlop initialization_counter_11 has been replicated 2 time(s)
-FlipFlop initialization_counter_2 has been replicated 1 time(s)
+FlipFlop initialization_counter_2 has been replicated 2 time(s)
 FlipFlop initialization_counter_3 has been replicated 1 time(s)
-FlipFlop initialization_counter_4 has been replicated 1 time(s)
 FlipFlop initialization_counter_5 has been replicated 1 time(s)
 FlipFlop initialization_counter_6 has been replicated 1 time(s)
-FlipFlop initialization_counter_7 has been replicated 1 time(s)
+FlipFlop initialization_counter_7 has been replicated 2 time(s)
 FlipFlop initialization_counter_8 has been replicated 2 time(s)
 FlipFlop initialization_counter_9 has been replicated 2 time(s)
 
@@ -417,8 +419,8 @@ Final Macro Processing ...
 Final Register Report
 
 Macro Statistics
-# Registers                                            : 102
- Flip-Flops                                            : 102
+# Registers                                            : 108
+ Flip-Flops                                            : 108
 
 =========================================================================
 
@@ -442,7 +444,7 @@ Clock Information:
 -----------------------------------+------------------------+-------+
 Clock Signal                       | Clock buffer(FF name)  | Load  |
 -----------------------------------+------------------------+-------+
-clock_40                           | BUFGP                  | 102   |
+clock_40                           | BUFGP                  | 108   |
 -----------------------------------+------------------------+-------+
 
 Asynchronous Control Signals Information:
@@ -453,9 +455,9 @@ Timing Summary:
 ---------------
 Speed Grade: -4
 
-   Minimum period: 18.596ns (Maximum Frequency: 53.776MHz)
+   Minimum period: 17.538ns (Maximum Frequency: 57.018MHz)
    Minimum input arrival time before clock: No path found
-   Maximum output required time after clock: 9.316ns
+   Maximum output required time after clock: 9.529ns
    Maximum combinational path delay: No path found
 
 =========================================================================
@@ -547,16 +549,16 @@ Design Summary:
 Number of errors:      0
 Number of warnings:    0
 Logic Utilization:
-  Number of Slice Flip Flops:           102 out of   7,168    1%
-  Number of 4 input LUTs:               525 out of   7,168    7%
+  Number of Slice Flip Flops:           108 out of   7,168    1%
+  Number of 4 input LUTs:               595 out of   7,168    8%
 Logic Distribution:
-  Number of occupied Slices:            338 out of   3,584    9%
-    Number of Slices containing only related logic:     338 out of     338 100%
-    Number of Slices containing unrelated logic:          0 out of     338   0%
+  Number of occupied Slices:            376 out of   3,584   10%
+    Number of Slices containing only related logic:     376 out of     376 100%
+    Number of Slices containing unrelated logic:          0 out of     376   0%
       *See NOTES below for an explanation of the effects of unrelated logic.
-  Total Number of 4 input LUTs:         612 out of   7,168    8%
-    Number used as logic:               525
-    Number used as a route-thru:         87
+  Total Number of 4 input LUTs:         684 out of   7,168    9%
+    Number used as logic:               595
+    Number used as a route-thru:         89
 
   The Slice Logic Distribution report is not meaningful if the design is
   over-mapped for a non-slice resource or if Placement fails.
@@ -564,7 +566,7 @@ Logic Distribution:
   Number of bonded IOBs:                 18 out of     141   12%
   Number of BUFGMUXs:                     1 out of       8   12%
 
-Average Fanout of Non-Clock Nets:                3.65
+Average Fanout of Non-Clock Nets:                3.66
 
 Peak Memory Usage:  258 MB
 Total REAL time to MAP completion:  1 secs 
@@ -616,7 +618,7 @@ Device Utilization Summary:
    Number of External IOBs                  18 out of 141    12%
       Number of LOCed IOBs                  18 out of 18    100%
 
-   Number of Slices                        338 out of 3584    9%
+   Number of Slices                        376 out of 3584   10%
       Number of SLICEMs                      0 out of 1792    0%
 
 
@@ -636,36 +638,36 @@ Total REAL time at the beginning of Placer: 1 secs
 Total CPU  time at the beginning of Placer: 1 secs 
 
 Phase 1.1  Initial Placement Analysis
-Phase 1.1  Initial Placement Analysis (Checksum:537d87b7) REAL time: 1 secs 
+Phase 1.1  Initial Placement Analysis (Checksum:537dbf74) REAL time: 1 secs 
 
 Phase 2.7  Design Feasibility Check
-Phase 2.7  Design Feasibility Check (Checksum:537d87b7) REAL time: 1 secs 
+Phase 2.7  Design Feasibility Check (Checksum:537dbf74) REAL time: 1 secs 
 
 Phase 3.31  Local Placement Optimization
-Phase 3.31  Local Placement Optimization (Checksum:537d87b7) REAL time: 1 secs 
+Phase 3.31  Local Placement Optimization (Checksum:537dbf74) REAL time: 1 secs 
 
 Phase 4.2  Initial Clock and IO Placement
 
-Phase 4.2  Initial Clock and IO Placement (Checksum:b01def1f) REAL time: 1 secs 
+Phase 4.2  Initial Clock and IO Placement (Checksum:b01e26dc) REAL time: 1 secs 
 
 Phase 5.36  Local Placement Optimization
-Phase 5.36  Local Placement Optimization (Checksum:b01def1f) REAL time: 1 secs 
+Phase 5.36  Local Placement Optimization (Checksum:b01e26dc) REAL time: 1 secs 
 
 Phase 6.8  Global Placement
-...............
-.....
-Phase 6.8  Global Placement (Checksum:546b7177) REAL time: 3 secs 
+...........
+......
+Phase 6.8  Global Placement (Checksum:81bdf634) REAL time: 3 secs 
 
 Phase 7.5  Local Placement Optimization
-Phase 7.5  Local Placement Optimization (Checksum:546b7177) REAL time: 3 secs 
+Phase 7.5  Local Placement Optimization (Checksum:81bdf634) REAL time: 3 secs 
 
 Phase 8.18  Placement Optimization
-Phase 8.18  Placement Optimization (Checksum:77dd9e4a) REAL time: 3 secs 
+Phase 8.18  Placement Optimization (Checksum:a7637a5f) REAL time: 3 secs 
 
 Phase 9.5  Local Placement Optimization
-Phase 9.5  Local Placement Optimization (Checksum:77dd9e4a) REAL time: 3 secs 
+Phase 9.5  Local Placement Optimization (Checksum:a7637a5f) REAL time: 3 secs 
 
-Total REAL time to Placer completion: 4 secs 
+Total REAL time to Placer completion: 3 secs 
 Total CPU  time to Placer completion: 3 secs 
 Writing design to file my_module_name.ncd
 
@@ -674,13 +676,13 @@ Writing design to file my_module_name.ncd
 Starting Router
 
 
-Phase  1  : 2170 unrouted;      REAL time: 4 secs 
+Phase  1  : 2439 unrouted;      REAL time: 4 secs 
 
-Phase  2  : 2054 unrouted;      REAL time: 4 secs 
+Phase  2  : 2314 unrouted;      REAL time: 4 secs 
 
-Phase  3  : 982 unrouted;      REAL time: 4 secs 
+Phase  3  : 1097 unrouted;      REAL time: 4 secs 
 
-Phase  4  : 982 unrouted; (Setup:0, Hold:0, Component Switching Limit:0)     REAL time: 4 secs 
+Phase  4  : 1097 unrouted; (Setup:0, Hold:0, Component Switching Limit:0)     REAL time: 4 secs 
 
 Phase  5  : 0 unrouted; (Setup:0, Hold:0, Component Switching Limit:0)     REAL time: 4 secs 
 
@@ -711,7 +713,7 @@ Generating Clock Report
 +---------------------+--------------+------+------+------------+-------------+
 |        Clock Net    |   Resource   |Locked|Fanout|Net Skew(ns)|Max Delay(ns)|
 +---------------------+--------------+------+------+------------+-------------+
-|      clock_40_BUFGP |      BUFGMUX0| No   |   74 |  0.020     |  1.034      |
+|      clock_40_BUFGP |      BUFGMUX0| No   |   78 |  0.020     |  1.034      |
 +---------------------+--------------+------+------+------------+-------------+
 
 * Net Skew is the difference between the minimum and maximum routing
@@ -731,8 +733,8 @@ Asterisk (*) preceding a constraint indicates it was not met.
   Constraint                                |    Check    | Worst Case |  Best Case | Timing |   Timing   
                                             |             |    Slack   | Achievable | Errors |    Score   
 ----------------------------------------------------------------------------------------------------------
-  ts_clock_40 = PERIOD TIMEGRP "clock_40" 2 | SETUP       |     7.220ns|    17.780ns|       0|           0
-  5 ns HIGH 50%                             | HOLD        |     0.827ns|            |       0|           0
+  ts_clock_40 = PERIOD TIMEGRP "clock_40" 2 | SETUP       |     7.694ns|    17.306ns|       0|           0
+  5 ns HIGH 50%                             | HOLD        |     0.855ns|            |       0|           0
 ----------------------------------------------------------------------------------------------------------
 
 
@@ -748,7 +750,7 @@ WARNING:Par:283 - There are 1 loadless signals in this design. This design will 
 Total REAL time to PAR completion: 5 secs 
 Total CPU time to PAR completion: 5 secs 
 
-Peak Memory Usage:  269 MB
+Peak Memory Usage:  275 MB
 
 Placement: Completed - No errors found.
 Routing: Completed - No errors found.
@@ -774,13 +776,13 @@ C:\Xilinx\14.7\ISE_DS\ISE\.
    "my_module_name" is an NCD, version 3.2, device xc3s400, package pq208, speed
 -4
 
-Analysis completed Tue May 06 13:27:05 2014
+Analysis completed Tue May 06 13:28:21 2014
 --------------------------------------------------------------------------------
 
 Generating Report ...
 
 Number of warnings: 0
-Total time: 0 secs 
+Total time: 1 secs 
 
 Process "Generate Post-Place & Route Static Timing" completed successfully
 
