@@ -8,18 +8,12 @@
 -- started 2013-12-26 by mza
 -- originally based on code from http://code.google.com/p/idlab-daq/source/browse/iTOP-DSP_FIN-COPPER-FINESSE/branches/finesse_copper_local_bus_test/FPGA/src/top.vhdl; concept for ucf-less vhdl from Nakao-san
 -- core of the code came together on 2014-01-02 (Isaac Asimov's birthday)
--- last edited 2014-01-06 by mza
+-- last edited 2014-05-07 by mza
 ----------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-
----- Uncomment the following library declaration if instantiating
----- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
---use work.clock_enable_generator.all;
 
 entity my_module_name is
 	Port (
@@ -61,7 +55,6 @@ end my_module_name;
 
 architecture my_module_name_architecture of my_module_name is
 	signal internal_sync      : std_logic := '0';
---	signal internal_clock_150 : std_logic := '0';
 	signal internal_clock_40  : std_logic := '0';
 	signal internal_data_bus               : std_logic_vector(7 downto 0) := x"00";
 	signal internal_enable                 : std_logic := '0';
@@ -71,8 +64,6 @@ architecture my_module_name_architecture of my_module_name is
 	signal internal_reset                  : std_logic := '1';
 	signal internal_interface_type_select  : std_logic_vector(1 downto 0) := "11";
 	signal clock_enable_1kHz  : std_logic := '0';
---	signal clock_enable_7MHz  : std_logic := '0';
---	signal clock_enable_50MHz : std_logic := '0';
 	constant size_of_reset_counter : integer := 16;
 	constant a_prime_number : integer := 16381;
 	signal reset_counter : unsigned(size_of_reset_counter-1 downto 0) := (others => '0');
@@ -92,7 +83,6 @@ architecture my_module_name_architecture of my_module_name is
 	signal transaction_in_progress : std_logic := '0';
 
 begin
---	internal_clock_150 <= clock_150;
 	internal_clock_40 <= clock_40;
 	sync <= internal_sync;
 	x <=    row - row_start     & '0';
@@ -113,16 +103,6 @@ begin
 			CLOCK_IN         => internal_clock_40,
 			CLOCK_ENABLE_OUT => clock_enable_1kHz
 		);
---	clock_7MHz : entity work.clock_enable_generator
---		generic map (
---			--DIVIDE_RATIO => 45 -- 3.333 MHz
---			--DIVIDE_RATIO => 21 -- 7.143 MHz, corresponding to 140 ns max read cycle timing
---			DIVIDE_RATIO => 6 -- 6.667 MHz, corresponding to 140 ns max read cycle timing
---		)
---		port map (
---			CLOCK_IN         => internal_clock_40,
---			CLOCK_ENABLE_OUT => clock_enable_7MHz
---		);
 
 	process (internal_clock_40)
 	begin
@@ -155,30 +135,27 @@ begin
 				end if;
 
 			end if;
-			--if (clock_enable_40MHz = '1') then
 
 				if (transaction_required = '1') then
-					if (individual_transaction_counter < 10) then -- 300 ns cycle time (takes a cycle to get here, and the end part of this block takes another
+					if (individual_transaction_counter < 10) then      -- total 300 ns cycle time
+					                                                   -- (takes a cycle to get here, and the end part of this block takes another)
 						transaction_in_progress <= '1';
-						if (individual_transaction_counter < 1) then -- for 25 ns:
+						if (individual_transaction_counter < 1) then    -- itc = 0 (for 25 ns)
 							internal_sync <= not internal_sync;
 							internal_enable <= '1';
-						elsif (individual_transaction_counter < 2) then -- for 75 ns:
+						elsif (individual_transaction_counter < 4) then -- itc = 1, 2, 3 (for 75 ns)
 							internal_chip_select <= '1';
-						elsif (individual_transaction_counter < 5) then -- for 175 ns:
+						else                                            -- itc = 4, 5, 6, 7, 8, 9 (for 150 ns)
 							internal_chip_select <= '0';
 							internal_enable <= '0';
 						end if;
 						individual_transaction_counter <= individual_transaction_counter + 1;
-					else
+					else                                               -- itc = 10 (for 25 ns)
 						transaction_required <= '0';
 						transaction_in_progress <= '0';
 						individual_transaction_counter <= (others => '0');
 					end if;
 				end if;
-
-			--end if;
---			if (clock_enable_7MHz = '1') then
 
 				if (internal_reset = '0' and initialization_phase = '1') then
 					if (transaction_in_progress = '0' and transaction_required = '0') then
@@ -289,13 +266,9 @@ begin
 					end if;
 				end if;
 
---			end if;
 		end if;
 	end process;
 end my_module_name_architecture;
-
---						if (x = 20 or x = 22) then -- takes 153.8 us to write a whole horizontal line in the original version of dumb mode (6.667 MHz clock cycles)
---						if (x = 20 or x = 22) then -- takes 230.4 us to write a whole horizontal line in the newer transaction-based version of dumb mode (6.667 MHz clock cycles)
 
 --use work.OLED_control.all;
 --package OLED_control is
@@ -303,4 +276,3 @@ end my_module_name_architecture;
 --end OLED_control;
 --package body OLED_control is
 --end OLED_control;
-
