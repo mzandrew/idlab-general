@@ -1,0 +1,26 @@
+AUTHORS:
+Bronson Edralin <bedralin@hawaii.edu>
+University of Hawaii at Manoa
+Instrumentation Development Lab (IDLab), WAT214
+
+COLLABORATION:
+IDLab from Dept of Physics, University of Hawaii at Manoa
+Center for Exploration of Energy and Matter, University of Indiana
+
+HVB ASSEMBLY TEST TEAM:
+SOFTWARE = Bronson Edralin <bedralin@hawaii.edu>
+HARDWARE = James Bynes <bynes@hawaii.edu>
+ADVISOR/TEST LEADER = Gerard Visser <gvisser@indiana.edu>
+
+DESCRIPTION:
+This is an automated test written to test the HVB Assembly Boards. 
+There should be around 90 of these up for testing. Just run the script 
+on Raspberry Pi (RPi) and it will generate a csv file in directory
+of your choosing. By default, it should be in the "results" directory.
+
+INSTRUMENTS USED:
+ISEG SHQ226L High Voltage Power Supply
+KEITHLEY 2010 Multimeter
+ 
+HOW TO RUN:
+sudo python main.py
