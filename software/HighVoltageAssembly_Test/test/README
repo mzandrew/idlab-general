@@ -1,0 +1,31 @@
+AUTHORS:
+Bronson Edralin <bedralin@hawaii.edu>
+University of Hawaii at Manoa
+Instrumentation Development Lab (IDLab), WAT214
+
+DESCRIPTION:
+You can use any one of these scripts to debug any commands
+of the instrument that you are testing over USB
+to RS232 connection or Ethernet connection. In order for
+you to use these scripts, they must be in the same folder
+as link.py and the library of the instrument that
+you are using. link.py has the RS232 and Ethernet modules
+written to establish communication between the Raspberry
+Pi and the instrument so you can send commands to them.
+The libraries, such as iseg_SHQ226L.py and keithley_2010.py, 
+hold the special string commands that the instruments accept. 
+
+INSTRUMENTS USED:
+ISEG SHQ226L High Voltage Power Supply
+KEITHLEY 2010 Multimeter
+
+SCRIPTS USED:
+tst_ethernet.py  
+tst_iseg.py  
+tst_keith.py  
+tst_serial.py
+
+HOW TO RUN:
+mv tst_serial.py ..
+sudo python tst_serial.py
+

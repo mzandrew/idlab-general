@@ -1,0 +1,124 @@
+2015-01-09 01:27:29,070 Test for HVB Assembly with Serial Number #wowzers started!!!
+2015-01-09 01:28:31,908 Status of ISEG HV Supply with PSvoltageSet=50V is: 
+2015-01-09 01:28:31,910 	ISEG HV Supply Channel #1:
+2015-01-09 01:28:31,913 	>> actual voltage = -00500e-01 V
+2015-01-09 01:28:31,916 	>> actual current = 00011e-09 A
+2015-01-09 01:28:31,918 	ISEG HV Supply Channel #2:
+2015-01-09 01:28:31,920 	>> actual voltage = -00501e-01 V
+2015-01-09 01:28:31,923 	>> actual current = 00003e-09 A
+2015-01-09 01:30:36,903 Test for HVB Assembly with Serial Number #wowzers ended!!!
+2015-01-09 01:36:35,947 Test for HVB Assembly with Serial Number #wowzers started!!!
+2015-01-09 01:42:49,470 Status of ISEG HV Supply with PSvoltageSet=60V is: 
+2015-01-09 01:42:49,473 	ISEG HV Supply Channel #1:
+2015-01-09 01:42:49,476 	>> actual voltage = -00600e-01 V
+2015-01-09 01:42:49,478 	>> actual current = 00000e-09 A
+2015-01-09 01:42:49,480 	ISEG HV Supply Channel #2:
+2015-01-09 01:42:49,483 	>> actual voltage = -00600e-01 V
+2015-01-09 01:42:49,485 	>> actual current = 00003e-09 A
+2015-01-09 01:44:54,596 Test for HVB Assembly with Serial Number #wowzers ended!!!
+2015-01-09 01:47:48,563 Test for HVB Assembly with Serial Number #wowman started!!!
+2015-01-09 01:51:18,748 Test for HVB Assembly with Serial Number #wowman started!!!
+2015-01-09 01:51:41,314 Status of ISEG HV Supply with PSvoltageSet=100V is: 
+2015-01-09 01:51:41,316 	ISEG HV Supply Channel #1:
+2015-01-09 01:51:41,319 	>> actual voltage = -01000e-01 V
+2015-01-09 01:51:41,321 	>> actual current = 00000e-09 A
+2015-01-09 01:51:41,324 	ISEG HV Supply Channel #2:
+2015-01-09 01:51:41,327 	>> actual voltage = -01000e-01 V
+2015-01-09 01:51:41,329 	>> actual current = 00003e-09 A
+2015-01-09 01:53:46,364 Test for HVB Assembly with Serial Number #wowman ended!!!
+2015-01-09 06:26:14,919 Test for HVB Assembly with Serial Number #wowmanyousee started!!!
+2015-01-09 06:27:40,486 Test for HVB Assembly with Serial Number #wowwmanyousee started!!!
+2015-01-09 06:28:06,372 Status of ISEG HV Supply with PSvoltageSet=100V is: 
+2015-01-09 06:28:06,374 	ISEG HV Supply Channel #1:
+2015-01-09 06:28:06,380 	>> actual voltage = -01000e-01 V
+2015-01-09 06:28:06,382 	>> actual current = 00000e-09 A
+2015-01-09 06:28:06,384 	ISEG HV Supply Channel #2:
+2015-01-09 06:28:06,386 	>> actual voltage = -01000e-01 V
+2015-01-09 06:28:06,389 	>> actual current = 00003e-09 A
+2015-01-09 06:30:11,523 Test for HVB Assembly with Serial Number #wowwmanyousee ended!!!
+2015-01-09 06:43:11,036 Test for HVB Assembly with Serial Number #eeeek started!!!
+2015-01-09 06:44:08,849 Test for HVB Assembly with Serial Number #eeeeek started!!!
+2015-01-09 06:45:34,959 Test for HVB Assembly with Serial Number #eeeek started!!!
+2015-01-09 06:46:43,651 Test for HVB Assembly with Serial Number #eeeeek started!!!
+2015-01-09 06:48:47,288 Test for HVB Assembly with Serial Number #eeeek started!!!
+2015-01-09 06:50:39,437 Test for HVB Assembly with Serial Number #eeeeeeek started!!!
+2015-01-09 06:55:40,522 Test for HVB Assembly with Serial Number #eeeeeek started!!!
+2015-01-09 06:56:21,639 Status of ISEG HV Supply with PSvoltageSet=50V is: 
+2015-01-09 06:56:21,642 	ISEG HV Supply Channel #1:
+2015-01-09 06:58:27,308 Test for HVB Assembly with Serial Number #yessir started!!!
+2015-01-09 06:58:43,234 Status of ISEG HV Supply with PSvoltageSet=100V is: 
+2015-01-09 06:58:43,237 	ISEG HV Supply Channel #1:
+2015-01-09 06:58:43,239 	>> actual voltage = -99.90 V
+2015-01-09 06:58:43,241 	>> actual current = 0.00 uA
+2015-01-09 06:58:43,243 	ISEG HV Supply Channel #2:
+2015-01-09 06:58:43,247 	>> actual voltage = -100.00 V
+2015-01-09 06:58:43,249 	>> actual current = 0.01 uA
+2015-01-09 07:00:48,344 Test for HVB Assembly with Serial Number #yessir ended!!!
+2015-01-09 20:17:24,691 Test for HVB Assembly with Serial Number #yesmanwow started!!!
+2015-01-09 20:18:13,473 Test for HVB Assembly with Serial Number #yesmanwow2 started!!!
+2015-01-09 20:21:46,409 Test for HVB Assembly with Serial Number #yesmanwow3 started!!!
+2015-01-09 20:25:06,347 Test for HVB Assembly with Serial Number #checking1 started!!!
+2015-01-09 20:27:04,477 Test for HVB Assembly with Serial Number #checking2 started!!!
+2015-01-09 20:52:34,968 Test for HVB Assembly with Serial Number #wowzers started!!!
+2015-01-09 20:57:38,188 Test for HVB Assembly with Serial Number #wowman started!!!
+2015-01-09 20:58:05,203 Status of ISEG HV Supply with PSvoltageSet=100V is: 
+2015-01-09 20:58:05,205 	ISEG HV Supply Channel #1:
+2015-01-09 20:58:05,209 	>> actual voltage = -100.00 V
+2015-01-09 20:58:05,211 	>> actual current = 0.00 uA
+2015-01-09 20:58:05,213 	ISEG HV Supply Channel #2:
+2015-01-09 20:58:05,215 	>> actual voltage = -100.00 V
+2015-01-09 20:58:05,218 	>> actual current = 0.00 uA
+2015-01-09 21:04:58,504 Test for HVB Assembly with Serial Number #wowman ended!!!
+2015-01-09 21:09:25,539 Test for HVB Assembly with Serial Number #wowzers5 started!!!
+2015-01-09 21:09:25,542 ISEG Voltage must be between 0 and 4400 for test
+2015-01-09 21:13:38,314 Test for HVB Assembly with Serial Number #testmeman started!!!
+2015-01-09 21:13:38,318 ISEG Voltage must be between 0 and 4400 for test
+2015-01-09 21:14:17,122 Test for HVB Assembly with Serial Number #wowman started!!!
+2015-01-09 21:14:17,124 ISEG Voltage must be between 0 and 4400 for test
+2015-01-09 21:21:11,488 Test for HVB Assembly with Serial Number #wowman started!!!
+2015-01-09 21:21:11,491 ISEG Voltage must be between 0 and 4400 for test
+2015-01-09 21:22:39,287 Test for HVB Assembly with Serial Number #wowmancheckitout started!!!
+2015-01-09 21:23:37,949 Status of ISEG HV Supply with PSvoltageSet=150V is: 
+2015-01-09 21:23:37,951 	ISEG HV Supply Channel #1:
+2015-01-09 21:23:37,953 	>> actual voltage = -150.00 V
+2015-01-09 21:23:37,957 	>> actual current = 0.00 uA
+2015-01-09 21:23:37,959 	ISEG HV Supply Channel #2:
+2015-01-09 21:23:37,961 	>> actual voltage = -150.10 V
+2015-01-09 21:23:37,964 	>> actual current = 0.00 uA
+2015-01-09 21:25:46,283 Test for HVB Assembly with Serial Number #wowmancheckitout ended!!!
+2015-01-09 22:10:07,081 Test for HVB Assembly with Serial Number #exit started!!!
+2015-01-09 22:11:52,710 Test for HVB Assembly with Serial Number #testing1234 started!!!
+2015-01-09 22:12:33,205 Status of ISEG HV Supply with PSvoltageSet=150V is: 
+2015-01-09 22:12:33,207 	ISEG HV Supply Channel #1:
+2015-01-09 22:12:33,209 	>> actual voltage = -150.10 V
+2015-01-09 22:12:33,212 	>> actual current = 0.00 uA
+2015-01-09 22:12:33,214 	ISEG HV Supply Channel #2:
+2015-01-09 22:12:33,217 	>> actual voltage = -150.00 V
+2015-01-09 22:12:33,219 	>> actual current = 0.00 uA
+2015-01-09 22:14:41,596 Test for HVB Assembly with Serial Number #testing1234 ended!!!
+2015-01-09 22:39:28,229 Test for HVB Assembly with Serial Number #testwhynot1234 started!!!
+2015-01-09 22:40:30,421 Status of ISEG HV Supply with PSvoltageSet=1000V is: 
+2015-01-09 22:40:30,423 	ISEG HV Supply Channel #1:
+2015-01-09 22:40:30,425 	>> actual voltage = -1000.10 V
+2015-01-09 22:40:30,429 	>> actual current = 0.00 uA
+2015-01-09 22:40:30,431 	ISEG HV Supply Channel #2:
+2015-01-09 22:40:30,433 	>> actual voltage = -1000.00 V
+2015-01-09 22:40:30,435 	>> actual current = 0.00 uA
+2015-01-09 22:42:38,773 Test for HVB Assembly with Serial Number #testwhynot1234 ended!!!
+2015-01-09 23:53:25,674 Test for HVB Assembly with Serial Number #testmeok1234 started!!!
+2015-01-09 23:54:35,664 Status of ISEG HV Supply with PSvoltageSet=1234V is: 
+2015-01-09 23:54:35,667 	ISEG HV Supply Channel #1:
+2015-01-09 23:54:35,669 	>> actual voltage = 1234.00 V
+2015-01-09 23:54:35,671 	>> actual current = 0.00 uA
+2015-01-09 23:54:35,674 	ISEG HV Supply Channel #2:
+2015-01-09 23:54:35,677 	>> actual voltage = 1234.00 V
+2015-01-09 23:54:35,679 	>> actual current = 0.00 uA
+2015-01-10 00:06:26,602 Test for HVB Assembly with Serial Number #testme1234 started!!!
+2015-01-10 00:07:30,953 Status of ISEG HV Supply with PSvoltageSet=1234V is: 
+2015-01-10 00:07:30,957 	ISEG HV Supply Channel #1:
+2015-01-10 00:07:30,959 	>> actual voltage = 1234.10 V
+2015-01-10 00:07:30,962 	>> actual current = 0.00 uA
+2015-01-10 00:07:30,964 	ISEG HV Supply Channel #2:
+2015-01-10 00:07:30,966 	>> actual voltage = 1234.00 V
+2015-01-10 00:07:30,969 	>> actual current = 0.00 uA
+2015-01-10 00:09:39,187 Test for HVB Assembly with Serial Number #testme1234 ended!!!
