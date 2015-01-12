@@ -92,7 +92,9 @@ class Iseg_SHQ226L(object):
 	    Output: return break time of ISEG in ms '''
         #print ("W")  #Uncomment for debug
         #self.link.ask_print("W")  # Print Instrument's Resp
-        return str(self.link.ask("W")).split()[-1].replace('-','e-').lstrip('e')
+        raw = self.link.ask("W")
+	break_time = raw.split()[-1].replace('-','e-').lstrip('e')
+	return break_time
 
     # Write break time
     # (break time 0 ... 255 ms)
@@ -116,7 +118,10 @@ class Iseg_SHQ226L(object):
 	    Output: return actual voltage (V) in scientific notation '''
         #print ("U"+self.chan)  #Uncomment for debug
         #self.link.ask_print("U"+self.chan)  # Print Instrument's Resp  
-        return str(self.link.ask("U"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+        raw = str(self.link.ask("U"+self.chan))
+	#print "Raw Actual_voltage is: "+str(raw)
+	actual_voltage = raw.split()[-1].replace('-','e-').lstrip('e')
+	return actual_voltage
 
     # Read actual current (A) on channel
     # {mantisse/exp. with sign}	    (in A) 
@@ -126,7 +131,8 @@ class Iseg_SHQ226L(object):
             Output: return actual current (A) in scientific notation '''
         #print ("I"+self.chan)  #Uncomment for debug
         #self.link.ask_print("I"+self.chan)  # Print Instrument's Resp  
-        return str(self.link.ask("I"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+        actual_current = str(self.link.ask("I"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+	return actual_current
 
     # Read voltage limit on channel
     # (in % of V_outmax) 
@@ -136,7 +142,8 @@ class Iseg_SHQ226L(object):
 	    Output: return voltage limit '''
         #print ("M"+self.chan)  #Uncomment for debug
         #self.link.ask_print("M"+self.chan)  # Print Instrument's Resp  
-        return str(self.link.ask("M"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+        voltage_limit = str(self.link.ask("M"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+	return voltage_limit
 
     # Read current limit on channel
     # (in % of I_outmax) 
@@ -146,7 +153,8 @@ class Iseg_SHQ226L(object):
 	    Output: return current limit '''
         #print ("N"+self.chan)  #Uncomment for debug
         #self.link.ask_print("N"+self.chan)  # Print Instrument's Resp  
-        return str(self.link.ask("N"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+        current_limit = str(self.link.ask("N"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+	return current_limit
 
     # Read set voltage on channel
     # {mantisse/exp. with sign}     (in V) 
@@ -182,7 +190,8 @@ class Iseg_SHQ226L(object):
 	    Output: return ramp speed (V/s) in scientific notation '''
         #print ("V"+self.chan)  #Uncomment for debug
 	#self.link.ask_print("V"+self.chan)  # Print Instrument's Resp
-        return str(self.link.ask("V"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+        ramp_speed = str(self.link.ask("V"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+	return ramp_speed
 
     # Write ramp speed on channel
     # (ramp speed = 2 - 255 V/s)
@@ -208,7 +217,8 @@ class Iseg_SHQ226L(object):
 		    NOTE: MUST SET CHANNEL NUMB BEFORE USING THIS '''
         #print ("G"+self.chan)  #Uncomment for debug
         #self.link.ask_print("G"+self.chan)  # Print Instrument's Resp
-        return str(self.link.ask("G"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+        start_voltage_change = str(self.link.ask("G"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+	return start_voltage_change
 
     # Read current trip on channel 
     # (trip corresponding resolution Range: A>0) 
@@ -218,7 +228,8 @@ class Iseg_SHQ226L(object):
 	    Output: current trip on channel (A) '''
         #print ("L"+self.channel)  #Uncomment for debug
         #self.link.ask_print("L"+self.chan)  # Print Instrument's Resp
-        return str(self.link.ask("L"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+        current_trip_A = str(self.link.ask("L"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+	return current_trip_A
 
     # Write current trip on channel  (Range: A)
     @current_trip_A.setter
@@ -241,7 +252,8 @@ class Iseg_SHQ226L(object):
             Output: current trip on channel (mA) '''
         #print ("LB"+self.chan)  #Uncomment for debug
         #self.link.ask_print("LB"+self.chan)  # Print Instrument's Resp
-        return str(self.link.ask("LB"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+        current_trip_mA = str(self.link.ask("LB"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+	return current_trip_mA
 
     # Write current trip on channel (Range: mA)
     @current_trip_mA.setter
@@ -264,7 +276,8 @@ class Iseg_SHQ226L(object):
             Output: current trip on channel (uA) '''
         #print ("LS"+self.chan)  #Uncomment for debug
         #self.link.ask_print("LS"+self.chan)  # Print Instrument's Resp
-        return str(self.link.ask("LS"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+        current_trip_uA = str(self.link.ask("LS"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+	return current_trip_uA
 
     # Write current trip on channel (Range: uA)
     @current_trip_uA.setter
@@ -287,8 +300,8 @@ class Iseg_SHQ226L(object):
 	    Output: return auto start status '''
         #print ("A"+self.chan)  #Uncomment for debug
         #self.link.ask_print("A"+self.chan)  # Print Instrument's Resp
-        return str(self.link.ask("A"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
-
+        auto_start = str(self.link.ask("A"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+	return auto_start
 
     # Write auto start on channel 
     @auto_start.setter
@@ -310,7 +323,8 @@ class Iseg_SHQ226L(object):
             Output: return status information '''
         #print ("S"+self.chan)  #Uncomment for debug
         #self.link.ask_print("S"+self.chan)  # Print Instrument's Resp
-        return str(self.link.ask("S"+self.chan)).split()[-1]
+        status_word = str(self.link.ask("S"+self.chan)).split()[-1]
+	return status_word
 
     # Read module status information 
     # (code 0...255, => Module Status)
@@ -320,8 +334,8 @@ class Iseg_SHQ226L(object):
             Output: return module status information '''
         #print ("T"+self.chan)  #Uncomment for debug
         #self.link.ask_print("T"+self.chan)  # Print Instrument's Resp
-        return str(self.link.ask("T"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
-
+        module_status = str(self.link.ask("T"+self.chan)).split()[-1].replace('-','e-').lstrip('e')
+	return module_status
 
 
 
