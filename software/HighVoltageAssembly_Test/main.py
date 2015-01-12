@@ -86,7 +86,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     CYAN = '\033[96m'
-
+    BROWN = '\033[33m'
 
 # Creating logfile for the hvb assembly test. It's a great way to keep track of the tests that we make
 logging.basicConfig(filename='HVB_ASSEMBLY_TEST_log',level=logging.DEBUG,format='%(asctime)s %(message)s')
@@ -104,13 +104,13 @@ print bcolors.OKBLUE+"\tADVISOR/TEST LEADER: Gerard Visser <gvisser@indiana.edu>
 
 print bcolors.HEADER+"Recommended voltage for test using unpotted boards is 1kV, and 4kV after potted. If you want to change this parameter setting or anything else, please do so in main.py\n"
 print "Current Parameters are:"+bcolors.ENDC
-print bcolors.CYAN+"\t>> Keithley Mult Addr = "+MULTIMETER_ADDR
-print "\t>> ISEG HV Supply Addr = "+HV_SUPPLY_ADDR
-print "\t>> ISEG Voltage (V) = "+ISEG_VOLTAGE+" V"
-print "\t>> ISEG RAMP Voltage Speed (V/s) = "+ISEG_RAMP_SPEED+" V/s"
-print "\t>> TIME PERIOD(s) for Switching = "+TIME_PERIOD+" sec"
-print "\t>> PURPOSE = "+PURPOSE
-print "\t>> CSV file will be stored in: "+LOC_DIR_FOR_STORING_CSV+bcolors.ENDC
+print bcolors.CYAN+"\t>> Keithley Mult Addr = "+bcolors.BOLD+MULTIMETER_ADDR+bcolors.ENDC
+print bcolors.CYAN+"\t>> ISEG HV Supply Addr = "+bcolors.BOLD+HV_SUPPLY_ADDR+bcolors.ENDC
+print bcolors.CYAN+"\t>> ISEG Voltage (V) = "+bcolors.BOLD+ISEG_VOLTAGE+" V"+bcolors.ENDC
+print bcolors.CYAN+"\t>> ISEG RAMP Voltage Speed (V/s) = "+bcolors.BOLD+ISEG_RAMP_SPEED+" V/s"+bcolors.ENDC
+print bcolors.CYAN+"\t>> TIME PERIOD(s) for Switching = "+bcolors.BOLD+TIME_PERIOD+" sec"+bcolors.ENDC
+print bcolors.CYAN+"\t>> PURPOSE = "+bcolors.BOLD+PURPOSE+bcolors.ENDC
+print bcolors.CYAN+"\t>> CSV file will be stored in: "+bcolors.BOLD+LOC_DIR_FOR_STORING_CSV+bcolors.ENDC
 print "\n"
 
 ts=time.time()

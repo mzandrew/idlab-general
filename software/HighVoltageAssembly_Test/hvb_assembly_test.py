@@ -57,6 +57,8 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     CYAN = '\033[96m'
+    BROWN = '\033[33m'
+
 
 # Creating logfile for the hvb assembly test. It's a great way to keep track of the tests that we make
 logging.basicConfig(filename='HVB_ASSEMBLY_TEST_log',level=logging.DEBUG,format='%(asctime)s %(message)s')
@@ -213,21 +215,21 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
     print "\tISEG HV Supply Channel #"+channel1+":"
     actual_voltage1_error = abs(actual_voltage1-float(ISEG_VOLTAGE))
     if (actual_voltage1_error >= 10): # Error
-	print "\t>> actual voltage = "+bcolors.FAIL+"%0.2f V"%actual_voltage1+bcolors.ENDC
+	print "\t>> actual voltage = "+bcolors.FAIL+bcolors.BOLD+"%0.2f V"%actual_voltage1+bcolors.ENDC
     elif (actual_voltage1_error >= 0.5) and (actual_voltage1_error < 10): # Warning
-        print "\t>> actual voltage = "+bcolors.WARNING+"%0.2f V"%actual_voltage1+bcolors.ENDC
+        print "\t>> actual voltage = "+bcolors.CYAN+bcolors.BOLD+"%0.2f V"%actual_voltage1+bcolors.ENDC
     else:                             # OKAY
-        print "\t>> actual voltage = "+bcolors.OKGREEN+"%0.2f V"%actual_voltage1+bcolors.ENDC
+        print "\t>> actual voltage = "+bcolors.OKGREEN+bcolors.BOLD+"%0.2f V"%actual_voltage1+bcolors.ENDC
 
     print "\t>> actual current = %0.2f uA"%actual_current1
     print "\tISEG HV Supply Channel #"+channel2+":"
     actual_voltage2_error = abs(actual_voltage2-float(ISEG_VOLTAGE))
     if (actual_voltage2_error >= 10): # Error
-        print "\t>> actual voltage = "+bcolors.FAIL+"%0.2f V"%actual_voltage2+bcolors.ENDC
+        print "\t>> actual voltage = "+bcolors.FAIL+bcolors.BOLD+"%0.2f V"%actual_voltage2+bcolors.ENDC
     elif (actual_voltage2_error >= 0.5) and (actual_voltage2_error < 10): # Warning
-        print "\t>> actual voltage = "+bcolors.WARNING+"%0.2f V"%actual_voltage2+bcolors.ENDC
+        print "\t>> actual voltage = "+bcolors.CYAN+bcolors.BOLD+"%0.2f V"%actual_voltage2+bcolors.ENDC
     else:                             # OKAY
-        print "\t>> actual voltage = "+bcolors.OKGREEN+"%0.2f V"%actual_voltage2+bcolors.ENDC
+        print "\t>> actual voltage = "+bcolors.OKGREEN+bcolors.BOLD+"%0.2f V"%actual_voltage2+bcolors.ENDC
     print "\t>> actual voltage = %0.2f V"%actual_voltage2
     print "\t>> actual current = %0.2f uA"%actual_current2
 
@@ -277,25 +279,25 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
         #time.sleep(CMD_DELAY)
 	#ramp_speed2 = iseg.ramp_speed
 	voltage_delay2 = float(ISEG_VOLTAGE)/float(ISEG_RAMP_SPEED)
-	print "\nStatus of ISEG HV Supply with PSvoltageSet="+bcolors.OKGREEN+ISEG_VOLTAGE+\
+	print "\nStatus of ISEG HV Supply with PSvoltageSet="+bcolors.OKGREEN+bcolors.BOLD+ISEG_VOLTAGE+\
 	    "V"+bcolors.ENDC+" is: "
 	print "\tISEG HV Supply Channel #"+channel1+":"
 	actual_voltage1_error = abs(actual_voltage1-float(ISEG_VOLTAGE))
 	if (actual_voltage1_error >= 10): # Error
-	    print "\t>> actual voltage = "+bcolors.FAIL+"%0.2f V"%actual_voltage1+bcolors.ENDC
+	    print "\t>> actual voltage = "+bcolors.FAIL+bcolors.BOLD+"%0.2f V"%actual_voltage1+bcolors.ENDC
 	elif (actual_voltage1_error >= 0.5) and (actual_voltage1_error < 10): # Warning
-	    print "\t>> actual voltage = "+bcolors.CYAN+"%0.2f V"%actual_voltage1+bcolors.ENDC
+	    print "\t>> actual voltage = "+bcolors.CYAN+bcolors.BOLD+"%0.2f V"%actual_voltage1+bcolors.ENDC
 	else:                             # OKAY
-	    print "\t>> actual voltage = "+bcolors.OKGREEN+"%0.2f V"%actual_voltage1+bcolors.ENDC
+	    print "\t>> actual voltage = "+bcolors.OKGREEN+bcolors.BOLD+"%0.2f V"%actual_voltage1+bcolors.ENDC
 	print "\t>> actual current = %0.2f uA"%actual_current1
 	print "\tISEG HV Supply Channel #"+channel2+":"
 	actual_voltage2_error = abs(actual_voltage2-float(ISEG_VOLTAGE))
 	if (actual_voltage2_error >= 10): # Error
-	    print "\t>> actual voltage = "+bcolors.FAIL+"%0.2f V"%actual_voltage2+bcolors.ENDC
+	    print "\t>> actual voltage = "+bcolors.FAIL+bcolors.BOLD+"%0.2f V"%actual_voltage2+bcolors.ENDC
 	elif (actual_voltage2_error >= 0.5) and (actual_voltage2_error < 10): # Warning
-	    print "\t>> actual voltage = "+bcolors.CYAN+"%0.2f V"%actual_voltage2+bcolors.ENDC
+	    print "\t>> actual voltage = "+bcolors.CYAN+bcolors.BOLD+"%0.2f V"%actual_voltage2+bcolors.ENDC
 	else:                             # OKAY
-	    print "\t>> actual voltage = "+bcolors.OKGREEN+"%0.2f V"%actual_voltage2+bcolors.ENDC	
+	    print "\t>> actual voltage = "+bcolors.OKGREEN+bcolors.BOLD+"%0.2f V"%actual_voltage2+bcolors.ENDC	
 	print "\t>> actual current = %0.2f uA"%actual_current2
 	RESPONSE = raw_input("\tPlease enter (c)ontinue, (e)xit, "+\
 	    "(u)pdate, or (s)et_voltage: ")
