@@ -75,29 +75,42 @@ DB_DBNAME = "belleII"
 DB_USER = "postgres"
 DB_PASSWORD = "pass123"
 
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    CYAN = '\033[96m'
+
+
 # Creating logfile for the hvb assembly test. It's a great way to keep track of the tests that we make
 logging.basicConfig(filename='HVB_ASSEMBLY_TEST_log',level=logging.DEBUG,format='%(asctime)s %(message)s')
 
 # Note: CSV File saved in /home/pi/daqtest1
 
-print "\nWelcome to Automated Test for HVB Assemblies for the Belle II Detector System\n"
-print "Collaboration between:"
-print "\tIDLab from University of Hawaii"
-print "\tUniversity of Indiana\n"
-print "TEAM:"
-print "\tSOFTWARE: Bronson Edralin <bedralin@hawaii.edu>"
-print "\tHARDWARE: James Bynes <bynes@hawaii.edu>"
-print "\tADVISOR/TEST LEADER: Gerard Visser <gvisser@indiana.edu>\n"
+print bcolors.HEADER+"\nWelcome to Automated Test for HVB Assemblies for the Belle II Detector System\n"
+print "Collaboration between:"+bcolors.ENDC
+print bcolors.OKGREEN+"\tIDLab from Dept of Physics, University of Hawaii"+bcolors.ENDC
+print bcolors.OKBLUE+"\tCenter for Exploration of Energy and Matter, University of Indiana\n"+bcolors.ENDC
+print bcolors.HEADER+"TEAM:"+bcolors.ENDC
+print bcolors.OKGREEN+"\tSOFTWARE: Bronson Edralin <bedralin@hawaii.edu>"
+print "\tHARDWARE: James Bynes <bynes@hawaii.edu>"+bcolors.ENDC
+print bcolors.OKBLUE+"\tADVISOR/TEST LEADER: Gerard Visser <gvisser@indiana.edu>\n"+bcolors.ENDC
 
-print "Recommended voltage for test using unpotted boards is 1kV, and 4kV after potted. If you want to change this parameter setting or anything else, please do so in main.py\n"
-print "Current Parameters are:"
-print "\t>> Keithley Mult Addr = "+MULTIMETER_ADDR
+print bcolors.HEADER+"Recommended voltage for test using unpotted boards is 1kV, and 4kV after potted. If you want to change this parameter setting or anything else, please do so in main.py\n"
+print "Current Parameters are:"+bcolors.ENDC
+print bcolors.CYAN+"\t>> Keithley Mult Addr = "+MULTIMETER_ADDR
 print "\t>> ISEG HV Supply Addr = "+HV_SUPPLY_ADDR
 print "\t>> ISEG Voltage (V) = "+ISEG_VOLTAGE+" V"
 print "\t>> ISEG RAMP Voltage Speed (V/s) = "+ISEG_RAMP_SPEED+" V/s"
 print "\t>> TIME PERIOD(s) for Switching = "+TIME_PERIOD+" sec"
 print "\t>> PURPOSE = "+PURPOSE
-print "\t>> CSV file will be stored in: "+LOC_DIR_FOR_STORING_CSV
+print "\t>> CSV file will be stored in: "+LOC_DIR_FOR_STORING_CSV+bcolors.ENDC
 print "\n"
 
 ts=time.time()
@@ -117,7 +130,7 @@ while (1):
 	sync_datetime.update_datetime(USERNAME,HOSTNAME)
 	break
     else:
-	print "\tError!!! Please input (y)es/(n)o\n"
+	print bcolors.FAIL+"\tError!!! Please input (y)es/(n)o\n"+bcolors.ENDC
 '''
 SERIAL_NUMBER = raw_input("Please enter serial number of board: ")
 
@@ -128,7 +141,7 @@ while (1):
     elif str(yes_or_no).upper() == "NO" or str(yes_or_no).upper() == "N":
 	SERIAL_NUMBER = raw_input("Please enter serial number of board: ")
     else:
-        print "\tError!!! Please input (y)es/(n)o\n"
+        print bcolors.FAIL+"\tError!!! Please input (y)es/(n)o\n"+bcolors.ENDC
 
 CSV_FILENAME = PURPOSE+".csv"
 
@@ -183,7 +196,7 @@ while (1):
 	db.insert_data_into_database(LOC_N_CSV, PURPOSE)
         break
     else:
-        print "\tError!!! Please input yes/no\n"
+        print bcolors.FAIL+"\tError!!! Please input yes/no\n"+bcolors.ENDC
 '''
 
 print "\n We are finally done!!! \033[1;5;34mMAHALO~\033[0m"

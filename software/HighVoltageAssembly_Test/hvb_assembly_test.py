@@ -45,7 +45,18 @@ import sys
 
 VOLTAGE_DELAY_ERROR = 2.5 # Enter float value which is multiplied on actual voltage_delay 
 ISEG_VOLTAGE_LIMIT = 4400 # ISEG Voltage should not be more  
-CMD_DELAY = 0.0
+CMD_DELAY = 0.05
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    CYAN = '\033[96m'
 
 # Creating logfile for the hvb assembly test. It's a great way to keep track of the tests that we make
 logging.basicConfig(filename='HVB_ASSEMBLY_TEST_log',level=logging.DEBUG,format='%(asctime)s %(message)s')
@@ -54,10 +65,18 @@ logging.basicConfig(filename='HVB_ASSEMBLY_TEST_log',level=logging.DEBUG,format=
 def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SERIAL_NUMBER="123456",ISEG_VOLTAGE="1000",ISEG_RAMP_SPEED="10",TIME_PERIOD="0.2",PURPOSE="HVB_RawTest",CodeVersion='1',LOC="/home/pi/daqtest1/"):
 
     if (float(ISEG_VOLTAGE) < 0) or (float(ISEG_VOLTAGE) > float(ISEG_VOLTAGE_LIMIT)):
-	print "Error!!! ISEG Voltage must be between 0 and "+str(ISEG_VOLTAGE_LIMIT)+\
-	    "for test"
+	print bcolors.FAIL+"Error!!! ISEG Voltage must be between 0 and "+str(ISEG_VOLTAGE_LIMIT)+\
+	    "for test"+bcolors.ENDC
 	logging.error('Error!!! ISEG Voltage must be between 0 and '+\
 	    str(ISEG_VOLTAGE_LIMIT)+'for test!')
+	# Reset parameters
+	iseg.channel = 1      # Ch 1
+	iseg.set_voltage = 0
+	status1 = iseg.start_voltage_change # This triggers it to change voltage
+	iseg.channel = 2      # Ch 2
+	iseg.set_voltage = 0
+	status2 = iseg.start_voltage_change # This triggers it to change voltage
+	# Force software to exit
 	sys.exit()
 
     # Set name of csv file for results
@@ -108,10 +127,18 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
 		    break
 	    except IndexError:
 		pass
-	    print "Checking file to see if it has right header..."
+	    #print "Checking file to see if it has right header..."
 	if not passed:
-	    print "Error!!! File exists already and it is not related to our test!"
+	    print bcolors.FAIL+"Error!!! File exists already and it is not related to our test!"+bcolors.ENDC
 	    logging.error('Error!!! File exists and not related to our test!')
+	    # Reset parameters
+	    iseg.channel = 1	 # Ch 1
+	    iseg.set_voltage = 0
+	    status1 = iseg.start_voltage_change # This triggers it to change voltage
+	    iseg.channel = 2	 # Ch 2
+	    iseg.set_voltage = 0
+	    status2 = iseg.start_voltage_change # This triggers it to change voltage
+	    # Force software to exit
 	    sys.exit()
     else:
 	with open(filename,'a') as csvfile: 
@@ -151,7 +178,7 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
 		    # of ISEG before sending commands!!!
     channel1 = iseg.channel
     #set_voltage1 = iseg.set_voltage
-    #time.sleep(CMD_DELAY)
+    time.sleep(CMD_DELAY)
     actual_voltage1 = -1*float(iseg.actual_voltage) # flipping voltage
     time.sleep(CMD_DELAY)
     actual_current1 = float(iseg.actual_current)*10**6
@@ -163,7 +190,7 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
                     # of ISEG before sending commands!!!
     channel2 = iseg.channel
     #set_voltage2 = iseg.set_voltage
-    #time.sleep(CMD_DELAY)
+    time.sleep(CMD_DELAY)
     actual_voltage2 = -1*float(iseg.actual_voltage) # flipping voltage
     time.sleep(CMD_DELAY)
     actual_current2 = float(iseg.actual_current)*10**6
@@ -176,7 +203,7 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
     voltage_delay = voltage_delay1 + voltage_delay2 
 
     # Update how long it will take for voltage to reach set Voltage
-    print "\tISEG Set voltage is: %s V"%ISEG_VOLTAGE
+    print "\tISEG Set voltage is: "+bcolors.OKGREEN+"%s V"%ISEG_VOLTAGE+bcolors.ENDC
     print "\tISEG Ramp Speed is: "+str(ISEG_RAMP_SPEED)+" V/s"
     print "\tTherefore, it will take %f sec(s) "%voltage_delay+\
 	  "for actual voltage to reach the set voltage...\n"
@@ -184,9 +211,23 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
     # Print current status
     print "Current status is..."
     print "\tISEG HV Supply Channel #"+channel1+":"
-    print "\t>> actual voltage = %0.2f V"%actual_voltage1
+    actual_voltage1_error = abs(actual_voltage1-float(ISEG_VOLTAGE))
+    if (actual_voltage1_error >= 10): # Error
+	print "\t>> actual voltage = "+bcolors.FAIL+"%0.2f V"%actual_voltage1+bcolors.ENDC
+    elif (actual_voltage1_error >= 0.5) and (actual_voltage1_error < 10): # Warning
+        print "\t>> actual voltage = "+bcolors.WARNING+"%0.2f V"%actual_voltage1+bcolors.ENDC
+    else:                             # OKAY
+        print "\t>> actual voltage = "+bcolors.OKGREEN+"%0.2f V"%actual_voltage1+bcolors.ENDC
+
     print "\t>> actual current = %0.2f uA"%actual_current1
     print "\tISEG HV Supply Channel #"+channel2+":"
+    actual_voltage2_error = abs(actual_voltage2-float(ISEG_VOLTAGE))
+    if (actual_voltage2_error >= 10): # Error
+        print "\t>> actual voltage = "+bcolors.FAIL+"%0.2f V"%actual_voltage2+bcolors.ENDC
+    elif (actual_voltage2_error >= 0.5) and (actual_voltage2_error < 10): # Warning
+        print "\t>> actual voltage = "+bcolors.WARNING+"%0.2f V"%actual_voltage2+bcolors.ENDC
+    else:                             # OKAY
+        print "\t>> actual voltage = "+bcolors.OKGREEN+"%0.2f V"%actual_voltage2+bcolors.ENDC
     print "\t>> actual voltage = %0.2f V"%actual_voltage2
     print "\t>> actual current = %0.2f uA"%actual_current2
 
@@ -216,7 +257,7 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
 			# of ISEG before sending commands!!!
 	channel1 = iseg.channel
 	#set_voltage1 = iseg.set_voltage
-        #time.sleep(CMD_DELAY)
+        time.sleep(CMD_DELAY)
 	actual_voltage1 = -1*float(iseg.actual_voltage) # flipping voltage
 	time.sleep(CMD_DELAY)
 	actual_current1 = float(iseg.actual_current)*10**6
@@ -229,26 +270,46 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
 			# of ISEG before sending commands!!!
 	channel2 = iseg.channel
 	#set_voltage2 = iseg.set_voltage
-        #time.sleep(CMD_DELAY)
+        time.sleep(CMD_DELAY)
 	actual_voltage2 = -1*float(iseg.actual_voltage) # flipping voltage
         time.sleep(CMD_DELAY)
 	actual_current2 = float(iseg.actual_current)*10**6
         #time.sleep(CMD_DELAY)
 	#ramp_speed2 = iseg.ramp_speed
 	voltage_delay2 = float(ISEG_VOLTAGE)/float(ISEG_RAMP_SPEED)
-	print "\nStatus of ISEG HV Supply with PSvoltageSet="+ISEG_VOLTAGE+\
-	    "V is: "
+	print "\nStatus of ISEG HV Supply with PSvoltageSet="+bcolors.OKGREEN+ISEG_VOLTAGE+\
+	    "V"+bcolors.ENDC+" is: "
 	print "\tISEG HV Supply Channel #"+channel1+":"
-	print "\t>> actual voltage = %0.2f V"%actual_voltage1
+	actual_voltage1_error = abs(actual_voltage1-float(ISEG_VOLTAGE))
+	if (actual_voltage1_error >= 10): # Error
+	    print "\t>> actual voltage = "+bcolors.FAIL+"%0.2f V"%actual_voltage1+bcolors.ENDC
+	elif (actual_voltage1_error >= 0.5) and (actual_voltage1_error < 10): # Warning
+	    print "\t>> actual voltage = "+bcolors.CYAN+"%0.2f V"%actual_voltage1+bcolors.ENDC
+	else:                             # OKAY
+	    print "\t>> actual voltage = "+bcolors.OKGREEN+"%0.2f V"%actual_voltage1+bcolors.ENDC
 	print "\t>> actual current = %0.2f uA"%actual_current1
 	print "\tISEG HV Supply Channel #"+channel2+":"
-	print "\t>> actual voltage = %0.2f V"%actual_voltage2
+	actual_voltage2_error = abs(actual_voltage2-float(ISEG_VOLTAGE))
+	if (actual_voltage2_error >= 10): # Error
+	    print "\t>> actual voltage = "+bcolors.FAIL+"%0.2f V"%actual_voltage2+bcolors.ENDC
+	elif (actual_voltage2_error >= 0.5) and (actual_voltage2_error < 10): # Warning
+	    print "\t>> actual voltage = "+bcolors.CYAN+"%0.2f V"%actual_voltage2+bcolors.ENDC
+	else:                             # OKAY
+	    print "\t>> actual voltage = "+bcolors.OKGREEN+"%0.2f V"%actual_voltage2+bcolors.ENDC	
 	print "\t>> actual current = %0.2f uA"%actual_current2
 	RESPONSE = raw_input("\tPlease enter (c)ontinue, (e)xit, "+\
 	    "(u)pdate, or (s)et_voltage: ")
 	try:
 	    if (RESPONSE.lower() == "exit" or RESPONSE.lower() == "e"):
-		print "\nExiting..."
+		print "\nExiting and resetting parameters..."
+		# Reset parameters
+		iseg.channel = 1      # Ch 1
+		iseg.set_voltage = 0
+		status1 = iseg.start_voltage_change # This triggers it to change voltage	
+		iseg.channel = 2      # Ch 2
+		iseg.set_voltage = 0
+		status2 = iseg.start_voltage_change # This triggers it to change voltage
+		# Force software to exit
 		sys.exit()
 	    elif (RESPONSE.lower() == "continue" or RESPONSE.lower() == "c"):
 		break
@@ -260,10 +321,18 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
 			' (V): ')
 		    try:
 			if (ISEG_VOLTAGE.lower() == "exit" or ISEG_VOLTAGE.lower() == "e"):
-			    print "\nExiting..."
+			    print "\nExiting and resetting parameters..."
+			    # Reset parameters
+			    iseg.channel = 1     # Ch 1
+			    iseg.set_voltage = 0
+			    status1 = iseg.start_voltage_change # This triggers it to change voltage
+			    iseg.channel = 2     # Ch 2
+			    iseg.set_voltage = 0
+			    status2 = iseg.start_voltage_change # This triggers it to change voltage
+			    # Force software to exit
 			    sys.exit()
-			elif (int(ISEG_VOLTAGE) < 0) or (int(ISEG_VOLTAGE) > 5000):
-			    print "\t>> Error!!! ISEG_VOLTAGE must be between 0 and 5000!"
+			elif (int(ISEG_VOLTAGE) < 0) or (int(ISEG_VOLTAGE) > float(ISEG_VOLTAGE_LIMIT)):
+			    print bcolors.FAIL+"\t>> Error!!! ISEG_VOLTAGE must be between 0 and %0.2f!"%ISEG_VOLTAGE_LIMIT+bcolors.ENDC
 			else:  # Setting new ISEG_VOLTAGE
 			    # Initialize parameters for ISEG Channel #1
 			    iseg.channel=1  # NOTE: Remember to always set channel
@@ -275,9 +344,9 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
                             iseg.set_voltage = ISEG_VOLTAGE
 			    
 			    # Calculate Waiting time
-			    voltage_delay = ((float(ISEG_VOLTAGE)-float(actual_voltage1))/\
-				float(ISEG_RAMP_SPEED) + (float(ISEG_VOLTAGE) - \
-				float(actual_voltage2))/float(ISEG_RAMP_SPEED))*VOLTAGE_DELAY_ERROR
+			    voltage_delay = (abs((float(ISEG_VOLTAGE)-float(actual_voltage1))/\
+				float(ISEG_RAMP_SPEED)) + abs((float(ISEG_VOLTAGE) - \
+				float(actual_voltage2))/float(ISEG_RAMP_SPEED)))*VOLTAGE_DELAY_ERROR
 
 			    # Print Wait update
 			    print "\nWaiting "+str(voltage_delay)+" sec(s)...\n"
@@ -291,13 +360,13 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
 					               # to reach set voltage
 			    break
 		    except ValueError:
-			print "\t>> Error!!! ISEG_VOLTAGE must be between 0 and 508!"
+			print bcolors.FAIL+"\t>> Error!!! ISEG_VOLTAGE must be between 0 and %0.2f!"%ISEG_VOLTAGE_LIMIT+bcolors.ENDC
 	    else:
-		print '\t>> Error!!! Must enter "(c)ontinue", "(e)xit", '+\
-		    '"(u)pdate", or "(s)et_voltage"!'	
+		print bcolors.FAIL+'\t>> Error!!! Must enter "(c)ontinue", "(e)xit", '+\
+		    '"(u)pdate", or "(s)et_voltage"!'+bcolors.ENDC	
 	except ValueError:
-            print '\t>> Error!!! Must enter "(c)ontinue", "(e)xit", '+\
-                '"(u)pdate", or "(s)et_voltage"!' 
+            print bcolors.FAIL+'\t>> Error!!! Must enter "(c)ontinue", "(e)xit", '+\
+                '"(u)pdate", or "(s)et_voltage"!'+bcolors.ENDC 
     print "\n"
 
     logging.info("Status of ISEG HV Supply with PSvoltageSet="+\
@@ -355,13 +424,17 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
 
 	iseg.channel=1  # NOTE: Remember to always set channel
 			# of ISEG before sending commands!!!
+	time.sleep(CMD_DELAY)
         PSvoltage1 = -1*float(iseg.actual_voltage) # Actual voltage from ISEG Ch1
 						   # flipping voltage
+	time.sleep(CMD_DELAY)
 	PScurrent1 = float(iseg.actual_current)    # Actual currrent from ISEG Ch1
 	iseg.channel=2  # NOTE: Remember to always set channel
                         # of ISEG before sending commands!!!
+	time.sleep(CMD_DELAY)
         PSvoltage2 = -1*float(iseg.actual_voltage) # Actual voltage from ISEG Ch2
 						   # flipping voltage
+	time.sleep(CMD_DELAY)
 	PScurrent2 = float(iseg.actual_current)    # Actual current from ISEG Ch2
 
 	# Update row to be written on csv
@@ -408,6 +481,9 @@ def hvb_assembly_test(multimeter_addr="192.168.1.102",hv_supply_addr="RS232",SER
     
 	
     # Reset parameters
+    iseg.channel = 1
+    iseg.set_voltage = 0
+    iseg.channel = 2
     iseg.set_voltage = 0
         
     # Reset all GPIO pins of RPi to LOW (0)
