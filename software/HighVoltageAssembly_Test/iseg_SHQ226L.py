@@ -258,13 +258,8 @@ class Iseg_SHQ226L(object):
         #print ("G"+self.chan)  #Uncomment for debug
         #self.link.ask_print("G"+self.chan)  # Print Instrument's Resp
 	raw = self.link.ask("G"+self.chan)
-        while(1):
-            try:
-		start_voltage_change = float(raw.split()[-1].replace('-','e-').lstrip('e'))
-                break
-            except ValueError:
-		raw = self.link.ask("G"+self.chan)
-	return str(start_voltage_change)
+	start_voltage_change = raw.split()[-1].replace('-','e-').lstrip('e')
+	return start_voltage_change
 
     # Read current trip on channel 
     # (trip corresponding resolution Range: A>0) 
