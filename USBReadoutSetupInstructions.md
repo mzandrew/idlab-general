@@ -1,0 +1,101 @@
+# Introduction #
+
+There are 4 steps to go through before a USB readout will work:
+
+  1. install windows/linux driver on PC
+  1. program cypress/eeprom
+  1. program FPGA/flash to talk to cypress
+  1. install readout software on PC
+
+
+---
+
+
+# Details #
+
+## install windows/linux driver on PC ##
+
+Depending on which operating system you're using, there are different steps to take.
+
+### install windows driver on PC ###
+> Assuming Cypress Suite USB 3.4.7 is used
+  1. Go to C:/Cypress/Cypress Suite USB 3.4.7/Driver/bin
+  1. Open appropriate OS folder. e.g., w2k = Windows2k ,wlh = Windows7/Vista, wxp = Windows XP
+  1. Open appropriate architecture.
+  1. Open cyusb.inf
+  1. Scroll down to find the different platforms. In the appropriate platform, copy and paste the line as follows: <%VID\_XXXX&PID\_XXXX.DeviceDesc%=CyUsb, USB\VID\_XXXX&PID\_XXXX>. Modify the XXXX with the proper VID and PID
+  1. Scroll further down to find the Strings section. You can choose to modify this section to provide human readable name for the device. <VID\_XXXX&PID\_XXXX.DeviceDesc="Cypress USB Generic Driver (3.4.2.147)">. Once again modify XXXX to the proper VID and PID. Changing the text in quotes will change the human readable name for the device.
+  1. Save the .inf file
+  1. Plug in your USB device and open Window's Device Manager
+  1. Locate the USB device, it should show up with an exclamation mark because drivers were not installed.
+  1. Right click and select Update Drivers
+  1. Select the option to manually locate driver and point the location to the path of the modified .inf file
+  1. If everything is done correctly, your device will appear in Window's Device Manager. There still might be an exclamation mark due to Window's security with unsigned drivers. To resolve this, boot the OS in Disable Device Signature Enforcement mode.
+
+### install linux driver on PC ###
+This should be automagic
+
+---
+
+
+## program cypress/eeprom ##
+
+You can program the cypress directly and use it, but when power to the board is lost, it will forget its programming.  To make the cypress capable of being useful upon power-up, you will have to program the eeprom connected to the cypress.
+
+### program cypress ###
+#### Windows ####
+  1. Install Cypress Suite (using version 3.4.7) and run the ControlCenter.
+  1. Select the Cypress device
+  1. Click "Program FX2" -> "RAM"
+  1. Select the .hex file to program the Cypress chip ([download fw.hex here](http://idlab-general.googlecode.com/files/fw.hex))
+
+#### Linux (Ubuntu) ####
+  1. Install cycfx2prog (sudo apt-get install cycfx2prog)
+  1. In the terminal enter the command 'cycfx2prog prg:fw.hex run' without the quotes ([download fw.hex here](http://idlab-general.googlecode.com/files/fw.hex))
+
+### program eeprom connected to cypress ###
+
+([download fw.iic here](https://idlab-general.googlecode.com/files/fw.iic))
+
+
+---
+
+
+## program FPGA/flash to talk to cypress ##
+
+Like the cypress, the FPGA can either be programmed directly and used, or the flash memory (platform flash or SPI) can be programmed so the FPGA will know what to do upon power-up.
+
+### program FPGA to talk to cypress ###
+
+### program FPGA's flash to talk to cypress ###
+
+
+---
+
+
+## install readout software on PC ##
+
+### install readout software on windows ###
+
+If you want to modify the USB readout software, you will have to have a compiler installed.
+
+We have some old software that compiles with wxwidgets, but it needs to be updated to work with the new method of talking to the cypress.
+
+The software that corresponds to the new method of talking to the cypress does not currently work (and needs visual c++ installed).
+
+### install readout software on linux (Ubuntu) ###
+  1. Make sure libusb-1.0-0 and g++ are installed.  If not, run
+```
+sudo apt-get install libusb-1.0-0; sudo apt-get install build-essential
+```
+  1. Put the following line in the file /etc/udev/rules.d/idlab.rules:
+```
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device",SYSFS{idVendor}=="04b4" , SYSFS{idProduct}=="1004", MODE="0666"
+```
+> and then
+```
+sudo udevadm control --reload-rules
+```
+> (or use [this script](http://idlab-general.googlecode.com/files/make_cypress_device_world_readable_with_udev_rule)).
+  1. In the directory of the software, run 'make' compile the executables.
+  1. Type './bin/SCROD\_test' or './bin/universal\_eval\_test' to run the executable.  (you may have to load the cypress firmware and/or the FPGA firmware before this will work).

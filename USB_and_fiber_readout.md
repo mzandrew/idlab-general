@@ -1,0 +1,135 @@
+## Introduction ##
+
+The existing firmware in USB\_and\_fiber\_readout is meant to be a basic starting point or template for adding some data acquisition to a board.  The firmware is meant to compile as-is for the [SCROD Revision A2](http://www.phys.hawaii.edu/~mza/PCB/SCROD/SCROD.revA2.html), and also be usable on Universal Eval Revisions A and B, with some modifications that are detailed below.
+
+## Implementation details ##
+
+An overview of the SCROD version of the implementation is provided in the following diagram (full version available [here](http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/scrod_readout_interface/scrod_example_daq_project.html) ):
+
+![http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/scrod_readout_interface/scrod_example_daq_project.png](http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/scrod_readout_interface/scrod_example_daq_project.png)
+
+### Data Acquisition interfaces (USB and fiberoptic) ###
+
+Two full duplex, 3.125 Gb/s fiberoptic links are also implemented using version 6.2 of the Xilinx 8B/10B Aurora Core.  In the iTOP application, one of these links is intended for nominal "event/waveform" data, while the other is for the "trigger" data.  Both links utilize the 32-bit streaming interface of the Aurora protocol.
+
+The USB portion of the code is adapted from Xin Gao's implementation of the Cypress USB interface.  Documentation on that can be found [here](https://code.google.com/p/idlab-general/source/browse/USB_and_fiber_readout/documentation/USB-FPGA%20Doc.pdf).  It implements four USB endpoints.  Endpoints 2 and 4 allow data to be sent by USB to the FPGA, and endpoints 6 and 8 are allocated for sending data from the FPGA to a PC via USB.  The data from the Cypress is read out in 16-bit wide words, half the size of the Aurora protocols described above.  To allow compatibility of the interface with downstream logic, there are four FIFOs with asymmetric read/write widths to convert the Cypress data into 32-bit words.
+
+Multiplexing is implemented to allow switching between these two data acquisition paths (USB/fiberoptic).  The multiplexer selects are based on detecting the presence of the USB clock, which is only active when a USB connection is made between the board and a PC.  If this clock is found, the USB connection will take priority over the fiberoptic connections and will deactivate the fiberoptic transceivers.
+
+Following the multiplexing logic, the selected data path connects to a set of FIFOs (two for receiving data and two for sending data).  The default values for these sizes are chosen based on loose expectations from requirements for the "event" and "trigger" data paths, and should be tailored to your use.
+
+### Fiber Interface 0, USB Endpoints 2 and 6: Command Interpreter I/O ###
+
+A command interpreter receives data from fiberoptic transceiver 0 or USB endpoint 2 and sends responses on fiberoptic transceiver 0 or USB endpoint 6.  The command interpreter is implemented via a [[PicoBlaze](http://www.xilinx.com/products/intellectual-property/picoblaze.htm)] 8-bit microcontroller core.
+
+Commands and responses are consistent with the posted [data formats](https://www.phys.hawaii.edu/~kurtisn/doku.php?id=itop:documentation:data_format).  The following commands are implemented in this firmware release:
+
+  * Ping
+  * Read from register
+  * Write to register
+
+The command interpreter implementation is contained in the file "command\_interpreter.psm".  It contains assembly code that performs the following actions:
+
+**Startup sequence**
+  1. Wait 300 ms
+  1. Interface with the I2C EEPROM on bus A to read the SCROD ID from memory addresses 0 and 1 and revision from memory address 2. This determines the ID that SCROD will respond to for subsequent commands.
+  1. Display the SCROD ID that was just read on the LEDs.
+  1. Interface with the I2C temperature sensor on bus A to turn off the I2C timeout feature.
+**Normal operation**
+  1. Infinite loop to search for data from the input FIFO and parse commands and send applicable responses as data is detected.
+
+Summary of the PicoBlaze register functions and scratch space in the command interpreter code is contained in [this spreadsheet](http://www.phys.hawaii.edu/~kurtisn/documentation/idlab_general/scrod_readout_interface/picoblaze_registers_and_memory.xlsx).
+
+### Read and Write Registers ###
+
+The file "firmware/FPGA/src/readout\_definitions.vhd" defines the number of 16-bit read and write registers available using the constants N\_GPR (# of general purpose register) and N\_RR (# of read register).  The baseline firmware includes 256 write registers (0-255) and 512 read registers (0-511).  Write registers 0-255 are mapped to read registers 0-255 in order so that any value written to a register can be subsequently verified.
+
+Register mappings are handled in "firmware/FPGA/src/scrod\_top.vhd" near the end of the file.  Customization for any given project will involve changing those values.  The defaults are:
+
+**Write registers**
+  * 0: SCROD LEDs
+  * 1: I2C interface to bus A
+  * 2: I2C interface to bus B
+  * 3: I2C interface to bus C
+  * 4-255: Unused (available)
+**Read registers**
+  * 0-255: Readback of write registers 0-255
+  * 256: I2C read interface from bus A
+  * 257: I2C read interface from bus B
+  * 258: I2C read interface from bus C
+  * 259-511: Unused (available)
+
+Note that changing the addresses for I2C devices will impact the startup code for the command interpreter, so corresponding changes may need to be made to the assembly code.
+
+### I2C Interfaces ###
+
+Generic I2C interfaces are implemented in "firmware/FPGA/src/peripherals/i2c\_master.vhd"  The control is performed via the general write/read registers as listed in the previous section.  The following are the formats of the interface.
+
+I2C write interfaces are implemented as follows:
+  * Bits 15-13 : Unused
+  * Bit 12 : Initiate I2C stop
+  * Bit 11 : Flag to send an acknowledge as part of a read operation
+  * Bit 10 : Initiate reading a byte over I2C
+  * Bit 9 : Initiate sending a byte over I2C, with byte given by bits 7:0
+  * Bit 8 : Initiate I2C start (or repeated start)
+  * Bits 7-0 : Byte to be sent as part of the I2C send (see bit 9)
+The "initiate" bits are all edge sensitive, to avoid needing to worry about about the length of the pulse output from the command interpreter.  This also means that they must be toggled low in between uses to be properly identified.
+
+I2C read interfaces are implemented as follows:
+  * Bit 15 : Acknowledged result from last I2C write byte transaction
+  * Bit 14 : Bit indicating that the i2c\_master module is busy
+  * Bits 13-8 : Unused
+  * Bits 7-0 : The byte received from the last I2C read transcation
+
+The following devices are on the three implemented I2C buses:
+
+**I2C Bus A**
+  * [24LC64FT](http://ww1.microchip.com/downloads/en/DeviceDoc/22154A.pdf) general purpose EEPROM (I2C address: 1010000)
+  * [STTS751](http://www.st.com/internet/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/DATASHEET/CD00252523.pdf) temperature sensor (I2C address: 1001010)
+
+**I2C Bus B**
+  * [AFBR-57R5AEZ](http://www.avagotech.com/docs/AV02-0550EN) fiberoptic transceiver 0, register space 0 (I2C address: 1010000)
+  * [AFBR-57R5AEZ](http://www.avagotech.com/docs/AV02-0550EN) fiberoptic transceiver 0, register space 1 (I2C address: 1010001)
+
+**I2C Bus C**
+  * [AFBR-57R5AEZ](http://www.avagotech.com/docs/AV02-0550EN) fiberoptic transceiver 1, register space 0 (I2C address: 1010000)
+  * [AFBR-57R5AEZ](http://www.avagotech.com/docs/AV02-0550EN) fiberoptic transceiver 1, register space 1 (I2C address: 1010001)
+
+### Fiber Interface 1, USB Endpoints 4 and 8: Loopback ###
+
+This firmware simply loops back the input FIFO to the output FIFO.  For SCROD-based systems in Belle II, this interface is anticipated to be used as a trigger path.  For general use, this interface could be used as the primary event data path, to avoid having to multiplex waveform data with command data on a single interface.
+
+## Extra installation instructions ##
+
+  * The PicoBlaze microcontroller source is not included in the repository due to licensing restrictions.  It is, however, freely available [[here](http://www.xilinx.com/products/intellectual-property/picoblaze.htm)], using the "download" link on the upper left of the page.
+    * After download, place "kcpsm6.vhd" in "firmware/FPGA/src/picoblaze/"
+    * Place "ROM\_form.vhd" in "firmware/FPGA/src/command\_interpreter/"
+    * If you would like to edit any assembly code, use the assembler contained in the distributed zip file from Xilinx.  A JTAG loader is also included, to allow loading new programs to the PicoBlaze without a full ISE recompile.
+  * To change the number of general or read registers, edit "firmware/FPGA/src/readout\_definitions.vhd"
+There are general purpose registers (GPR) and read registers (RR).  The first N\_GPR registers are mapped back to the read registers in order, with the idea that you can always read back any register that you can set.  Any extra read registers after that can be used for whatever you'd like to read in from elsewhere in the firmware.  Because the command interpreter assembly code uses I2C devices on startup, and these devices are matched to specific register numbers, changes to N\_GPR and N\_RR can impact startup functionality, and may require reassembly of the command interpreter.
+
+## Example software ##
+
+The "software/linux" directory contains example code to flash a pattern on the LEDs, read out temperature values from the STTS751 via an I2C transaction, or write a SCROD ID to the EEPROM via an I2C transaction.  Much of the code for I2C transactions could/should be encapsulated into a separate interface for ease of use.  The given examples are simply the way to perform such a transaction in "raw" form.
+
+For further instructions on how to read out, see [here](http://code.google.com/p/idlab-general/wiki/USBReadoutSetupInstructions).
+
+## Known issues and limitations ##
+
+  * The fiberoptic interface seems to accumulate significant numbers of errors unless the size of the outgoing data for loopback is limited to ~100 kB.  This may be due to the sizing of the FIFOs in the design or the interface logic to the Aurora channels, which are occasionally unavailable due to clock compensation cycles.
+  * The USB interface will accumulate significant numbers of errors unless the size of the outgoing data for loopback is limited to ~512 bytes or less.  This may be due to the sizing of the FIFOs in the design.
+  * The multiplex selects should only really be utilized at the time of FPGA programming.  Trying to switch interfaces during operation results in both interfaces failing to properly send data after the switch.  I believe this could be handled by properly tying signals for the unused interface low during the appropriate multiplex select condition.  However, for now this has not been addressed since the primary goal was to allow selection of the interface without recompiling, which this certainly accomplishes.
+
+## Changes anticipated for use with Universal Eval (Rev A or B) ##
+
+The project as posted should synthesize and implement for the SCROD Revision A2.  The project is intended also for use in the Universal Eval, though it requires a number of changes.  **Anyone who would like to modify the existing code and commit changes is encouraged to do so.**  This should preferably be done in a way that allows compilation for both systems using generics.  The following changes are noted, though they may not be complete:
+
+  * The command interpreter will need to be reassembled using kcpsm3, a Spartan-3 optimized version of the PicoBlaze.  An attempt was made to use only instructions supported by kcpsm3 and kcpsm6 so that no changes would be necessary, but this must be verified.
+  * The generic "INCLUDE\_AURORA" should be set to 0 at the readout\_interfaces.vhd level.  This will keep any Aurora primitives from attempting to be instantiated, and is necessary since the Universal Eval uses a Spartan-3.
+  * The target FPGA for the design should be changed to the appropriate Spartan-3.
+  * A new ucf file should be created to match the pin mappings for the Universal Eval.  If the existing SCROD ucf is used as a template, the fiberoptic pieces of the ucf file should be commented out or removed.
+  * The FIFO sizes may have to be reduced to fit within Spartan-3 resources.  The main offender is likely to be the "event/waveform" output FIFO, which is very large in the original project.
+  * The chipscope cores need to be removed or regenerated for a Spartan-3, since they are by default generated for a Spartan-6.
+  * General clocking generation interface should be changed to Spartan-3 compatible version.
+  * Force USB/fiber selection bits?
+  * Regenerate all cores for Spartan-3 compatibility.
